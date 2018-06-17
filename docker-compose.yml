@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:10.1
+  stpmex-callback:
+    build: .
+    volumes:
+      - .:/stpmex_handler
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URI=postgresql://postgres@db/postgres
+      - PYTHONPATH=/stpmex_handler
+    env_file:
+      - .env
