@@ -17,5 +17,5 @@ migrate = Migrate(app, db)
 import stpmex_handler.views
 import stpmex_handler.models
 
-if not os.environ.get('STPMEX_HANDLER_ENV', '').lower() == 'prod':
+if not os.getenv('STPMEX_HANDLER_ENV', '').lower() == 'prod':
     import stpmex_handler.commands

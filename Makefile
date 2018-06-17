@@ -13,10 +13,10 @@ venv:
 clean:
 		rm -rf venv/
 
-install: venv
+install:
 		pip install --quiet --upgrade -r requirements.txt
 
-install-dev: install
+install-dev: venv install
 		pip install --quiet --upgrade -r requirements-dev.txt
 
 lint:
