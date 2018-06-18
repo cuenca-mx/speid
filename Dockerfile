@@ -1,12 +1,11 @@
 FROM python:3.6
 MAINTAINER Matin Tamizi <matin@cuenca.io>
 
-RUN pip install --quiet gunicorn
-
 # Install app
 ADD Makefile requirements.txt /stpmex-handler/
 WORKDIR /stpmex-handler
 RUN make install
+RUN pip install --quiet gunicorn
 
 # Add repo contents to image
 ADD . /stpmex-handler/

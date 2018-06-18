@@ -20,5 +20,5 @@ install-dev: venv install
 		pip install --quiet --upgrade -r requirements-dev.txt
 
 lint:
-		pycodestyle --ignore=E402 stpmex_handler
+		pycodestyle --ignore=E402 stpmex_handler migrations
 
