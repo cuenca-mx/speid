@@ -1,3 +1,5 @@
+import json
+
 from flask import request
 
 from stpmex_handler import app, db
@@ -18,6 +20,10 @@ def callback_handler():
 @app.after_request
 def log_posts(response):
     if request.method == 'POST':
+        if request.is_json:
+            body = json.dumps(request.json)
+        else:
+            body = request.data or json.dumps(request.form)
         path_limit = Request.__table__.c.path.type.length
         qs_limit = Request.__table__.c.query_string.type.length
         req = Request(
@@ -27,7 +33,7 @@ def log_posts(response):
             query_string=request.query_string.decode()[:qs_limit],
             ip_address=request.remote_addr,
             headers=dict(request.headers),
-            body=str(request.json)
+            body=body
         )
         db.session.add(req)
         db.session.commit()
