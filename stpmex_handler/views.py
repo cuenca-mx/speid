@@ -3,7 +3,7 @@ import json
 from flask import request
 
 from stpmex_handler import app, db
-from stpmex_handler.models import Request
+from stpmex_handler.models import OrdenEvent, Request
 from stpmex_handler.tables.types import HttpRequestMethod
 
 
@@ -23,7 +23,7 @@ def log_posts(response):
         if request.is_json:
             body = json.dumps(request.json)
         else:
-            body = request.data or json.dumps(request.form)
+            body = request.data.decode('utf-8') or json.dumps(request.form)
         path_limit = Request.__table__.c.path.type.length
         qs_limit = Request.__table__.c.query_string.type.length
         req = Request(
