@@ -22,7 +22,9 @@ def create_orden_events():
 
 @app.route('/ordenes', methods=['POST'])
 def create_orden():
-    return 'logged'
+    orden_dict = request.json
+    orden_dict['estado'] = 'LIQUIDACION'
+    return make_response(jsonify(orden_dict), 201)
 
 
 @app.before_request
