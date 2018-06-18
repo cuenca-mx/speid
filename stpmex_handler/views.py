@@ -14,6 +14,9 @@ def health_check():
 
 @app.route('/stp', methods=['POST'])
 def callback_handler():
+    orden = OrdenEvent.transform(request.json)
+    db.session.add(orden)
+    db.session.commit()
     return 'got it!'
 
 
