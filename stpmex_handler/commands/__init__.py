@@ -2,6 +2,8 @@ from werkzeug.serving import run_simple
 
 from stpmex_handler import app
 
+from . import docker
+
 
 @app.cli.command()
 def serve():

@@ -1,4 +1,5 @@
 Werkzeug
+SQLAlchemy
 Flask
 Flask-SQLAlchemy
 Flask-Migrate
