@@ -13,11 +13,16 @@ def health_check():
 
 
 @app.route('/orden_events', methods=['POST'])
-def callback_handler():
+def create_orden_events():
     orden_event = OrdenEvent.transform(request.json)
     db.session.add(orden_event)
     db.session.commit()
     return make_response(jsonify(orden_event.to_dict()), 201)
+
+
+@app.route('/ordenes', methods=['POST'])
+def create_orden():
+    return 'logged'
 
 
 @app.before_request
