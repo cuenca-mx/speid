@@ -10,7 +10,7 @@ class OrdenEvent(db.Model):
     def transform(cls, orden_dict):
         orden = cls(
             orden_id=orden_dict['id'],
-            estado=orden_dict['estado'],
-            detalle=orden_dict['detalle']
+            estado=orden_dict['Estado'],
+            detalle=orden_dict['Detalle']
         )
         return orden
