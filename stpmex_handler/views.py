@@ -27,7 +27,7 @@ def log_posts(response):
             query_string=request.query_string.decode()[:qs_limit],
             ip_address=request.remote_addr,
             headers=dict(request.headers),
-            body=str(dict(request.form)) or request.data.strip()
+            body=str(request.json)
         )
         db.session.add(req)
         db.session.commit()
