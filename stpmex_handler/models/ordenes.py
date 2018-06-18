@@ -17,4 +17,5 @@ class Orden(db.Model):
         orden.monto = int(orden.monto * 100)
         orden.fecha_operacion = dt.datetime.strptime(
             str(orden.fecha_operacion), '%Y%m%d').date()
+        orden.estado = 'LIQUIDACION'
         return orden

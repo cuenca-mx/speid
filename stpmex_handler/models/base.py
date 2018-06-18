@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 import flask_sqlalchemy as fsa
 from sqlalchemy.ext.declarative import declarative_base
@@ -23,7 +23,7 @@ class Model(fsa.Model):
         cols = self.__mapper__.c.keys()
         for col in cols:
             value = getattr(self, col)
-            if type(value) is datetime.datetime:
+            if type(value) in (dt.datetime, dt.date):
                 value = str(value)
             rv[col] = value
         return rv

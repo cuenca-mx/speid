@@ -3,7 +3,7 @@ import json
 from flask import jsonify, make_response, request
 
 from stpmex_handler import app, db
-from stpmex_handler.models import OrdenEvent, Request
+from stpmex_handler.models import Orden, OrdenEvent, Request
 from stpmex_handler.tables.types import HttpRequestMethod
 
 
@@ -22,9 +22,10 @@ def create_orden_events():
 
 @app.route('/ordenes', methods=['POST'])
 def create_orden():
-    orden_dict = request.json
-    orden_dict['estado'] = 'LIQUIDACION'
-    return make_response(jsonify(orden_dict), 201)
+    orden = Orden.transform(request.json)
+    db.session.add(orden)
+    db.session.commit()
+    return make_response(jsonify(orden.to_dict()), 201)
 
 
 @app.before_request
