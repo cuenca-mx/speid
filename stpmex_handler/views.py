@@ -12,7 +12,7 @@ def health_check():
     return "I'm healthy!"
 
 
-@app.route('/stp', methods=['POST'])
+@app.route('/orden_events', methods=['POST'])
 def callback_handler():
     orden = OrdenEvent.transform(request.json)
     db.session.add(orden)
