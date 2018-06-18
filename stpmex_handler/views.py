@@ -1,6 +1,6 @@
 import json
 
-from flask import request
+from flask import jsonify, make_response, request
 
 from stpmex_handler import app, db
 from stpmex_handler.models import OrdenEvent, Request
@@ -14,10 +14,10 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def callback_handler():
-    orden = OrdenEvent.transform(request.json)
-    db.session.add(orden)
+    orden_event = OrdenEvent.transform(request.json)
+    db.session.add(orden_event)
     db.session.commit()
-    return 'got it!'
+    return make_response(jsonify(orden_event.to_dict()), 201)
 
 
 @app.before_request
