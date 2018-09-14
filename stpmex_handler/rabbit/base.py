@@ -1,6 +1,9 @@
 import pika
-from . import RABBIT_URL, RPC_QUEUE
 import uuid
+import os
+
+RABBIT_URL = os.getenv('RABBIT_URL')
+RPC_QUEUE = 'rpc_queue'
 
 
 class Base:

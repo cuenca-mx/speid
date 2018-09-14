@@ -6,6 +6,7 @@ ADD Makefile requirements.txt /stpmex-handler/
 WORKDIR /stpmex-handler
 RUN make install
 RUN pip install --quiet gunicorn
+RUN pip install --quiet docker
 
 # Add repo contents to image
 ADD . /stpmex-handler/
