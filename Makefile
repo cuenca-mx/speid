@@ -16,9 +16,11 @@ clean:
 install:
 		pip install --quiet --upgrade -r requirements.txt
 
-install-dev: venv install
+install-dev: install
 		pip install --quiet --upgrade -r requirements-dev.txt
+
+test: install-dev lint
+		pytest -v /stpmex_handler/test/test.py
 
 lint:
 		pycodestyle --ignore=E402 stpmex_handler migrations
-

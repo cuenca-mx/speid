@@ -1,31 +1,25 @@
 import pika
 import uuid
-import os
+import time
+from stpmex_handler.rabbit import CONNECTION
 
-RABBIT_URL = os.getenv('RABBIT_URL')
 RPC_QUEUE = 'rpc_queue'
 
 
-class Base:
+class RpcClient():
     def __init__(self):
-        # TODO Validate this instruction doesn't create a new connection on each call, otherwise move it to __init__.py
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBIT_URL))
-        self.channel = self.connection.channel()
-
-
-class RpcClient(Base):
-    def __init__(self):
-        super().__init__()
         # Sets a unique channel
+        self.channel = CONNECTION.channel()
         result = self.channel.queue_declare(exclusive=True)
         self.callback_queue = result.method.queue
         # Define a function to be called when an answer is received
-        self.channel.basic_consume(self.on_response, no_ack=True, queue=self.callback_queue)
+        self.channel.basic_consume(self.on_response, no_ack=True,
+                                   queue=self.callback_queue)
         self.response = None
         self.corr_id = None
 
     def on_response(self, ch, method, props, body):
-        # Only handle those with the correlation ID same as requested
+        # Only handle those with same correlation ID requested
         if self.corr_id == props.correlation_id:
             self.response = body
 
@@ -42,20 +36,24 @@ class RpcClient(Base):
                                    body=str(element))
 
         # Wait to the response
-        # TODO How much time to wait for this response?
+        t0 = time.time()
         while self.response is None:
-            self.connection.process_data_events()
+            CONNECTION.process_data_events()
+            t1 = time.time()
+            if t1 - t0 > 15:
+                break
 
+        print("Timeout exceeded")
         return self.response
 
 
-class ConfirmModeClient(Base):
+class ConfirmModeClient():
     def __init__(self, queue):
-        super().__init__()
+        self.channel = CONNECTION.channel()
         # Make the queue durable in order to not miss any element
         # TODO Use the channel in Confirm mode to make it more persistent
-        self.queue = queue
         self.channel.queue_declare(queue=queue, durable=True)
+        self.queue = queue
 
     def call(self, element):
         # Not using an exchange as we only deliver one task to one subscriber
@@ -63,5 +61,5 @@ class ConfirmModeClient(Base):
                                    routing_key=self.queue,
                                    body=str(element),
                                    properties=pika.BasicProperties(
-                                       delivery_mode=2    # Makes the message persistent
+                                       delivery_mode=2  # Message persistent
                                    ))

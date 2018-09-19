@@ -2,11 +2,10 @@ FROM python:3.6
 MAINTAINER Matin Tamizi <matin@cuenca.io>
 
 # Install app
-ADD Makefile requirements.txt /stpmex-handler/
+ADD Makefile requirements.txt requirements-dev.txt /stpmex-handler/
 WORKDIR /stpmex-handler
 RUN make install
 RUN pip install --quiet gunicorn
-RUN pip install --quiet docker
 
 # Add repo contents to image
 ADD . /stpmex-handler/

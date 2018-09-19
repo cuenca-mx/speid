@@ -1,16 +1,35 @@
 version: '3'
 
 services:
+
   db:
     image: postgres:10.1
+
+  rabbitmq:
+    image: rabbitmq
+    ports:
+      - 5672
+
   stpmex-callback:
-    build: .
+    build:
+      context: .
+      args:
+        - DATABASE_URI=postgresql://postgres@db/postgres
+        - PYTHONPATH=/stpmex_handler
+        - AMPQ_ADDRESS=rabbitmq
+        - STPMEX_HANDLER_ENV=prod
     volumes:
       - .:/stpmex_handler
+    links:
+      - db
+      - rabbitmq
     depends_on:
       - db
+      - rabbitmq
     environment:
       - DATABASE_URI=postgresql://postgres@db/postgres
       - PYTHONPATH=/stpmex_handler
-    env_file:
-      - .env
+      - AMPQ_ADDRESS=rabbitmq
+      - STPMEX_HANDLER_ENV=prod
+      - FLASK_APP=stpmex_handler/views.py
+      - FLASK_ENV=development

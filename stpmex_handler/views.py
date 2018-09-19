@@ -1,9 +1,8 @@
 import json
-
 from flask import jsonify, make_response, request
-from .rabbit import RpcClient, ConfirmModeClient
+from stpmex_handler.rabbit.base import RpcClient, ConfirmModeClient
 from stpmex_handler import app, db
-from stpmex_handler.models import Orden, OrdenEvent, Request
+from stpmex_handler.models import Request
 from stpmex_handler.tables.types import HttpRequestMethod
 
 
@@ -14,19 +13,17 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
-    orden_event = OrdenEvent.transform(request.json)
     rabbit_client = ConfirmModeClient('cuenca.stp.orden_events')
-    rabbit_client.call(orden_event)
-    return make_response(jsonify(orden_event.to_dict()), 201)
+    rabbit_client.call(request.json)
+    return make_response(jsonify(request.json), 201)
 
 
 @app.route('/ordenes', methods=['POST'])
 def create_orden():
-    orden = Orden.transform(request.json)
     rabbit_client = RpcClient()
-    resp = rabbit_client.call(orden)
+    resp = rabbit_client.call(request.json)
     # TODO Pending to do something with the response
-    return make_response(jsonify(orden.to_dict()), 201)
+    return make_response(jsonify(request.json), 201)
 
 
 @app.before_request

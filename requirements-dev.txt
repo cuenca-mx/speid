@@ -2,3 +2,4 @@ ipython
 ipdb
 pycodestyle
 docker
+pytest
