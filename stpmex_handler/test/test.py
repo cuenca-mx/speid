@@ -3,6 +3,8 @@ import os
 import json
 import threading
 from ast import literal_eval
+from stpmex import Orden
+from stpmex.types import Institucion
 
 
 def callback(ch, method, properties, body):
@@ -105,6 +107,19 @@ class TestStpWeb:
             Empresa="TAMIZI"
         )
         res = app.post('/ordenes', data=json.dumps(data),
+                       content_type='application/json')
+
+        assert res.status_code == 201
+
+    def test_generate_order(self, app):
+        data = Orden(
+            conceptoPago='Prueba',
+            institucionOperante=Institucion.STP.value,
+            cuentaBeneficiario='072691004495711499',
+            institucionContraparte=Institucion.BANORTE_IXE.value,
+            monto=1.2,
+            nombreBeneficiario='Ricardo Sanchez')
+        res = app.post('/generate_order', data=json.dumps(data.__dict__),
                        content_type='application/json')
 
         assert res.status_code == 201

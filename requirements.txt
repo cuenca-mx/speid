@@ -6,3 +6,5 @@ Flask-SQLAlchemy
 Flask-Migrate
 psycopg2-binary
 pika
+stpmex
+boto3

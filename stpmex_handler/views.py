@@ -4,6 +4,7 @@ from stpmex_handler.rabbit.base import RpcClient, ConfirmModeClient
 from stpmex_handler import app, db
 from stpmex_handler.models import Request
 from stpmex_handler.tables.types import HttpRequestMethod
+from stpmex_handler import stpmex
 
 
 @app.route('/')
@@ -24,6 +25,13 @@ def create_orden():
     resp = rabbit_client.call(request.json)
     # TODO Pending to do something with the response
     return make_response(jsonify(request.json), 201)
+
+
+@app.route('/generate_order', methods=['POST'])
+def generate_order():
+    order = stpmex.Orden(**request.json)
+    res = order.registra()
+    return make_response(jsonify(res), 201)
 
 
 @app.before_request
