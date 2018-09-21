@@ -4,6 +4,7 @@ from stpmex_handler.rabbit.base import RpcClient, ConfirmModeClient
 from stpmex_handler import app, db
 from stpmex_handler.models import Request, Transaction, Event
 from stpmex_handler.tables.types import HttpRequestMethod
+from stpmex_handler.models.helpers import save_items
 
 
 @app.route('/')
@@ -26,8 +27,6 @@ def create_orden():
         type='CREATE',
         meta=str(request.json)
     )
-    db.session.add(transaction)
-    db.session.add(event_created)
     rabbit_client = RpcClient()
     resp = rabbit_client.call(request.json)
     # TODO Pending to do something with the response
@@ -36,8 +35,7 @@ def create_orden():
         type='COMPLETE',
         meta=str(resp)
     )
-    db.session.add(event_received)
-    db.session.commit()
+    save_items([transaction, event_created, event_received], db)
     return make_response(jsonify(request.json), 201)
 
 
@@ -59,5 +57,6 @@ def log_posts():
         headers=dict(request.headers),
         body=body
     )
+
     db.session.add(req)
     db.session.commit()
