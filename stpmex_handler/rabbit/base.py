@@ -35,15 +35,10 @@ class RpcClient():
                                    ),
                                    body=str(element))
 
-        # Wait to the response
-        t0 = time.time()
+        # Wait to the response up to 15 seconds
         while self.response is None:
-            CONNECTION.process_data_events()
-            t1 = time.time()
-            if t1 - t0 > 15:
-                break
+            CONNECTION.process_data_events(15)
 
-        print("Timeout exceeded")
         return self.response
 
 
