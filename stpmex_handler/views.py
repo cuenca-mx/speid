@@ -14,8 +14,25 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
+    request_id = request.json['id']
+    if request_id is None or int(request_id) <= 0:
+        return make_response(jsonify(request.json), 400)
+
+    res = Transaction.query.filter(Transaction.orden_id == request_id)
+    if res is None or len(res) > 1:
+        event = Event(
+            type='ERROR',
+            meta=str(request.json)
+        )
+    else:
+        event = Event(
+            transaction_id=res[0].id,
+            type='RECEIVE',
+            meta=str(request.json)
+        )
     rabbit_client = ConfirmModeClient('cuenca.stp.orden_events')
     rabbit_client.call(request.json)
+    save_items([event], db)
     return make_response(jsonify(request.json), 201)
 
 

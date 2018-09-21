@@ -1,3 +1,4 @@
+from stpmex_handler.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE
 from .celery import app
 from stpmex_handler.models.helpers import snake_to_camel, save_items
 from .celery import stpmex
@@ -10,7 +11,7 @@ def send_order(order_dict):
     transaction = Transaction(order_dict)
     event_created = Event(
         transaction_id=transaction.id,
-        type="CREATE",
+        type='CREATE',
         meta=str(order_dict)
     )
 
@@ -21,10 +22,14 @@ def send_order(order_dict):
 
     event_complete = Event(
         transaction_id=transaction.id,
-        type="COMPLETE",
+        type='COMPLETE',
         meta=str(res)
     )
     if res.id > 0:
         transaction.orden_id = res.id
+    else:
+        event_complete.type = 'ERROR'
+        client = ConfirmModeClient(NEW_ORDER_QUEUE)
+        client.call(order_dict)
 
     save_items([transaction, event_created, event_complete])

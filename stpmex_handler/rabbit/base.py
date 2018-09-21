@@ -1,9 +1,9 @@
 import pika
 import uuid
-import time
 from stpmex_handler.rabbit import CONNECTION
 
 RPC_QUEUE = 'rpc_queue'
+NEW_ORDER_QUEUE = 'cuenca.stp.new_order'
 
 
 class RpcClient():

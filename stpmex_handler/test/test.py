@@ -1,12 +1,12 @@
-import pika
-import os
 import json
+import os
 import threading
 from ast import literal_eval
-from stpmex import Orden
+import pika
 from stpmex.types import Institucion
-from stpmex_handler.models import Transaction, Event
 from stpmex_handler import db
+from stpmex_handler.models import Transaction, Event
+from stpmex_handler.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE
 
 
 def callback(ch, method, properties, body):
@@ -65,13 +65,32 @@ class TestStpWeb:
                        content_type='application/json')
         assert res.status_code == 201
 
+    def test_fail_create_order(self, app):
+        data = dict(
+            Estado='LIQUIDACION',
+            Detalle='0'
+        )
+        res = app.post('/orden_events', data=json.dumps(data),
+                       content_type='application/json')
+        assert res.status_code == 400
+
+    def test_fail_id_create_order(self, app):
+        data = dict(
+            id='23746784628243224242', # An ID we don't have in the records
+            Estado='LIQUIDACION',
+            Detalle='0'
+        )
+        res = app.post('/orden_events', data=json.dumps(data),
+                       content_type='application/json')
+        assert res.status_code == 400
+
     def test_assert_receive_create_order(self):
         queue_name = 'cuenca.stp.orden_events'
         connection = pika.BlockingConnection(pika.ConnectionParameters(
             host=os.getenv('AMPQ_ADDRESS')))
         channel = connection.channel()
 
-        queue = channel.queue_declare(queue=queue_name, durable=True)
+        channel.queue_declare(queue=queue_name, durable=True)
         print('Waiting for the message....')
 
         channel.basic_qos(prefetch_count=1)
@@ -115,17 +134,15 @@ class TestStpWeb:
         assert res.status_code == 201
 
     def test_generate_order(self, app):
-        data = Orden(
+        order = dict(
             conceptoPago='Prueba',
             institucionOperante=Institucion.STP.value,
             cuentaBeneficiario='072691004495711499',
             institucionContraparte=Institucion.BANORTE_IXE.value,
             monto=1.2,
             nombreBeneficiario='Ricardo Sanchez')
-        #res = app.post('/generate_order', data=json.dumps(data.__dict__()),
-        #               content_type='application/json')
-
-        #assert res.status_code == 201
+        client = ConfirmModeClient(NEW_ORDER_QUEUE)
+        client.call(order)
 
     def test_save_transaction(self):
         transaction_request = {

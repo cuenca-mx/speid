@@ -10,6 +10,12 @@ RUN pip install --quiet gunicorn
 # Add repo contents to image
 ADD . /stpmex-handler/
 
+# Start celery
+RUN pip install --quiet celery
+COPY celeryd /etc/default/celeryd
+CMD ["sh", "/etc/init.d/celeryd", "start"]
+
+
 ENV PORT 3000
 EXPOSE $PORT
 
