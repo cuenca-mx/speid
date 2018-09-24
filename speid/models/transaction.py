@@ -1,15 +1,18 @@
 import datetime as dt
-from speid.tables import transactions
-from speid.models.base import db
-from speid.models.helpers import camel_to_snake
+
 from sqlalchemy.orm import relationship
+
+from speid.tables import transactions
+
+from .base import db
 from .events import Event
+from .helpers import camel_to_snake
 
 
 class Transaction(db.Model):
     __table__ = transactions
-    events = relationship(Event,
-                          primaryjoin=Event.transaction_id == __table__.c.id)
+
+    events = relationship(Event)
 
     @classmethod
     def transform(cls, trans_dict):

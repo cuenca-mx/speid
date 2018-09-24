@@ -4,8 +4,3 @@ from speid.tables import events
 
 class Event(db.Model):
     __table__ = events
-
-    def __init__(self, transaction_id: int, type: str, meta: str):
-        self.transaction_id = transaction_id,
-        self.type = type
-        self.meta = meta

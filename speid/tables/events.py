@@ -1,5 +1,7 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, String
+
 from speid import db
+
 from . import cols
 
 events = db.Table(
