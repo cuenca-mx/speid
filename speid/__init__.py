@@ -16,6 +16,7 @@ migrate = Migrate(app, db)
 
 
 import speid.models
+import speid.views
 
 if not stpmex_handler_env.lower() == 'prod':
     import speid.commands
