@@ -20,4 +20,4 @@ ENV PORT 3000
 EXPOSE $PORT
 
 CMD ["gunicorn", "--access-logfile=-", "--error-logfile=-", \
-     "--bind=0.0.0.0:3000", "--workers=3", "stpmex_handler:app"]
+     "--bind=0.0.0.0:3000", "--workers=3", "speid:app"]

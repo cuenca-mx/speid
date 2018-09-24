@@ -17,19 +17,8 @@ services:
     build:
       context: .
       args:
-        - DATABASE_URI=postgresql://postgres@db/postgres
-        - PYTHONPATH=/speid
         - AMPQ_ADDRESS=rabbitmq
-        - STPMEX_HANDLER_ENV=prod
-        - STP_WSDL=https://demo.stpmex.com:7024/speidemo/webservices/SpeiActualizaServices?wsdl
-        - STP_EMPRESA=TAMIZI
-        - STP_KEY_PASSPHRASE=12345678
-        - STP_PREFIJO=1570
-        - STP_PRIVATE_KEY=prueba-key.pem
-        - STP_BUCKET_S3=stpcuenca
-        - STP_PRIVATE_LOCATION=pk.pem
-        - AWS_ACCESS_KEY_ID=AKIAIS6OKZSTNOOFA4TA
-        - AWS_SECRET_ACCESS_KEY=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
+        - FLASK_ENV=development
     volumes:
       - .:/speid
     ports:
@@ -40,19 +29,5 @@ services:
     depends_on:
       - db
       - rabbitmq
-    environment:
-      - DATABASE_URI=postgresql://postgres@db/postgres
-      - PYTHONPATH=/speid
-      - AMPQ_ADDRESS=rabbitmq
-      - STPMEX_HANDLER_ENV=prod
-      - FLASK_APP=speid/views.py
-      - FLASK_ENV=development
-      - STP_WSDL=https://demo.stpmex.com:7024/speidemo/webservices/SpeiActualizaServices?wsdl
-      - STP_EMPRESA=TAMIZI
-      - STP_KEY_PASSPHRASE=12345678
-      - STP_PREFIJO=1570
-      - STP_PRIVATE_KEY=prueba-key.pem
-      - STP_BUCKET_S3=stpcuenca
-      - STP_PRIVATE_LOCATION=pk.pem
-      - AWS_ACCESS_KEY_ID=AKIAIS6OKZSTNOOFA4TA
-      - AWS_SECRET_ACCESS_KEY=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
+    env_file:
+      - .env
