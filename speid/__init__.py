@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
-import stpmex_handler.models
+import speid.models
 
 if not stpmex_handler_env.lower() == 'prod':
-    import stpmex_handler.commands
+    import speid.commands

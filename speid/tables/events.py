@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
-from stpmex_handler import db
+from speid import db
 from . import cols
 
 events = db.Table(

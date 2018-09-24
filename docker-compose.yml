@@ -18,7 +18,7 @@ services:
       context: .
       args:
         - DATABASE_URI=postgresql://postgres@db/postgres
-        - PYTHONPATH=/stpmex_handler
+        - PYTHONPATH=/speid
         - AMPQ_ADDRESS=rabbitmq
         - STPMEX_HANDLER_ENV=prod
         - STP_WSDL=https://demo.stpmex.com:7024/speidemo/webservices/SpeiActualizaServices?wsdl
@@ -31,7 +31,7 @@ services:
         - AWS_ACCESS_KEY_ID=AKIAIS6OKZSTNOOFA4TA
         - AWS_SECRET_ACCESS_KEY=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
     volumes:
-      - .:/stpmex_handler
+      - .:/speid
     ports:
       - 3000:3000
     links:
@@ -42,10 +42,10 @@ services:
       - rabbitmq
     environment:
       - DATABASE_URI=postgresql://postgres@db/postgres
-      - PYTHONPATH=/stpmex_handler
+      - PYTHONPATH=/speid
       - AMPQ_ADDRESS=rabbitmq
       - STPMEX_HANDLER_ENV=prod
-      - FLASK_APP=stpmex_handler/views.py
+      - FLASK_APP=speid/views.py
       - FLASK_ENV=development
       - STP_WSDL=https://demo.stpmex.com:7024/speidemo/webservices/SpeiActualizaServices?wsdl
       - STP_EMPRESA=TAMIZI

@@ -1,7 +1,7 @@
 import datetime as dt
-from stpmex_handler.tables import transactions
-from stpmex_handler.models.base import db
-from stpmex_handler.models.helpers import camel_to_snake
+from speid.tables import transactions
+from speid.models.base import db
+from speid.models.helpers import camel_to_snake
 from sqlalchemy.orm import relationship
 from .events import Event
 

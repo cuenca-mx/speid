@@ -2,7 +2,7 @@ import os
 
 import docker
 
-from stpmex_handler import app, db
+from speid import app, db
 
 
 DB_CONTAINER_NAME = 'speid_db'

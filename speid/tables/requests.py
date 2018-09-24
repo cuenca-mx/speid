@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Enum, JSON, String
 
-from stpmex_handler import db
+from speid import db
 
 from . import cols
 from .types import HttpRequestMethod

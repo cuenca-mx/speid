@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Date, Integer, String
-from stpmex_handler import db
+from speid import db
 from . import cols
 
 transactions = db.Table(

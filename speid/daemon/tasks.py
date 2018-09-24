@@ -1,8 +1,8 @@
-from stpmex_handler.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE
+from speid.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE
 from .celery import app
-from stpmex_handler.models.helpers import snake_to_camel, save_items
+from speid.models.helpers import snake_to_camel, save_items
 from .celery import stpmex
-from stpmex_handler.models import Transaction, Event
+from speid.models import Transaction, Event
 
 
 @app.task

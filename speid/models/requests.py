@@ -1,4 +1,4 @@
-from stpmex_handler.tables import requests
+from speid.tables import requests
 
 from .base import db
 

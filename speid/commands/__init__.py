@@ -1,6 +1,6 @@
 from werkzeug.serving import run_simple
 
-from stpmex_handler import app
+from speid import app
 
 from . import docker
 

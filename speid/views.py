@@ -1,10 +1,10 @@
 import json
 from flask import jsonify, make_response, request
-from stpmex_handler.rabbit.base import RpcClient, ConfirmModeClient
-from stpmex_handler import app, db
-from stpmex_handler.models import Request, Transaction, Event
-from stpmex_handler.tables.types import HttpRequestMethod
-from stpmex_handler.models.helpers import save_items
+from speid.rabbit.base import RpcClient, ConfirmModeClient
+from speid import app, db
+from speid.models import Request, Transaction, Event
+from speid.tables.types import HttpRequestMethod
+from speid.models.helpers import save_items
 
 
 @app.route('/')

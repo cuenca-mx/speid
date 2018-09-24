@@ -1,5 +1,5 @@
-from stpmex_handler.models.base import db
-from stpmex_handler.tables import events
+from speid.models.base import db
+from speid.tables import events
 
 
 class Event(db.Model):

@@ -4,9 +4,9 @@ import threading
 from ast import literal_eval
 import pika
 from stpmex.types import Institucion
-from stpmex_handler import db
-from stpmex_handler.models import Transaction, Event
-from stpmex_handler.rabbit.base import (
+from speid import db
+from speid.models import Transaction, Event
+from speid.rabbit.base import (
     ConfirmModeClient, NEW_ORDER_QUEUE, RPC_QUEUE)
 
 

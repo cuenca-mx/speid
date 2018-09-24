@@ -1,4 +1,4 @@
-from stpmex_handler import views
+from speid import views
 import pytest
 
 
