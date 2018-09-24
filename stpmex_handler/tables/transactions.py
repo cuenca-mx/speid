@@ -5,7 +5,7 @@ from . import cols
 transactions = db.Table(
     'transactions', db.metadata,
     cols.id('tr'), cols.created_at(),
-    Column('orden_id', Integer, nullable=True),  # AKA Clave
+    Column('orden_id', Integer),  # STP Ordenes.clave
     Column('fecha_operacion', Date, nullable=False),
     Column('institucion_ordenante', Integer, nullable=False),
     Column('institucion_beneficiaria', Integer, nullable=False),
