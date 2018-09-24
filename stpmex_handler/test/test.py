@@ -6,7 +6,7 @@ import pika
 from stpmex.types import Institucion
 from stpmex_handler import db
 from stpmex_handler.models import Transaction, Event
-from stpmex_handler.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE
+from stpmex_handler.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE, RPC_QUEUE
 
 
 def callback(ch, method, properties, body):
@@ -34,10 +34,10 @@ class ConsumerThread(threading.Thread):
         connection = pika.BlockingConnection(pika.ConnectionParameters(
             host=os.getenv('AMPQ_ADDRESS')))
         channel = connection.channel()
-        channel.queue_declare(queue='rpc_queue')
+        channel.queue_declare(queue=RPC_QUEUE)
 
         channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(on_request, queue='rpc_queue')
+        channel.basic_consume(on_request, queue=RPC_QUEUE)
 
         print("Waiting for the message...")
 
@@ -55,6 +55,17 @@ class TestStpWeb:
         res = app.get('/')
         assert res.status_code == 200
 
+    def test_generate_order(self, app):
+        order = dict(
+            conceptoPago='Prueba',
+            institucionOperante=Institucion.STP.value,
+            cuentaBeneficiario='072691004495711499',
+            institucionContraparte=Institucion.BANORTE_IXE.value,
+            monto=1.2,
+            nombreBeneficiario='Ricardo Sanchez')
+        client = ConfirmModeClient(NEW_ORDER_QUEUE)
+        client.call(order)
+
     def test_create_order(self, app):
         data = dict(
             id='251189',
@@ -64,25 +75,6 @@ class TestStpWeb:
         res = app.post('/orden_events', data=json.dumps(data),
                        content_type='application/json')
         assert res.status_code == 201
-
-    def test_fail_create_order(self, app):
-        data = dict(
-            Estado='LIQUIDACION',
-            Detalle='0'
-        )
-        res = app.post('/orden_events', data=json.dumps(data),
-                       content_type='application/json')
-        assert res.status_code == 400
-
-    def test_fail_id_create_order(self, app):
-        data = dict(
-            id='23746784628243224242', # An ID we don't have in the records
-            Estado='LIQUIDACION',
-            Detalle='0'
-        )
-        res = app.post('/orden_events', data=json.dumps(data),
-                       content_type='application/json')
-        assert res.status_code == 400
 
     def test_assert_receive_create_order(self):
         queue_name = 'cuenca.stp.orden_events'
@@ -104,6 +96,25 @@ class TestStpWeb:
         assert channel.queue_declare(queue=queue_name, durable=True). \
             method.message_count == 0
         connection.close()
+
+    def test_fail_create_order(self, app):
+        data = dict(
+            Estado='LIQUIDACION',
+            Detalle='0'
+        )
+        res = app.post('/orden_events', data=json.dumps(data),
+                       content_type='application/json')
+        assert res.status_code == 400
+
+    def test_fail_id_create_order(self, app):
+        data = dict(
+            id='999999',  # An ID we don't have in the records
+            Estado='LIQUIDACION',
+            Detalle='0'
+        )
+        res = app.post('/orden_events', data=json.dumps(data),
+                       content_type='application/json')
+        assert res.status_code == 201
 
     def test_create_order_event(self, app):
         thread = ConsumerThread()
@@ -133,17 +144,6 @@ class TestStpWeb:
 
         assert res.status_code == 201
 
-    def test_generate_order(self, app):
-        order = dict(
-            conceptoPago='Prueba',
-            institucionOperante=Institucion.STP.value,
-            cuentaBeneficiario='072691004495711499',
-            institucionContraparte=Institucion.BANORTE_IXE.value,
-            monto=1.2,
-            nombreBeneficiario='Ricardo Sanchez')
-        client = ConfirmModeClient(NEW_ORDER_QUEUE)
-        client.call(order)
-
     def test_save_transaction(self):
         transaction_request = {
             "Clave": 2456303,
@@ -166,7 +166,7 @@ class TestStpWeb:
             "estado": "estado"
         }
         transaction = Transaction.transform(transaction_request)
-        event = Event(transaction_id= transaction.id, type='TEST', meta='TEST')
+        event = Event(transaction_id=transaction.id, type='TEST', meta='TEST')
         db.session.add(transaction)
         db.session.add(event)
         db.session.commit()

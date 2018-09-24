@@ -8,7 +8,8 @@ from .events import Event
 
 class Transaction(db.Model):
     __table__ = transactions
-    events = relationship(Event, primaryjoin=Event.transaction_id == __table__.c.id)
+    events = relationship(Event,
+                          primaryjoin=Event.transaction_id == __table__.c.id)
 
     @classmethod
     def transform(cls, trans_dict):
