@@ -5,7 +5,7 @@ import docker
 from stpmex_handler import app, db
 
 
-DB_CONTAINER_NAME = 'stpmex_db'
+DB_CONTAINER_NAME = 'speid_db'
 
 
 @app.cli.group('docker')
