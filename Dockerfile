@@ -1,5 +1,5 @@
-FROM python:3.6
-MAINTAINER Matin Tamizi <matin@cuenca.io>
+FROM python:3.7
+MAINTAINER Cuenca <dev@cuenca.com>
 
 # Install app
 ADD Makefile requirements.txt requirements-dev.txt /stpmex-handler/

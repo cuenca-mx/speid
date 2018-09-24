@@ -1,6 +1,6 @@
 SHELL := bash
 PATH := ./venv/bin:${PATH}
-PYTHON=python3.6
+PYTHON=python3.7
 
 
 default: install
