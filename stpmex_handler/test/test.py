@@ -6,10 +6,11 @@ import pika
 from stpmex.types import Institucion
 from stpmex_handler import db
 from stpmex_handler.models import Transaction, Event
-from stpmex_handler.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE, RPC_QUEUE
+from stpmex_handler.rabbit.base import (
+    ConfirmModeClient, NEW_ORDER_QUEUE, RPC_QUEUE)
 
 
-def callback(ch, method, properties, body):
+def callback(ch, method, _, body):
     print("Received: \n %r" % str(body))
     print("Done")
     ch.basic_ack(delivery_tag=method.delivery_tag)
