@@ -14,8 +14,3 @@ def camel_to_snake(s):
 def snake_to_camel(s):
     words = s.split('_')
     return "".join(r.title() for r in words)
-
-
-def save_items(items, db):
-    map(lambda x: db.session.add(x), items)
-    db.session.commit()

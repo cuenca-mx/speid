@@ -2,7 +2,9 @@ import json
 import os
 import threading
 from ast import literal_eval
+
 import pika
+
 from stpmex.types import Institucion
 from speid import db
 from speid.models import Transaction, Event

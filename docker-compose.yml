@@ -4,6 +4,7 @@ services:
 
   db:
     image: postgres:10.1
+    container_name: speid_db
     ports:
       - 5432:5432
 

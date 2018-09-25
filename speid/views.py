@@ -1,10 +1,11 @@
 import json
+
 from flask import jsonify, make_response, request
-from speid.rabbit.base import RpcClient, ConfirmModeClient
+
 from speid import app, db
 from speid.models import Request, Transaction, Event
+from speid.rabbit.base import RpcClient, ConfirmModeClient
 from speid.tables.types import HttpRequestMethod
-from speid.models.helpers import save_items
 
 
 @app.route('/')
@@ -34,13 +35,16 @@ def create_orden_events():
         )
     rabbit_client = ConfirmModeClient('cuenca.stp.orden_events')
     rabbit_client.call(request.json)
-    save_items([event], db)
+    db.session.add(event)
+    db.session.commit()
     return make_response(jsonify(request.json), 201)
 
 
 @app.route('/ordenes', methods=['POST'])
 def create_orden():
     transaction = Transaction.transform(request.json)
+    db.session.add(transaction)
+    db.session.commit()
     event_created = Event(
         transaction_id=transaction.id,
         type='CREATE',
@@ -54,7 +58,9 @@ def create_orden():
         type='COMPLETE',
         meta=str(resp)
     )
-    save_items([transaction, event_created, event_received], db)
+    db.session.add(event_created)
+    db.session.add(event_received)
+    db.session.commit()
     return make_response(jsonify(request.json), 201)
 
 
