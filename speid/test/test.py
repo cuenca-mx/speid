@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import threading
@@ -60,12 +61,24 @@ class TestStpWeb:
 
     def test_generate_order(self, app):
         order = dict(
-            concepto_pago='Prueba',
+            fecha_operacion=datetime.date.today(),
             institucion_ordenante=Institucion.STP.value,
-            cuenta_ordenante='072691004495711499',
             institucion_beneficiaria=Institucion.BANORTE_IXE.value,
+            clave_rastreo="12340",
             monto=1.2,
-            nombre_beneficiario='Ricardo Sanchez')
+            nombre_ordenante="BANCO",
+            tipo_cuenta_ordenante=40,
+            cuenta_ordenante="072691004495711499",
+            rfc_curp_ordenante="ND",
+            nombre_beneficiario="Ricardo Sánchez",
+            tipo_cuenta_beneficiario=40,
+            cuenta_beneficiario="646180157000000004",
+            rfc_curp_beneficiario="ND",
+            concepto_pago="PRUEBA",
+            referencia_numerica=2423,
+            empresa="TAMIZI",
+            estado="estado"
+        )
         trace = [[order], {}, {"callbacks": None, "errbacks": None, "chain": None, "chord": None}]
         client = ConfirmModeClient(NEW_ORDER_QUEUE)
         client.channel.basic_publish(exchange='',
