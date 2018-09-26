@@ -60,12 +60,12 @@ class TestStpWeb:
 
     def test_generate_order(self, app):
         order = dict(
-            conceptoPago='Prueba',
-            institucionOperante=Institucion.STP.value,
-            cuentaBeneficiario='072691004495711499',
-            institucionContraparte=Institucion.BANORTE_IXE.value,
+            concepto_pago='Prueba',
+            institucion_ordenante=Institucion.STP.value,
+            cuenta_ordenante='072691004495711499',
+            institucion_beneficiaria=Institucion.BANORTE_IXE.value,
             monto=1.2,
-            nombreBeneficiario='Ricardo Sanchez')
+            nombre_beneficiario='Ricardo Sanchez')
         trace = [[order], {}, {"callbacks": None, "errbacks": None, "chain": None, "chord": None}]
         client = ConfirmModeClient(NEW_ORDER_QUEUE)
         client.channel.basic_publish(exchange='',
