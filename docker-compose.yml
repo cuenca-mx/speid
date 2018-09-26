@@ -20,6 +20,7 @@ services:
       args:
         - AMPQ_ADDRESS=rabbitmq
         - FLASK_ENV=development
+    tty: true
     volumes:
       - .:/speid
     ports:

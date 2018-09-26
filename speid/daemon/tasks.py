@@ -1,14 +1,17 @@
-from speid.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE
-from .celery import app
-from speid.models.helpers import snake_to_camel, save_items
-from .celery import stpmex
+from speid import db
 from speid.models import Transaction, Event
+from speid.models.helpers import snake_to_camel
+from speid.rabbit.base import ConfirmModeClient, NEW_ORDER_QUEUE
+from .celery_app import app
+from .celery_app import stpmex
 
 
 @app.task
 def send_order(order_dict):
     # Save transaction
     transaction = Transaction(order_dict)
+    db.session.add(transaction)
+    db.session.commit()
     event_created = Event(
         transaction_id=transaction.id,
         type='CREATE',
@@ -32,4 +35,6 @@ def send_order(order_dict):
         client = ConfirmModeClient(NEW_ORDER_QUEUE)
         client.call(order_dict)
 
-    save_items([transaction, event_created, event_complete])
+    db.session.add(event_created)
+    db.session.add(event_complete)
+    db.session.commit()

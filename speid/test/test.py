@@ -66,8 +66,16 @@ class TestStpWeb:
             institucionContraparte=Institucion.BANORTE_IXE.value,
             monto=1.2,
             nombreBeneficiario='Ricardo Sanchez')
+        trace = [[order], {}, {"callbacks": None, "errbacks": None, "chain": None, "chord": None}]
         client = ConfirmModeClient(NEW_ORDER_QUEUE)
-        client.call(order)
+        client.channel.basic_publish(exchange='',
+                              routing_key=client.queue,
+                              body=json.dumps(trace),
+                              properties=pika.BasicProperties(
+                                  delivery_mode=2,  # Message persistent
+                                  headers={'task': 'speid.daemon.tasks.send_order',
+                                           'id': 'PRUEBA'}
+                              ))
 
     def test_create_order(self, app):
         data = dict(
