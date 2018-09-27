@@ -1,7 +1,8 @@
-from celery import Celery
-import stpmex
-import boto3
 import os
+
+import boto3
+import stpmex
+from celery import Celery
 
 # Obtiene las variables de ambiente
 stp_private_location = os.getenv('STP_PRIVATE_LOCATION')

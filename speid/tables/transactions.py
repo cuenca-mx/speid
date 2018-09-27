@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Date, Integer, String
+
 from speid import db
 from . import cols
 

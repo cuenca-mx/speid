@@ -1,0 +1,2 @@
+class StpConnectionError(ConnectionError):
+    pass

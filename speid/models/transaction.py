@@ -3,7 +3,6 @@ import datetime as dt
 from sqlalchemy.orm import relationship
 
 from speid.tables import transactions
-
 from .base import db
 from .events import Event
 from .helpers import camel_to_snake

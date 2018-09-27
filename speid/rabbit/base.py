@@ -1,12 +1,14 @@
-import pika
 import uuid
+
+import pika
+
 from speid.rabbit import CONNECTION
 
 RPC_QUEUE = 'rpc_queue'
 NEW_ORDER_QUEUE = 'cuenca.stp.new_order'
 
 
-class RpcClient():
+class RpcClient:
     def __init__(self):
         # Sets a unique channel
         self.channel = CONNECTION.channel()
@@ -18,7 +20,7 @@ class RpcClient():
         self.response = None
         self.corr_id = None
 
-    def on_response(self, ch, method, props, body):
+    def on_response(self, _, __, props, body):
         # Only handle those with same correlation ID requested
         if self.corr_id == props.correlation_id:
             self.response = body
@@ -42,11 +44,10 @@ class RpcClient():
         return self.response
 
 
-class ConfirmModeClient():
+class ConfirmModeClient:
     def __init__(self, queue):
         self.channel = CONNECTION.channel()
         # Make the queue durable in order to not miss any element
-        # TODO Use the channel in Confirm mode to make it more persistent
         self.channel.queue_declare(queue=queue, durable=True)
         self.queue = queue
 

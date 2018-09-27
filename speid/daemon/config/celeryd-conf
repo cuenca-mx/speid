@@ -12,7 +12,7 @@ CELERY_APP="speid.daemon.celery_app:app"
 
 # Change dir at start
 
-#CELERYD_CHDIR='speid/speid/daemon/'
+# CELERYD_CHDIR='speid/speid/daemon/'
 
 # Set logging level to DEBUG
 CELERYD_LOG_LEVEL="DEBUG"

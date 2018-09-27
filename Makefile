@@ -6,7 +6,7 @@ PYTHON=python3.7
 default: install
 
 venv:
-		$(PYTHON) -m venv --prompt stpmex-handler venv
+		$(PYTHON) -m venv --prompt speid venv
 		source venv/bin/activate
 		pip install --quiet --upgrade pip
 
@@ -25,7 +25,7 @@ install-dev: install
 		pip install --quiet --upgrade -r requirements-dev.txt
 
 test: install-dev lint
-		pytest -v stpmex_handler/test/test.py
+		pytest -v speid/test/test.py
 
 lint:
-		pycodestyle --ignore=E402 stpmex_handler migrations
+		pycodestyle --ignore=E402 speid migrations

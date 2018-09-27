@@ -5,7 +5,7 @@ from flask import jsonify, make_response, request
 from speid import app, db
 from speid.models import Request, Transaction, Event
 from speid.rabbit.base import RpcClient, ConfirmModeClient
-from speid.tables.types import HttpRequestMethod
+from speid.tables.types import HttpRequestMethod, State
 
 
 @app.route('/')
@@ -15,6 +15,7 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
+
     if "id" not in request.json or int(request.json["id"]) <= 0:
         return make_response(jsonify(request.json), 400)
 
@@ -23,14 +24,14 @@ def create_orden_events():
     if res is None or len(res) != 1:
         event = Event(
             transaction_id=0,
-            type='ERROR',
+            type=State.error,
             meta=str(request.json)
         )
     else:
         transaction = res
         event = Event(
             transaction_id=transaction.id,
-            type='RECEIVE',
+            type=State.received,
             meta=str(request.json)
         )
     rabbit_client = ConfirmModeClient('cuenca.stp.orden_events')
@@ -45,22 +46,25 @@ def create_orden():
     transaction = Transaction.transform(request.json)
     db.session.add(transaction)
     db.session.commit()
+
     event_created = Event(
         transaction_id=transaction.id,
-        type='CREATE',
+        type=State.created,
         meta=str(request.json)
     )
+
     rabbit_client = RpcClient()
     resp = rabbit_client.call(request.json)
-    # TODO Pending to do something with the response
+
     event_received = Event(
         transaction_id=transaction.id,
-        type='COMPLETE',
+        type=State.completed,
         meta=str(resp)
     )
     db.session.add(event_created)
     db.session.add(event_received)
     db.session.commit()
+
     return make_response(jsonify(request.json), 201)
 
 

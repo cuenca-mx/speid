@@ -5,8 +5,8 @@ import threading
 from ast import literal_eval
 
 import pika
-
 from stpmex.types import Institucion
+
 from speid import db
 from speid.models import Transaction, Event
 from speid.rabbit.base import (
@@ -79,16 +79,17 @@ class TestStpWeb:
             empresa="TAMIZI",
             estado="estado"
         )
-        trace = [[order], {}, {"callbacks": None, "errbacks": None, "chain": None, "chord": None}]
         client = ConfirmModeClient(NEW_ORDER_QUEUE)
         client.channel.basic_publish(exchange='',
-                              routing_key=client.queue,
-                              body=json.dumps(trace),
-                              properties=pika.BasicProperties(
-                                  delivery_mode=2,  # Message persistent
-                                  headers={'task': 'speid.daemon.tasks.send_order',
-                                           'id': 'PRUEBA'}
-                              ))
+                                     routing_key=client.queue,
+                                     body=str(order),
+                                     properties=pika.BasicProperties(
+                                         delivery_mode=2,
+                                         headers={
+                                             'task': ('speid.daemon.tasks.'
+                                                      'send_order'),
+                                             'id': 'TEST'}
+                                     ))
 
     def test_create_order(self, app):
         data = dict(
