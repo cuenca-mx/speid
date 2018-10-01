@@ -1,16 +1,18 @@
-import datetime
 import json
 import os
 import threading
 from ast import literal_eval
 
 import pika
+import pytest
+from celery import Celery
 from stpmex.types import Institucion
 
 from speid import db
 from speid.models import Transaction, Event
-from speid.rabbit.base import (
-    ConfirmModeClient, NEW_ORDER_QUEUE, RPC_QUEUE)
+from speid.models.exceptions import OrderNotFoundException
+from speid.rabbit.base import (RPC_QUEUE)
+from speid.tables.types import State
 
 
 def callback(ch, method, _, body):
@@ -19,7 +21,7 @@ def callback(ch, method, _, body):
     ch.basic_ack(delivery_tag=method.delivery_tag)
     body = body.decode()
     order = literal_eval(body)
-    assert order["id"] == '251189'
+    assert order["id"] == '5623689'
 
 
 def on_request(ch, method, props, body):
@@ -61,39 +63,24 @@ class TestStpWeb:
 
     def test_generate_order(self, app):
         order = dict(
-            fecha_operacion=datetime.date.today(),
-            institucion_ordenante=Institucion.STP.value,
-            institucion_beneficiaria=Institucion.BANORTE_IXE.value,
-            clave_rastreo="12340",
+            conceptoPago='PRUEBA',
+            institucionOperante=Institucion.STP.value,
+            cuentaBeneficiario='646180157000000004',
+            institucionContraparte=000,
             monto=1.2,
-            nombre_ordenante="BANCO",
-            tipo_cuenta_ordenante=40,
-            cuenta_ordenante="072691004495711499",
-            rfc_curp_ordenante="ND",
-            nombre_beneficiario="Ricardo Sánchez",
-            tipo_cuenta_beneficiario=40,
-            cuenta_beneficiario="646180157000000004",
-            rfc_curp_beneficiario="ND",
-            concepto_pago="PRUEBA",
-            referencia_numerica=2423,
-            empresa="TAMIZI",
-            estado="estado"
+            nombreBeneficiario='Ricardo Sánchez',
+            nombreOrdenante='BANCO',
+            cuentaOrdenante='072691004495711499',
+            rfcCurpOrdenante='ND'
         )
-        client = ConfirmModeClient(NEW_ORDER_QUEUE)
-        client.channel.basic_publish(exchange='',
-                                     routing_key=client.queue,
-                                     body=str(order),
-                                     properties=pika.BasicProperties(
-                                         delivery_mode=2,
-                                         headers={
-                                             'task': ('speid.daemon.tasks.'
-                                                      'send_order'),
-                                             'id': 'TEST'}
-                                     ))
+        app = Celery('stp_client')
+        app.config_from_object('speid.daemon.celeryconfig')
+        app.send_task('speid.daemon.tasks.send_order',
+                      kwargs={'order_dict': order})
 
-    def test_create_order(self, app):
+    def test_create_order_found(self, app):
         data = dict(
-            id='251189',
+            id='5623689',
             Estado='LIQUIDACION',
             Detalle="0"
         )
@@ -137,9 +124,9 @@ class TestStpWeb:
             Estado='LIQUIDACION',
             Detalle='0'
         )
-        res = app.post('/orden_events', data=json.dumps(data),
-                       content_type='application/json')
-        assert res.status_code == 201
+        with pytest.raises(OrderNotFoundException):
+            app.post('/orden_events', data=json.dumps(data),
+                     content_type='application/json')
 
     def test_create_order_event(self, app):
         thread = ConsumerThread()
@@ -191,7 +178,11 @@ class TestStpWeb:
             "estado": "estado"
         }
         transaction = Transaction.transform(transaction_request)
-        event = Event(transaction_id=transaction.id, type='TEST', meta='TEST')
+        event = Event(
+            transaction_id=transaction.id,
+            type=State.created,
+            meta='TEST'
+        )
         db.session.add(transaction)
         db.session.add(event)
         db.session.commit()

@@ -4,6 +4,7 @@ from flask import jsonify, make_response, request
 
 from speid import app, db
 from speid.models import Request, Transaction, Event
+from speid.models.exceptions import OrderNotFoundException
 from speid.rabbit.base import RpcClient, ConfirmModeClient
 from speid.tables.types import HttpRequestMethod, State
 
@@ -22,13 +23,9 @@ def create_orden_events():
     request_id = request.json['id']
     res = Transaction.query.filter(Transaction.orden_id == request_id).all()
     if res is None or len(res) != 1:
-        event = Event(
-            transaction_id=0,
-            type=State.error,
-            meta=str(request.json)
-        )
+        raise OrderNotFoundException(f'Order Id: {request_id}')
     else:
-        transaction = res
+        transaction = res[0]
         event = Event(
             transaction_id=transaction.id,
             type=State.received,

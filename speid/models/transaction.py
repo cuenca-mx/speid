@@ -1,3 +1,4 @@
+import datetime
 import datetime as dt
 
 from sqlalchemy.orm import relationship
@@ -22,4 +23,26 @@ class Transaction(db.Model):
             str(transaction.fecha_operacion),
             '%Y%m%d'
         ).date()
+        return transaction
+
+    @classmethod
+    def transform_from_order(cls, order):
+        transaction = cls(
+            fecha_operacion=datetime.date.today(),
+            institucion_ordenante=order.institucionOperante,
+            institucion_beneficiaria=order.institucionContraparte,
+            clave_rastreo=order.claveRastreo,
+            monto=order.monto,
+            nombre_ordenante=order.nombreOrdenante,
+            cuenta_ordenante=order.cuentaOrdenante,
+            rfc_curp_ordenante=order.rfcCurpOrdenante,
+            nombre_beneficiario=order.nombreBeneficiario,
+            tipo_cuenta_beneficiario=order.tipoCuentaBeneficiario,
+            cuenta_beneficiario=order.cuentaBeneficiario,
+            rfc_curp_beneficiario=order.rfcCurpBeneficiario,
+            concepto_pago=order.conceptoPago,
+            referencia_numerica=order.referenciaNumerica,
+            empresa=order.empresa,
+            estado="ND"
+        )
         return transaction

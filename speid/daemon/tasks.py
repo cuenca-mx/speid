@@ -1,30 +1,38 @@
+from stpmex import Orden
+
 from speid import db
 from speid.models import Transaction, Event
 from speid.models.exceptions import StpConnectionError
-from speid.models.helpers import snake_to_camel
 from speid.tables.types import State
 from .celery_app import app
-from .celery_app import stpmex
 
 
-@app.task
-def send_order(order_dict):
-    # Save transaction
-    transaction = Transaction(**order_dict)
-    db.session.add(transaction)
-    db.session.commit()
+def retry_timeout(attempts):
+    return 2 * attempts
+
+
+@app.task(bind=True, max_retries=5)
+def send_order(self, order_dict):
+    # Create event
     event_created = Event(
-        transaction_id=transaction.id,
         type=State.created,
         meta=str(order_dict)
     )
 
-    # Send order to STP
-    order_dict = {snake_to_camel(k): v for k, v in order_dict.items()}
     try:
-        order = stpmex.Orden(**order_dict)
+        # Recover orden
+        order = Orden(**order_dict)
+        # Save transaction
+        transaction = Transaction.transform_from_order(order)
+        db.session.add(transaction)
+        db.session.commit()
+
+        event_created.transaction_id = transaction.id
+
+        # Send order to STP
         res = order.registra()
-    except ConnectionError:
+    except ConnectionError as exc:
+        self.retry(countdown=retry_timeout(self.request.retries), exc=exc)
         raise StpConnectionError(ConnectionError)
     finally:
         db.session.add(event_created)
@@ -39,8 +47,6 @@ def send_order(order_dict):
         event_complete.type = State.completed
     else:
         event_complete.type = State.error
-        # Send the order back to the queue in case of an error
-        send_order.delay(order_dict)
 
     db.session.add(event_complete)
     db.session.commit()
