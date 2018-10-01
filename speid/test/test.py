@@ -66,7 +66,7 @@ class TestStpWeb:
             conceptoPago='PRUEBA',
             institucionOperante=Institucion.STP.value,
             cuentaBeneficiario='646180157000000004',
-            institucionContraparte=000,
+            institucionContraparte=Institucion.BANORTE_IXE.value,
             monto=1.2,
             nombreBeneficiario='Ricardo Sánchez',
             nombreOrdenante='BANCO',
