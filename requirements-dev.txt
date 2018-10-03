@@ -3,3 +3,4 @@ ipdb
 pycodestyle
 docker
 pytest
+flask-shell-ipython
