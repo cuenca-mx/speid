@@ -15,6 +15,7 @@ COPY speid/daemon/config/celeryd-daemon /etc/init.d/celeryd
 COPY speid/daemon/config/celeryd-conf /etc/default/celeryd
 RUN mkdir -p /etc/default
 RUN chmod +x /etc/init.d/celeryd
+RUN chmod -R a+rw /
 RUN adduser celery --disabled-password
 RUN mkdir -p /var/log/celery/ && chown celery:celery /var/log/celery/
 RUN mkdir -p /var/run/celery/ && chown celery:celery /var/run/celery/
