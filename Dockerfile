@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.6
 MAINTAINER Cuenca <dev@cuenca.com>
 
 # Install app
