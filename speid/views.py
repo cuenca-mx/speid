@@ -1,6 +1,7 @@
 import json
 
 from flask import jsonify, make_response, request
+import traceback
 
 from speid import app, db
 from speid.models import Request, Transaction, Event
@@ -38,7 +39,7 @@ def create_orden_events():
         rabbit_client.call(request.json)
     except Exception as exc:
         event.type = State.error
-        event.meta = str(exc)
+        event.meta = traceback.format_exc()
         pass
     finally:
         db.session.add(event)
