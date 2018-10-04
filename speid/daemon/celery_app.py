@@ -5,13 +5,13 @@ import stpmex
 from celery import Celery
 
 # Obtiene las variables de ambiente
-stp_private_location = os.getenv('STP_PRIVATE_LOCATION')
-stp_bucket_s3 = os.getenv('STP_BUCKET_S3')
-stp_key_s3 = os.getenv('STP_PRIVATE_KEY')
-wsdl_path = os.getenv('STP_WSDL')
-stp_empresa = os.getenv('STP_EMPRESA')
-priv_key_passphrase = os.getenv('STP_KEY_PASSPHRASE')
-stp_prefijo = os.getenv('STP_PREFIJO')
+stp_private_location = os.environ['STP_PRIVATE_LOCATION']
+stp_bucket_s3 = os.environ['STP_BUCKET_S3']
+stp_key_s3 = os.environ['STP_PRIVATE_KEY']
+wsdl_path = os.environ['STP_WSDL']
+stp_empresa = os.environ['STP_EMPRESA']
+priv_key_passphrase = os.environ['STP_KEY_PASSPHRASE']
+stp_prefijo = os.environ['STP_PREFIJO']
 
 # Inicia Celery y lo configura usando el archivo celeryconfig.py
 app = Celery('stp_client')

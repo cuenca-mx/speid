@@ -21,7 +21,7 @@ def on_request(ch, method, props, body):
 class ConsumerThread(threading.Thread):
     def run(self):
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host=os.getenv('AMPQ_ADDRESS')))
+            host=os.environ['AMPQ_ADDRESS']))
         channel = connection.channel()
         channel.queue_declare(queue=RPC_QUEUE)
 

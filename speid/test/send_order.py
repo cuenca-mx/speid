@@ -51,7 +51,7 @@ class TestSendOrder:
     def test_assert_receive_create_order(self):
         queue_name = 'cuenca.stp.orden_events'
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-            host=os.getenv('AMPQ_ADDRESS')))
+            host=os.environ['AMPQ_ADDRESS']))
         channel = connection.channel()
 
         channel.queue_declare(queue=queue_name, durable=True)

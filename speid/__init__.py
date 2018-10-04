@@ -3,7 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-database_uri = os.getenv('DATABASE_URI')
+database_uri = os.environ['DATABASE_URI']
 speid_env = os.getenv('SPEID_ENV', '')
 
 app = Flask('speid')
