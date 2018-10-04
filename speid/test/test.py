@@ -1,6 +1,7 @@
 import json
 import os
 import threading
+import urllib.request
 from ast import literal_eval
 
 import pika
@@ -55,6 +56,20 @@ class ConsumerThread(threading.Thread):
         connection.close()
 
 
+class SendOrderEvent(threading.Thread):
+    def run(self):
+        body = {'id': "5623859", 'Estado': 'LIQUIDACION', 'Detalle': '0'}
+
+        url = "http://localhost:3000/orden_events"
+        req = urllib.request.Request(url)
+        req.add_header('Content-Type', 'application/json; charset=utf-8')
+        json_data = json.dumps(body)
+        json_data_as_bytes = json_data.encode('utf-8')
+        req.add_header('Content-Length', len(json_data_as_bytes))
+        response = urllib.request.urlopen(req, json_data_as_bytes)
+        assert response.code == 200
+
+
 class TestStpWeb:
 
     def test_ping(self, app):
@@ -80,13 +95,13 @@ class TestStpWeb:
 
     def test_create_order_found(self, app):
         data = dict(
-            id='5623689',
+            id='5623859',
             Estado='LIQUIDACION',
             Detalle="0"
         )
         res = app.post('/orden_events', data=json.dumps(data),
                        content_type='application/json')
-        assert res.status_code == 201
+        assert res.status_code == 200
 
     def test_assert_receive_create_order(self):
         queue_name = 'cuenca.stp.orden_events'
@@ -106,7 +121,7 @@ class TestStpWeb:
         connection.add_timeout(10, stop)
         channel.start_consuming()
         assert channel.queue_declare(queue=queue_name, durable=True). \
-            method.message_count == 0
+                   method.message_count == 0
         connection.close()
 
     def test_fail_create_order(self, app):
@@ -188,3 +203,14 @@ class TestStpWeb:
         db.session.commit()
         assert transaction.id is not None
         assert event.id is not None
+
+    def test_multiple_request(self):
+
+        threads = []
+        for r in range(30):
+            t = SendOrderEvent()
+            t.start()
+            threads.append(t)
+
+        for r in threads:
+            r.join()

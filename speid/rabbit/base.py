@@ -2,16 +2,29 @@ import uuid
 
 import pika
 
-from speid.rabbit import CONNECTION
+from speid.rabbit import RABBIT_URL, RABBIT_URL_TYPE
 
 RPC_QUEUE = 'rpc_queue'
 NEW_ORDER_QUEUE = 'cuenca.stp.new_order'
 
 
-class RpcClient:
+class BaseClient:
     def __init__(self):
+        if RABBIT_URL_TYPE == 'url':
+            parameters = pika.URLParameters(RABBIT_URL)
+        else:
+            parameters = pika.ConnectionParameters(host=RABBIT_URL)
+        self.connection = pika.BlockingConnection(parameters)
+
+    def __del__(self):
+        self.connection.close()
+
+
+class RpcClient(BaseClient):
+    def __init__(self):
+        super().__init__()
         # Sets a unique channel
-        self.channel = CONNECTION.channel()
+        self.channel = self.connection.channel()
         result = self.channel.queue_declare(exclusive=True)
         self.callback_queue = result.method.queue
         # Define a function to be called when an answer is received
@@ -39,14 +52,15 @@ class RpcClient:
 
         # Wait to the response up to 15 seconds
         while self.response is None:
-            CONNECTION.process_data_events(15)
+            self.connection.process_data_events(15)
 
         return self.response
 
 
-class ConfirmModeClient:
+class ConfirmModeClient(BaseClient):
     def __init__(self, queue):
-        self.channel = CONNECTION.channel()
+        super().__init__()
+        self.channel = self.connection.channel()
         # Make the queue durable in order to not miss any element
         self.channel.queue_declare(queue=queue, durable=True)
         self.queue = queue

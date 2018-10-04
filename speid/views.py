@@ -1,7 +1,6 @@
 import json
 
 from flask import jsonify, make_response, request
-import traceback
 
 from speid import app, db
 from speid.models import Request, Transaction, Event
@@ -18,33 +17,25 @@ def health_check():
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
 
-    event = Event()
+    if "id" not in request.json or int(request.json["id"]) <= 0:
+        return make_response(jsonify(request.json), 400)
 
-    try:
-        if "id" not in request.json or int(request.json["id"]) <= 0:
-            return make_response(jsonify(request.json), 400)
-
-        request_id = request.json['id']
-        res = Transaction.query.filter(Transaction.orden_id == request_id).all()
-        if res is None or len(res) != 1:
-            raise OrderNotFoundException(f'Order Id: {request_id}')
-        else:
-            transaction = res[0]
-            event = Event(
-                transaction_id=transaction.id,
-                type=State.received,
-                meta=str(request.json)
-            )
-        rabbit_client = ConfirmModeClient('cuenca.stp.orden_events')
-        rabbit_client.call(request.json)
-    except Exception as exc:
-        event.type = State.error
-        event.meta = traceback.format_exc()
-        pass
-    finally:
-        db.session.add(event)
-        db.session.commit()
-    return make_response(jsonify(request.json), 201)
+    request_id = request.json['id']
+    res = Transaction.query.filter(Transaction.orden_id == request_id).all()
+    if res is None or len(res) != 1:
+        raise OrderNotFoundException(f'Order Id: {request_id}')
+    else:
+        transaction = res[0]
+        event = Event(
+            transaction_id=transaction.id,
+            type=State.received,
+            meta=str(request.json)
+        )
+    rabbit_client = ConfirmModeClient('cuenca.stp.orden_events')
+    rabbit_client.call(request.json)
+    db.session.add(event)
+    db.session.commit()
+    return "got it!"
 
 
 @app.route('/ordenes', methods=['POST'])
