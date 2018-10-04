@@ -26,6 +26,7 @@ def create_orden_events():
         raise OrderNotFoundException(f'Order Id: {request_id}')
     else:
         transaction = res[0]
+        transaction.estado = request.json['Estado']
         event = Event(
             transaction_id=transaction.id,
             type=State.received,

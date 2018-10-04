@@ -1,11 +1,12 @@
-from sqlalchemy import Column, Date, Integer, String, CheckConstraint
+from sqlalchemy import Column, Date, Integer, String, CheckConstraint, Enum
 
 from speid import db
+from speid.tables.types import Estado
 from . import cols
 
 transactions = db.Table(
     'transactions',
-    cols.id('tr'), cols.created_at(),
+    cols.id('tr'), cols.created_at(), cols.updated_at(),
     Column('orden_id', Integer),  # STP Ordenes.clave
     Column('fecha_operacion', Date, nullable=False),
     Column('institucion_ordenante', Integer, nullable=False),
@@ -23,5 +24,5 @@ transactions = db.Table(
     Column('concepto_pago', String, nullable=False),
     Column('referencia_numerica', Integer, nullable=False),
     Column('empresa', String, nullable=False),
-    Column('estado', String, nullable=False)
+    Column('estado', Enum(Estado), nullable=False)
 )

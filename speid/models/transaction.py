@@ -4,6 +4,7 @@ import datetime as dt
 from sqlalchemy.orm import relationship
 
 from speid.tables import transactions
+from speid.tables.types import Estado
 from .base import db
 from .events import Event
 from .helpers import camel_to_snake
@@ -44,6 +45,6 @@ class Transaction(db.Model):
             concepto_pago=order.conceptoPago,
             referencia_numerica=order.referenciaNumerica,
             empresa=order.empresa,
-            estado="ND"
+            estado=Estado.pendiente
         )
         return transaction
