@@ -7,7 +7,7 @@ from .types import HttpRequestMethod
 
 
 requests = db.Table(
-    'requests', db.metadata,
+    'requests',
     cols.id('RQ'), cols.created_at(),
     Column('method', Enum(HttpRequestMethod, name='http_request_method'),
            nullable=False),

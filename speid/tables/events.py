@@ -5,7 +5,7 @@ from speid.tables.types import State
 from . import cols
 
 events = db.Table(
-    'events', db.metadata,
+    'events',
     cols.id('ev'), cols.created_at(),
     Column('transaction_id', String(24), ForeignKey('transactions.id')),
     Column('type', db.Enum(State)),

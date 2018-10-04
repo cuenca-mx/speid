@@ -25,7 +25,7 @@ install-dev: install
 		pip install --quiet --upgrade -r requirements-dev.txt
 
 test: install-dev lint
-		pytest -v speid/test/test.py
+		pytest -v speid/test/
 
 lint:
 		pycodestyle --ignore=E402 speid migrations

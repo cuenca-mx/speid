@@ -1,17 +1,17 @@
-from sqlalchemy import Column, Date, Integer, String
+from sqlalchemy import Column, Date, Integer, String, CheckConstraint
 
 from speid import db
 from . import cols
 
 transactions = db.Table(
-    'transactions', db.metadata,
+    'transactions',
     cols.id('tr'), cols.created_at(),
     Column('orden_id', Integer),  # STP Ordenes.clave
     Column('fecha_operacion', Date, nullable=False),
     Column('institucion_ordenante', Integer, nullable=False),
     Column('institucion_beneficiaria', Integer, nullable=False),
     Column('clave_rastreo', String, nullable=False, index=True),
-    Column('monto', Integer, nullable=False),
+    Column('monto', Integer, CheckConstraint('monto>0'), nullable=False),
     Column('nombre_ordenante', String, nullable=False),
     Column('tipo_cuenta_ordenante', Integer),
     Column('cuenta_ordenante', String(18), nullable=False),

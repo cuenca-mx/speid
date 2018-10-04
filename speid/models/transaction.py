@@ -18,6 +18,7 @@ class Transaction(db.Model):
     def transform(cls, trans_dict):
         trans_dict = {camel_to_snake(k): v for k, v in trans_dict.items()}
         trans_dict['orden_id'] = trans_dict.pop('clave')
+        trans_dict['monto'] = trans_dict['monto'] * 100
         transaction = cls(**trans_dict)
         transaction.fecha_operacion = dt.datetime.strptime(
             str(transaction.fecha_operacion),
