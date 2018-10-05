@@ -1,5 +1,7 @@
 ## SPEI Daemon 
 
+[![Build Status](https://travis-ci.com/cuenca-mx/speid.svg?branch=master)](https://travis-ci.com/cuenca-mx/speid)
+
 Envía y recibe órdenes SPEI. Utilizando RabbitMQ y Postgress para almacenar 
 los datos.
 
