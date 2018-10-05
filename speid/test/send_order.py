@@ -16,7 +16,7 @@ def callback(ch, method, _, body):
     ch.basic_ack(delivery_tag=method.delivery_tag)
     body = body.decode()
     order = literal_eval(body)
-    assert order["id"] == '5623689'
+    assert order["Estado"] == 'LIQUIDACION'
 
 
 class TestSendOrder:
@@ -40,7 +40,7 @@ class TestSendOrder:
 
     def test_create_order_found(self, app):
         data = dict(
-            id='5623859',
+            id='5623943',
             Estado='LIQUIDACION',
             Detalle="0"
         )

@@ -4,7 +4,7 @@ import urllib.request
 
 from speid import db
 from speid.models import Transaction, Event
-from speid.tables.types import State
+from speid.tables.types import State, Estado
 
 
 class SendOrderEvent(threading.Thread):
@@ -46,15 +46,16 @@ class TestGeneral:
             "ConceptoPago": "PRUEBA",
             "ReferenciaNumerica": 2423,
             "Empresa": "TAMIZI",
-            "estado": "estado"
+            "estado": Estado.pendiente
         }
         transaction = Transaction.transform(transaction_request)
+        db.session.add(transaction)
+        db.session.commit()
         event = Event(
             transaction_id=transaction.id,
             type=State.created,
             meta='TEST'
         )
-        db.session.add(transaction)
         db.session.add(event)
         db.session.commit()
         assert transaction.id is not None

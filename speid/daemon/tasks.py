@@ -23,7 +23,6 @@ def send_order(self, order_dict):
     try:
         # Recover orden
         order_trans = {snake_to_camel(k): v for k, v in order_dict.items()}
-        order_trans.monto = order_trans.monto / 100
         order = Orden(**order_trans)
         # Save transaction
         transaction = Transaction.transform_from_order(order)
@@ -33,6 +32,7 @@ def send_order(self, order_dict):
         event_created.transaction_id = transaction.id
 
         # Send order to STP
+        order.monto = order.monto / 100
         res = order.registra()
     except ConnectionError as exc:
         self.retry(countdown=retry_timeout(self.request.retries), exc=exc)

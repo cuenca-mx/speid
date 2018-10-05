@@ -13,4 +13,4 @@ def camel_to_snake(s):
 
 def snake_to_camel(s):
     words = s.split('_')
-    return "".join(r.title() for r in words)
+    return words[0] + "".join(r.title() for r in words[1:])

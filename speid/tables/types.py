@@ -15,5 +15,5 @@ class State(Enum):
 
 class Estado(Enum):
     pendiente = 'PENDIENTE'
-    liquidacion = 'LIQUIDACION',
+    liquidacion = 'LIQUIDACION'
     devolucion = 'DEVOLUCION'

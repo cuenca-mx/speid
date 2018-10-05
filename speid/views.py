@@ -6,7 +6,7 @@ from speid import app, db
 from speid.models import Request, Transaction, Event
 from speid.models.exceptions import OrderNotFoundException
 from speid.rabbit.base import RpcClient, ConfirmModeClient
-from speid.tables.types import HttpRequestMethod, State
+from speid.tables.types import Estado, HttpRequestMethod, State
 
 
 @app.route('/')
@@ -21,12 +21,11 @@ def create_orden_events():
         return make_response(jsonify(request.json), 400)
 
     request_id = request.json['id']
-    res = Transaction.query.filter(Transaction.orden_id == request_id).all()
-    if res is None or len(res) != 1:
+    transaction = db.session.query(Transaction).filter_by(orden_id=request_id).one()
+    if transaction is None:
         raise OrderNotFoundException(f'Order Id: {request_id}')
     else:
-        transaction = res[0]
-        transaction.estado = request.json['Estado']
+        transaction.estado = Estado(request.json['Estado'])
         event = Event(
             transaction_id=transaction.id,
             type=State.received,
@@ -34,6 +33,7 @@ def create_orden_events():
         )
     rabbit_client = ConfirmModeClient('cuenca.stp.orden_events')
     rabbit_client.call(request.json)
+    db.session.add(transaction)
     db.session.add(event)
     db.session.commit()
     return "got it!"
