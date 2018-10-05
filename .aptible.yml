@@ -1,2 +1,2 @@
-before_release:
-  - flask db upgrade
+#before_release:
+#  - flask db upgrade
