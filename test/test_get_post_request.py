@@ -69,7 +69,3 @@ class TestGetPostRequests:
 
         for r in threads:
             r.join()
-
-    def test_ping(self):
-        res = send_post('http://localhost:3000/', None)
-        assert res.status_code == 200

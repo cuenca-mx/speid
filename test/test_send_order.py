@@ -5,9 +5,8 @@ from ast import literal_eval
 import pika
 import pytest
 from celery import Celery
+from sqlalchemy.orm.exc import NoResultFound
 from stpmex.types import Institucion
-
-from speid.models.exceptions import OrderNotFoundException
 
 
 def callback(ch, method, _, body):
@@ -40,7 +39,7 @@ class TestSendOrder:
 
     def test_create_order_found(self, app):
         data = dict(
-            id='5623943',
+            id='2456303',
             Estado='LIQUIDACION',
             Detalle="0"
         )
@@ -84,6 +83,6 @@ class TestSendOrder:
             Estado='LIQUIDACION',
             Detalle='0'
         )
-        with pytest.raises(OrderNotFoundException):
+        with pytest.raises(NoResultFound):
             app.post('/orden_events', data=json.dumps(data),
                      content_type='application/json')

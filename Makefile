@@ -22,10 +22,11 @@ clean-pyc:
 		find . -name '*.pyc' -delete
 		find . -name '*~' -delete
 
-test: clean-pyc lint docker-test
-		pytest --noconftest  -v test/test_get_post_request.py
+test: clean-pyc lint
+		pytest
 
 docker-test: docker-build
+		# Clean up even if there's an error
 		$(DOCKER) scripts/test.sh || $(MAKE) docker-stop
 		$(MAKE) docker-stop
 

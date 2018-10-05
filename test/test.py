@@ -5,6 +5,10 @@ from speid.tables.types import State, Estado
 
 class TestGeneral:
 
+    def test_ping(self, app):
+        res = app.get('/')
+        assert res.status_code == 200
+
     def test_save_transaction(self):
         transaction_request = {
             "Clave": 2456303,
