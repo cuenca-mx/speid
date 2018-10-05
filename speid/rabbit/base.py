@@ -48,7 +48,7 @@ class RpcClient(BaseClient):
                                        reply_to=self.callback_queue,
                                        correlation_id=self.corr_id
                                    ),
-                                   body=str(element))
+                                   body=element)
 
         # Wait to the response up to 15 seconds
         while self.response is None:

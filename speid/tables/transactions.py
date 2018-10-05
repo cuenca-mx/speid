@@ -24,5 +24,5 @@ transactions = db.Table(
     Column('concepto_pago', String, nullable=False),
     Column('referencia_numerica', Integer, nullable=False),
     Column('empresa', String, nullable=False),
-    Column('estado', Enum(Estado), nullable=False)
+    Column('estado', Enum(Estado))
 )

@@ -9,12 +9,13 @@ from speid.rabbit.base import RPC_QUEUE
 
 def on_request(ch, method, props, body):
     print("Received RCP: \n %r" % str(body))
-    response = "Ok"
+    b = json.loads(body)
+    b['estado'] = 'LIQUIDACION'
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(
                          correlation_id=props.correlation_id),
-                     body=str(response))
+                     body=json.dumps(b))
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
@@ -60,8 +61,7 @@ class TestReceiveOrder:
             RFCCurpBeneficiario="ND",
             ConceptoPago="PRUEBA",
             ReferenciaNumerica=2423,
-            Empresa="TAMIZI",
-            estado="estado"
+            Empresa="TAMIZI"
         )
         res = app.post('/ordenes', data=json.dumps(data),
                        content_type='application/json')
