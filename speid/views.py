@@ -21,7 +21,8 @@ def create_orden_events():
         return make_response(jsonify(request.json), 400)
 
     request_id = request.json['id']
-    transaction = db.session.query(Transaction).filter_by(orden_id=request_id).one()
+    transaction = db.session.query(Transaction).\
+        filter_by(orden_id=request_id).one()
     if transaction is None:
         raise OrderNotFoundException(f'Order Id: {request_id}')
     else:

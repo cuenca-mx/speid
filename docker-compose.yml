@@ -4,27 +4,17 @@ services:
 
   db:
     image: postgres:10.1
-    container_name: speid_db
-    ports:
-      - 5432:5432
 
   rabbitmq:
     image: rabbitmq
-    ports:
-      - 5672:5672
-      - 15672:15672
 
-  stpmex-callback:
-    build:
-      context: .
-      args:
-        - AMPQ_ADDRESS=rabbitmq
-        - FLASK_ENV=development
+  speid:
+    build: .
     tty: true
-    volumes:
-      - .:/speid
     ports:
       - 3000:3000
+    volumes:
+      - .:/speid
     links:
       - db
       - rabbitmq

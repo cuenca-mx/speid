@@ -65,8 +65,8 @@ class TestSendOrder:
 
         connection.add_timeout(10, stop)
         channel.start_consuming()
-        assert channel.queue_declare(queue=queue_name, durable=True). \
-                   method.message_count == 0
+        assert channel.queue_declare(queue=queue_name,
+                                     durable=True).method.message_count == 0
         connection.close()
 
     def test_fail_create_order(self, app):

@@ -2,10 +2,10 @@ FROM python:3.6
 MAINTAINER Cuenca <dev@cuenca.com>
 
 # Install app
-ADD Makefile requirements.txt requirements-dev.txt /speid/
+ADD Makefile requirements.txt /speid/
 WORKDIR /speid
+RUN pip install --quiet --upgrade pip
 RUN make install
-RUN pip install --quiet gunicorn
 
 # Add repo contents to image
 ADD . /speid/
@@ -24,4 +24,5 @@ RUN pip install --quiet celery
 ENV PORT 3000
 EXPOSE $PORT
 
-CMD /etc/init.d/celeryd start && gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:3000 --workers=3 speid:app
+CMD /etc/init.d/celeryd start \
+    && gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:$PORT --workers=3 speid:app

@@ -4,3 +4,4 @@ pycodestyle
 docker
 pytest
 flask-shell-ipython
+werkzeug
