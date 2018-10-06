@@ -6,6 +6,7 @@ ADD Makefile requirements.txt /speid/
 WORKDIR /speid
 RUN pip install --quiet --upgrade pip
 RUN make install
+RUN pip install --quiet gunicorn
 
 # Add repo contents to image
 ADD . /speid/
@@ -24,5 +25,5 @@ RUN pip install --quiet celery
 ENV PORT 3000
 EXPOSE $PORT
 
-CMD /etc/init.d/celeryd start \
+CMD chmod -R a+rxw /etc/hosts && /etc/init.d/celeryd start \
     && gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:$PORT --workers=3 speid:app

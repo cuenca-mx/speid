@@ -27,7 +27,7 @@ s3.Bucket(stp_bucket_s3).download_file(stp_key_s3, stp_private_location)
 if edit_hosts == 'true':
     host_ip = os.environ['HOST_IP']
     host_ad = os.environ['HOST_AD']
-    hosts = Hosts(path='/etc/hosts')
+    hosts = Hosts()
     new_entry = HostsEntry(
         entry_type='ipv4',
         address=host_ip,
