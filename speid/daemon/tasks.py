@@ -21,8 +21,7 @@ def send_order(self, order_val):
 
     try:
         # Recover orden
-        transaction, order_dict = Transaction.transform_from_order(order_val)
-        order = Orden(**order_dict)
+        transaction, order = Transaction.transform_from_order(order_val)
         # Save transaction
         db.session.add(transaction)
         db.session.commit()
