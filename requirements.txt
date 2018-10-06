@@ -8,3 +8,4 @@ pika>=0.12,<0.13
 stpmex>=0.0.5
 boto3>=1.9,<2.0
 celery>=4.2,<4.3
+python-hosts>=0.4,<0.5

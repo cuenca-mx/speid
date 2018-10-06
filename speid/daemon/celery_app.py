@@ -3,6 +3,7 @@ import os
 import boto3
 import stpmex
 from celery import Celery
+from python_hosts import Hosts, HostsEntry
 
 # Obtiene las variables de ambiente
 stp_private_location = os.environ['STP_PRIVATE_LOCATION']
@@ -12,6 +13,7 @@ wsdl_path = os.environ['STP_WSDL']
 stp_empresa = os.environ['STP_EMPRESA']
 priv_key_passphrase = os.environ['STP_KEY_PASSPHRASE']
 stp_prefijo = os.environ['STP_PREFIJO']
+edit_hosts = os.environ['EDIT_HOSTS']
 
 # Inicia Celery y lo configura usando el archivo celeryconfig.py
 app = Celery('stp_client')
@@ -20,6 +22,19 @@ app.config_from_object('speid.daemon.celeryconfig')
 # Obtiene la private key de S3
 s3 = boto3.resource('s3')
 s3.Bucket(stp_bucket_s3).download_file(stp_key_s3, stp_private_location)
+
+# Edita archivo hosts si es necesario
+if edit_hosts == 'true':
+    host_ip = os.environ['HOST_IP']
+    host_ad = os.environ['HOST_AD']
+    hosts = Hosts(path='/etc/hosts')
+    new_entry = HostsEntry(
+        entry_type='ipv4',
+        address=host_ip,
+        names=[host_ad]
+    )
+    hosts.add([new_entry])
+    hosts.write()
 
 # Configura el cliente STP
 with open(stp_private_location) as fp:
