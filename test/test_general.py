@@ -1,4 +1,7 @@
+from stpmex.types import Institucion
+
 from speid import db
+from speid.daemon.tasks import send_order
 from speid.models import Transaction, Event
 from speid.tables.types import State, Estado
 
@@ -42,3 +45,32 @@ class TestGeneral:
         db.session.commit()
         assert transaction.id is not None
         assert event.id is not None
+
+    def test_worker_without_version(self):
+        order = dict(
+            concepto_pago='PRUEBA',
+            institucion_operante=Institucion.STP.value,
+            cuenta_beneficiario='072691004495711499',
+            institucion_contraparte=Institucion.BANORTE_IXE.value,
+            monto=1020,
+            nombre_beneficiario='Ricardo Sánchez',
+            nombre_ordenante='BANCO',
+            cuenta_ordenante='646180157000000004',
+            rfc_curp_ordenante='ND'
+        )
+        send_order(order)
+
+    def test_worker_with_version_0(self):
+        order = dict(
+            concepto_pago='PRUEBA',
+            institucion_operante=Institucion.STP.value,
+            cuenta_beneficiario='072691004495711499',
+            institucion_contraparte=Institucion.BANORTE_IXE.value,
+            monto=1020,
+            nombre_beneficiario='Ricardo Sánchez',
+            nombre_ordenante='BANCO',
+            cuenta_ordenante='646180157000000004',
+            rfc_curp_ordenante='ND',
+            version=0
+        )
+        send_order(order)

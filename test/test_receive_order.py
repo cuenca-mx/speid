@@ -45,7 +45,7 @@ class TestReceiveOrder:
         thread = ConsumerThread()
         thread.start()
         data = dict(
-            Clave=2456303,
+            Clave=2456304,
             FechaOperacion=20180618,
             InstitucionOrdenante=846,
             InstitucionBeneficiaria=90646,

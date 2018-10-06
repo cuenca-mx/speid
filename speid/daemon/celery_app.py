@@ -1,6 +1,8 @@
 import os
 
 import boto3
+from botocore import UNSIGNED
+from botocore.config import Config
 import stpmex
 from celery import Celery
 from python_hosts import Hosts, HostsEntry
@@ -20,8 +22,11 @@ app = Celery('stp_client')
 app.config_from_object('speid.daemon.celeryconfig')
 
 # Obtiene la private key de S3
-s3 = boto3.resource('s3')
-s3.Bucket(stp_bucket_s3).download_file(stp_key_s3, stp_private_location)
+if "AWS_ACCESS_KEY_ID" in os.environ:
+    s3 = boto3.client('s3')
+else:
+    s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
+s3.download_file(stp_bucket_s3, stp_key_s3, stp_private_location)
 
 # Edita archivo hosts si es necesario
 if edit_hosts == 'true':
