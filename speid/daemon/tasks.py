@@ -3,7 +3,6 @@ from stpmex import Orden
 from speid import db
 from speid.models import Transaction, Event
 from speid.models.exceptions import StpConnectionError
-from speid.models.helpers import snake_to_camel
 from speid.tables.types import State
 from .celery_app import app
 
@@ -13,19 +12,18 @@ def retry_timeout(attempts):
 
 
 @app.task(bind=True, max_retries=5)
-def send_order(self, order_dict):
+def send_order(self, order_val):
     # Create event
     event_created = Event(
         type=State.created,
-        meta=str(order_dict)
+        meta=str(order_val)
     )
 
     try:
         # Recover orden
-        order_trans = {snake_to_camel(k): v for k, v in order_dict.items()}
-        order = Orden(**order_trans)
+        transaction, order_dict = Transaction.transform_from_order(order_val)
+        order = Orden(**order_dict)
         # Save transaction
-        transaction = Transaction.transform_from_order(order)
         db.session.add(transaction)
         db.session.commit()
 

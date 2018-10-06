@@ -25,5 +25,5 @@ RUN pip install --quiet celery
 ENV PORT 3000
 EXPOSE $PORT
 
-CMD chmod -R a+rxw /etc/hosts && /etc/init.d/celeryd start \
-    && gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:$PORT --workers=3 speid:app
+CMD chmod -R a+rxw /etc/hosts && /etc/init.d/celeryd start
+CMD ["gunicorn", "--access-logfile=-", "--error-logfile=-", "--bind=0.0.0.0:3000", "--workers=5", "speid:app"]
