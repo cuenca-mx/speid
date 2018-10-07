@@ -58,7 +58,7 @@ El cuerpo del mensaje almacenado en RabbitMQ es como sigue:
 'clave': 6440277,                              # Orden ID de STP 
 'fecha_operacion': 20181008,                     
 'institucion_ordenante': '072',                  # Código del banco definido por SPEI
-'institucion_beneficiaria': '646',               # Cödigo del banco definido por SPEI
+'institucion_beneficiaria': '646',               # Código del banco definido por SPEI
 'clave_rastreo': '7279MAP6201810060648658333', 
 'monto': 1020,                                 # En centavos 
 'nombre_ordenante': 'RICARDO SANCHEZ CASTILLO', 
