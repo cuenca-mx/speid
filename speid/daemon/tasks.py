@@ -1,5 +1,3 @@
-from stpmex import Orden
-
 from speid import db
 from speid.models import Transaction, Event
 from speid.models.exceptions import StpConnectionError

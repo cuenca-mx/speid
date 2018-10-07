@@ -2,7 +2,6 @@ import datetime as dt
 
 from sqlalchemy.orm import relationship
 from stpmex.ordenes import ORDEN_FIELDNAMES, Orden
-from stpmex.types import Institucion
 
 from speid.tables import transactions
 from speid.tables.types import Estado
