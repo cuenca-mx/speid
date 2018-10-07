@@ -9,8 +9,8 @@ transactions = db.Table(
     cols.id('tr'), cols.created_at(), cols.updated_at(),
     Column('orden_id', Integer, unique=True),  # STP Ordenes.clave
     Column('fecha_operacion', Date, nullable=False),
-    Column('institucion_ordenante', Integer, nullable=False),
-    Column('institucion_beneficiaria', Integer, nullable=False),
+    Column('institucion_ordenante', String, nullable=False),
+    Column('institucion_beneficiaria', String, nullable=False),
     Column('clave_rastreo', String, nullable=False, index=True),
     Column('monto', Integer, CheckConstraint('monto>0'), nullable=False),
     Column('nombre_ordenante', String, nullable=False),
@@ -25,5 +25,6 @@ transactions = db.Table(
     Column('referencia_numerica', Integer, nullable=False),
     Column('empresa', String, nullable=False),
     Column('estado', Enum(Estado)),
-    Column('version', Integer, CheckConstraint('version>=0 AND version<2'))
+    Column('version', Integer, CheckConstraint('version>=0 AND version<2')),
+    Column('speid_id', String, unique=True)
 )

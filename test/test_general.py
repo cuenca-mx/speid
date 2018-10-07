@@ -1,5 +1,3 @@
-from stpmex.types import Institucion
-
 from speid import db
 from speid.daemon.tasks import send_order
 from speid.models import Transaction, Event
@@ -16,7 +14,7 @@ class TestGeneral:
         transaction_request = {
             "Clave": 2456303,
             "FechaOperacion": 20180618,
-            "InstitucionOrdenante": 846,
+            "InstitucionOrdenante": 40012,
             "InstitucionBeneficiaria": 90646,
             "ClaveRastreo": "PRUEBATAMIZI1",
             "Monto": 100.0,
@@ -31,7 +29,7 @@ class TestGeneral:
             "ConceptoPago": "PRUEBA",
             "ReferenciaNumerica": 2423,
             "Empresa": "TAMIZI",
-            "estado": Estado.pendiente
+            "estado": Estado.success
         }
         transaction = Transaction.transform(transaction_request)
         db.session.add(transaction)
@@ -49,9 +47,9 @@ class TestGeneral:
     def test_worker_without_version(self):
         order = dict(
             concepto_pago='PRUEBA',
-            institucion_operante=Institucion.STP.value,
+            institucion_operante='646',
             cuenta_beneficiario='072691004495711499',
-            institucion_contraparte=Institucion.BANORTE_IXE.value,
+            institucion_contraparte='072',
             monto=1020,
             nombre_beneficiario='Ricardo Sánchez',
             nombre_ordenante='BANCO',
@@ -63,9 +61,9 @@ class TestGeneral:
     def test_worker_with_version_0(self):
         order = dict(
             concepto_pago='PRUEBA',
-            institucion_operante=Institucion.STP.value,
+            institucion_operante='646',
             cuenta_beneficiario='072691004495711499',
-            institucion_contraparte=Institucion.BANORTE_IXE.value,
+            institucion_contraparte='072',
             monto=1020,
             nombre_beneficiario='Ricardo Sánchez',
             nombre_ordenante='BANCO',

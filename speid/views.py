@@ -26,7 +26,7 @@ def create_orden_events():
     if transaction is None:
         raise OrderNotFoundException(f'Order Id: {request_id}')
     else:
-        transaction.estado = Estado(request.json['Estado'])
+        transaction.estado = Estado.get_state_from_stp(request.json['Estado'])
         event = Event(
             transaction_id=transaction.id,
             type=State.received,
@@ -53,11 +53,11 @@ def create_orden():
     )
 
     rabbit_client = RpcClient()
-    # resp = rabbit_client.call(json.dumps(request.json))
-    # r = json.loads(resp)
+    resp = rabbit_client.call(json.dumps(transaction.to_dict()))
+    r = json.loads(resp)
 
-    r = request.json
-    r['estado'] = 'LIQUIDACION'
+    # r = request.json
+    # r['estado'] = 'LIQUIDACION'
 
     event_received = Event(
         transaction_id=transaction.id,
