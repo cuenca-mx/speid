@@ -55,7 +55,7 @@ El cuerpo del mensaje almacenado en RabbitMQ es como sigue:
 
 ```python
 {
-'clave': 6440277,                              # Orden ID de STP 
+'orden_id': 6440277,                              # Orden ID de STP 
 'fecha_operacion': 20181008,                     
 'institucion_ordenante': '072',                  # Código del banco definido por SPEI
 'institucion_beneficiaria': '646',               # Código del banco definido por SPEI
@@ -82,14 +82,13 @@ colocar la tarea en RabbitMQ como una orden de Celery:
 
 ```python
 from celery import Celery
-from stpmex.types import Institucion
 
 order = dict(
             concepto_pago='PRUEBA',
             institucion_operante='646',
             cuenta_beneficiario='646180157000000004',
             institucion_contraparte='072',
-            monto=1.2,
+            monto=120,
             nombre_beneficiario='Ricardo Sánchez',
             nombre_ordenante='BANCO',
             cuenta_ordenante='072691004495711499',
@@ -100,7 +99,7 @@ order = dict(
 app = Celery('stp_client')
 app.config_from_object('speid.daemon.celeryconfig')
 app.send_task('speid.daemon.tasks.send_order',
-              kwargs={'order_dict': order})
+              kwargs={'order_val': order})
 ```
 
 Se puede utilizar el archivo de configuración `speid.daemon.celeryconfig` o hacer una configuración

@@ -6,7 +6,6 @@ import pika
 import pytest
 from celery import Celery
 from sqlalchemy.orm.exc import NoResultFound
-from stpmex.types import Institucion
 
 
 def callback(ch, method, _, body):
@@ -23,9 +22,9 @@ class TestSendOrder:
     def test_generate_order(self, app):
         order = dict(
             concepto_pago='PRUEBA',
-            institucion_operante=Institucion.STP.value,
+            institucion_operante='646',
             cuenta_beneficiario='072691004495711499',
-            institucion_contraparte=Institucion.BANORTE_IXE.value,
+            institucion_contraparte='072',
             monto=1020,
             nombre_beneficiario='Ricardo Sánchez',
             nombre_ordenante='BANCO',

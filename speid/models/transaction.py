@@ -1,6 +1,7 @@
 import datetime as dt
 
 from sqlalchemy.orm import relationship
+from stpmex.helpers import stp_to_spei_bank_code
 from stpmex.ordenes import ORDEN_FIELDNAMES, Orden
 
 from speid.tables import transactions
@@ -20,6 +21,13 @@ class Transaction(db.Model):
         trans_dict = {camel_to_snake(k): v for k, v in trans_dict.items()}
         trans_dict['orden_id'] = trans_dict.pop('clave')
         trans_dict['monto'] = trans_dict['monto'] * 100
+        trans_dict['institucion_ordenante'] = stp_to_spei_bank_code(
+            trans_dict.pop('institucion_ordenante')
+        )
+        trans_dict['institucion_beneficiaria'] = stp_to_spei_bank_code(
+            trans_dict.pop('institucion_beneficiaria')
+        )
+        trans_dict['institucion_beneficiaria'] = ''
         transaction = cls(**trans_dict)
         transaction.fecha_operacion = dt.datetime.strptime(
             str(transaction.fecha_operacion),
@@ -38,7 +46,7 @@ class Transaction(db.Model):
         order = Orden(**order_dict)
         transaction = cls(**trans_dict)
         transaction.fecha_operacion = dt.date.today()
-        transaction.estado = Estado.pendiente
+        transaction.estado = Estado.submitted
         transaction.institucion_ordenante = order.institucionOperante
         transaction.institucion_beneficiaria = order.institucionContraparte
         transaction.clave_rastreo = order.claveRastreo

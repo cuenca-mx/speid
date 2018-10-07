@@ -16,7 +16,7 @@ class SendOrder(threading.Thread):
         body = dict(
             Clave=2456303,
             FechaOperacion=20180618,
-            InstitucionOrdenante=846,
+            InstitucionOrdenante=40012,
             InstitucionBeneficiaria=90646,
             ClaveRastreo="PRUEBATAMIZI1",
             Monto=100.0,

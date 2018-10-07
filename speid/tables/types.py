@@ -14,6 +14,15 @@ class State(Enum):
 
 
 class Estado(Enum):
-    pendiente = 'PENDIENTE'
-    liquidacion = 'LIQUIDACION'
-    devolucion = 'DEVOLUCION'
+    submitted = 'submitted'  # Sent to STP
+    success = 'success'      # LIQUIDACION from STP
+    failed = 'failed'        # DEVOLUCION from STP
+    error = 'error'          # Internal error
+
+    @classmethod
+    def get_state_from_stp(cls, stp_state):
+        if stp_state == 'LIQUIDACION':
+            return cls.success
+        if stp_state == 'DEVOLUCION':
+            return cls.failed
+        return cls.error

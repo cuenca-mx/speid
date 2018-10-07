@@ -10,7 +10,7 @@ from speid.rabbit.base import RPC_QUEUE
 def on_request(ch, method, props, body):
     print("Received RCP: \n %r" % str(body))
     b = json.loads(body)
-    b['estado'] = 'LIQUIDACION'
+    b['estado'] = 'success'
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,
                      properties=pika.BasicProperties(
@@ -47,7 +47,7 @@ class TestReceiveOrder:
         data = dict(
             Clave=2456304,
             FechaOperacion=20180618,
-            InstitucionOrdenante=846,
+            InstitucionOrdenante=40012,
             InstitucionBeneficiaria=90646,
             ClaveRastreo="PRUEBATAMIZI1",
             Monto=100.0,
