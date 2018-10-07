@@ -177,7 +177,7 @@ Este es el cuerpo del mensaje en RabbitMQ:
 ````python
 {
 'orden_id': 'orden_id', 
-'estado': 'LIQUIDACION',    # Opciones [success, failed] 
+'estado': 'success',    # Opciones [success, failed] 
 'speid_id': 'SOME_ID'
 }
 ````
