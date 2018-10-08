@@ -2,10 +2,7 @@ import uuid
 
 import pika
 
-from speid.rabbit import RABBIT_URL, RABBIT_URL_TYPE
-
-RPC_QUEUE = 'rpc_queue'
-NEW_ORDER_QUEUE = 'cuenca.stp.new_order'
+from speid.rabbit import RABBIT_URL, RABBIT_URL_TYPE, RPC_QUEUE
 
 
 class BaseClient:

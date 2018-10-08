@@ -14,7 +14,16 @@ def callback(ch, method, _, body):
     ch.basic_ack(delivery_tag=method.delivery_tag)
     body = body.decode()
     order = literal_eval(body)
-    assert order["Estado"] == 'LIQUIDACION'
+    assert order["estado"] == 'success'
+
+
+def callback_order(ch, method, _, body):
+    print("Received: \n %r" % str(body))
+    print("Done")
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+    body = body.decode()
+    order = literal_eval(body)
+    assert order["Estado"] == 'submitted'
 
 
 class TestSendOrder:
@@ -22,19 +31,21 @@ class TestSendOrder:
     def test_generate_order(self, app):
         order = dict(
             concepto_pago='PRUEBA',
-            institucion_operante='646',
+            institucion_ordenante='646',
             cuenta_beneficiario='072691004495711499',
-            institucion_contraparte='072',
+            institucion_beneficiaria='072',
             monto=1020,
             nombre_beneficiario='Ricardo Sánchez',
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
-            rfc_curp_ordenante='ND'
+            rfc_curp_ordenante='ND',
+            speid_id='SOME_RANDOM_ID',
+            version=1
         )
         app = Celery('stp_client')
         app.config_from_object('speid.daemon.celeryconfig')
         app.send_task('speid.daemon.tasks.send_order',
-                      kwargs={'order_dict': order})
+                      kwargs={'order_val': order})
 
     def test_create_order_found(self, app):
         data = dict(
