@@ -128,27 +128,27 @@ Campos opcionales:
     "speid_id": "ID generado por el backend para identificar la orden",
     "version": 1, //Se asume versión 0 si no es especificado
     "empresa": "Default: Aquella que fue ingresada en las credenciales de STP",
-    "folioOrigen": "",
-    "claveRastreo": "Default: CR{TIME}",
-    "tipoPago": 1, //Default: 1
-    "tipoCuentaOrdenante": "",
-    "tipoCuentaBeneficiario": 40, //Default: 40
-    "rfcCurpBeneficiario": "Default: ND",
-    "emailBeneficiario": "",
-    "tipoCuentaBeneficiario2": "",
-    "nombreBeneficiario2": "",
-    "cuentaBeneficiario2": "",
-    "rfcCurpBeneficiario2": "",
-    "conceptoPago2": "",
-    "claveCatUsuario1": "",
-    "claveCatUsuario2": "",
-    "clavePago": "",
-    "referenciaCobranza": "",
-    "referenciaNumerica": 0, //Default: Número aleatorio
-    "tipoOperacion": "",
+    "folio_origen": "",
+    "clave_rastreo": "Default: CR{TIME}",
+    "tipo_pago": 1, //Default: 1
+    "tipo_cuenta_ordenante": "",
+    "tipo_cuenta_beneficiario": 40, //Default: 40
+    "rfc_curp_beneficiario": "Default: ND",
+    "email_beneficiario": "",
+    "tipo_cuenta_beneficiario2": "",
+    "nombre_beneficiario2": "",
+    "cuenta_beneficiario2": "",
+    "rfc_curpBeneficiario2": "",
+    "concepto_pago2": "",
+    "clave_cat_usuario1": "",
+    "clave_cat_usuario2": "",
+    "clave_pago": "",
+    "referencia_cobranza": "",
+    "referencia_numerica": 0, //Default: Número aleatorio
+    "tipo_operacion": "",
     "topologia": "Default: T",
     "usuario": "",
-    "medioEntrega": 3, //Default: 3
+    "medio_entrega": 3, //Default: 3
     "prioridad": 1, //Default: 1
     "iva": "",
 }
