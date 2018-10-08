@@ -1,0 +1,6 @@
+.git
+venv
+.env
+pk.pem
+.pytest_cache
+.idea
