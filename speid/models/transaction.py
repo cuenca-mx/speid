@@ -1,7 +1,7 @@
 import datetime as dt
 
 from sqlalchemy.orm import relationship
-from stpmex.helpers import stp_to_spei_bank_code
+from stpmex.helpers import stp_to_spei_bank_code, spei_to_stp_bank_code
 from stpmex.ordenes import ORDEN_FIELDNAMES, Orden
 
 from speid.tables import transactions
@@ -11,10 +11,58 @@ from .events import Event
 from .helpers import camel_to_snake
 
 
+def contain_required_fields(required_fields, dict_val):
+    for r in required_fields:
+        if r not in dict_val:
+            return False
+    return True
+
+
+class TransactionFactory:
+
+    @classmethod
+    def create_transaction(cls, version, order_dict):
+        if version == 0 and Transaction.is_valid(order_dict):
+            return Transaction.transform_from_order(order_dict)
+        if version == 1 and TransactionV1.is_valid(order_dict):
+            return TransactionV1.transform_from_order(order_dict)
+        return Transaction.error(order_dict)
+
+
 class Transaction(db.Model):
     __table__ = transactions
 
     events = relationship(Event)
+
+    required_fields = [
+        "concepto_pago",
+        "institucion_ordenante",
+        "cuenta_beneficiario",
+        "institucion_beneficiaria",
+        "monto",
+        "nombre_beneficiario",
+        "nombre_ordenante",
+        "cuenta_ordenante",
+        "rfc_curp_ordenante"
+    ]
+
+    @classmethod
+    def error(cls, order_dict):
+        trans_dict = {camel_to_snake(k): v for k, v in order_dict.items()}
+        transaction = Transaction(**trans_dict)
+        transaction.estado = Estado.error
+        transaction.fecha_operacion = dt.date.today()
+        transaction.clave_rastreo = "ND"
+        transaction.tipo_cuenta_beneficiario = 0
+        transaction.rfc_curp_beneficiario = "ND",
+        transaction.concepto_pago = "ND",
+        transaction.referencia_numerica = 0,
+        transaction.empresa = "ND"
+        return transaction, None
+
+    @classmethod
+    def is_valid(cls, order_dict):
+        return contain_required_fields(cls.required_fields, order_dict)
 
     @classmethod
     def transform(cls, trans_dict):
@@ -37,6 +85,7 @@ class Transaction(db.Model):
 
     @classmethod
     def transform_from_order(cls, order_dict):
+
         trans_dict = {k: order_dict[k] for k in
                       filter(lambda r: r in order_dict,
                              transactions.columns.keys())}
@@ -47,8 +96,12 @@ class Transaction(db.Model):
         transaction = cls(**trans_dict)
         transaction.fecha_operacion = dt.date.today()
         transaction.estado = Estado.submitted
-        transaction.institucion_ordenante = order.institucionOperante
-        transaction.institucion_beneficiaria = order.institucionContraparte
+        order.institucionOperante = spei_to_stp_bank_code(
+            transaction.institucion_ordenante
+        )
+        order.institucionContraparte = spei_to_stp_bank_code(
+            transaction.institucion_beneficiaria
+        )
         transaction.clave_rastreo = order.claveRastreo
         transaction.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
         transaction.rfc_curp_beneficiario = order.rfcCurpBeneficiario,
@@ -56,4 +109,21 @@ class Transaction(db.Model):
         transaction.referencia_numerica = order.referenciaNumerica,
         transaction.empresa = order.empresa,
 
+        return transaction, order
+
+
+class TransactionV1(Transaction):
+
+    required_v1_fields = ['speid_id']
+
+    @classmethod
+    def is_valid(cls, order_dict):
+        return super().is_valid(order_dict) and contain_required_fields(
+            cls.required_v1_fields,
+            order_dict)
+
+    @classmethod
+    def transform_from_order(cls, order_dict):
+        transaction, order = super().transform_from_order(order_dict)
+        transaction.speid_id = order_dict['speid_id']
         return transaction, order

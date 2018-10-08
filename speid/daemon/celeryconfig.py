@@ -1,6 +1,6 @@
 import os
 
-from speid.rabbit.base import NEW_ORDER_QUEUE
+from speid.rabbit import NEW_ORDER_QUEUE
 
 broker_url = os.environ['AMPQ_ADDRESS']
 task_serializer = 'json'

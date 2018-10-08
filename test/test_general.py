@@ -1,6 +1,9 @@
+import pytest
+
 from speid import db
-from speid.daemon.tasks import send_order
+from speid.daemon.tasks import execute_task
 from speid.models import Transaction, Event
+from speid.models.exceptions import MalformedOrderException
 from speid.tables.types import State, Estado
 
 
@@ -29,7 +32,8 @@ class TestGeneral:
             "ConceptoPago": "PRUEBA",
             "ReferenciaNumerica": 2423,
             "Empresa": "TAMIZI",
-            "estado": Estado.success
+            "estado": Estado.success,
+            "speid_id": "SPEI_TEST"
         }
         transaction = Transaction.transform(transaction_request)
         db.session.add(transaction)
@@ -44,26 +48,42 @@ class TestGeneral:
         assert transaction.id is not None
         assert event.id is not None
 
+    def test_worker_with_incorrect_version(self):
+        order = dict(
+            concepto_pago='PRUEBA',
+            institucion_ordenante='646',
+            cuenta_beneficiario='072691004495711499',
+            institucion_beneficiaria='072',
+            monto=1020,
+            nombre_beneficiario='Ricardo Sánchez',
+            nombre_ordenante='BANCO',
+            cuenta_ordenante='646180157000000004',
+            rfc_curp_ordenante='ND',
+            version=99999
+        )
+        with pytest.raises(MalformedOrderException):
+            execute_task(order_val=order)
+
     def test_worker_without_version(self):
         order = dict(
             concepto_pago='PRUEBA',
-            institucion_operante='646',
+            institucion_ordenante='646',
             cuenta_beneficiario='072691004495711499',
-            institucion_contraparte='072',
+            institucion_beneficiaria='072',
             monto=1020,
             nombre_beneficiario='Ricardo Sánchez',
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND'
         )
-        send_order(order)
+        execute_task(order)
 
     def test_worker_with_version_0(self):
         order = dict(
             concepto_pago='PRUEBA',
-            institucion_operante='646',
+            institucion_ordenante='646',
             cuenta_beneficiario='072691004495711499',
-            institucion_contraparte='072',
+            institucion_beneficiaria='072',
             monto=1020,
             nombre_beneficiario='Ricardo Sánchez',
             nombre_ordenante='BANCO',
@@ -71,4 +91,36 @@ class TestGeneral:
             rfc_curp_ordenante='ND',
             version=0
         )
-        send_order(order)
+        execute_task(order)
+
+    def test_malformed_order_worker_with_version_1(self):
+        order = dict(
+            concepto_pago='PRUEBA',
+            institucion_ordenante='646',
+            cuenta_beneficiario='072691004495711499',
+            institucion_beneficiaria='072',
+            monto=1020,
+            nombre_beneficiario='Ricardo Sánchez',
+            nombre_ordenante='BANCO',
+            cuenta_ordenante='646180157000000004',
+            rfc_curp_ordenante='ND',
+            version=1
+        )
+        with pytest.raises(MalformedOrderException):
+            execute_task(order)
+
+    def test_worker_with_version_1(self):
+        order = dict(
+            concepto_pago='PRUEBA',
+            institucion_ordenante='646',
+            cuenta_beneficiario='072691004495711499',
+            institucion_beneficiaria='072',
+            monto=1020,
+            nombre_beneficiario='Ricardo Sánchez',
+            nombre_ordenante='BANCO',
+            cuenta_ordenante='646180157000000004',
+            rfc_curp_ordenante='ND',
+            speid_id='SOME_RANDOM_ID',
+            version=1
+        )
+        execute_task(order)

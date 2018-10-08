@@ -17,7 +17,7 @@ class Estado(Enum):
     submitted = 'submitted'  # Sent to STP
     success = 'success'      # LIQUIDACION from STP
     failed = 'failed'        # DEVOLUCION from STP
-    error = 'error'          # Internal error
+    error = 'error'          # Malformed order
 
     @classmethod
     def get_state_from_stp(cls, stp_state):
