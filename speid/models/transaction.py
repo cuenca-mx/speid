@@ -98,10 +98,10 @@ class Transaction(db.Model):
         transaction.estado = Estado.submitted
         order.institucionOperante = spei_to_stp_bank_code(
             transaction.institucion_ordenante
-        )
+        ).value
         order.institucionContraparte = spei_to_stp_bank_code(
             transaction.institucion_beneficiaria
-        )
+        ).value
         transaction.clave_rastreo = order.claveRastreo
         transaction.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
         transaction.rfc_curp_beneficiario = order.rfcCurpBeneficiario,

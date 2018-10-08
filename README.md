@@ -83,17 +83,17 @@ colocar la tarea en RabbitMQ como una orden de Celery:
 ```python
 from celery import Celery
 
-order = dict(
+order = order = dict(
             concepto_pago='PRUEBA',
-            institucion_operante='646',
-            cuenta_beneficiario='646180157000000004',
-            institucion_contraparte='072',
-            monto=120,
+            institucion_ordenante='646',
+            cuenta_beneficiario='072691004495711499',
+            institucion_beneficiaria='072',
+            monto=1020,
             nombre_beneficiario='Ricardo Sánchez',
             nombre_ordenante='BANCO',
-            cuenta_ordenante='072691004495711499',
+            cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
-            speid_id='SOME_ID',
+            speid_id='SOME_RANDOM_ID',
             version=1
         )
 app = Celery('stp_client')
@@ -110,9 +110,9 @@ Estos son los campos obligatorios a incluir en la orden:
 ```javascript
 {
     "concepto_pago": "Concepto"
-    "institucion_operante": "Código del banco en SPEI",
+    "institucion_ordenante": "Código del banco en SPEI",
     "cuenta_beneficiario": "CLABE del beneficiario",
-    "institucion_contraparte": "Código del banco en SPEI",
+    "institucion_beneficiaria": "Código del banco en SPEI",
     "monto": 120, //Cantidad en centavos
     "nombre_beneficiario": "Nombre",
     "nombre_ordenante": "Nombre",
