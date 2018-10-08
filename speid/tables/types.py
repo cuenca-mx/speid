@@ -26,3 +26,11 @@ class Estado(Enum):
         if stp_state == 'DEVOLUCION':
             return cls.failed
         return cls.error
+
+    @classmethod
+    def convert_to_stp_state(cls, state):
+        if state == cls.success:
+            return 'LIQUIDACION'
+        if state == cls.failed:
+            return 'DEVOLUCION'
+        return 'DEVOLUCION'
