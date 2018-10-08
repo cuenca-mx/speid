@@ -54,11 +54,11 @@ def create_orden():
     )
 
     rabbit_client = RpcClient()
-    resp = rabbit_client.call(json.dumps(transaction.to_dict()))
-    r = json.loads(resp)
-
-    # r = request.json
-    # r['estado'] = 'LIQUIDACION'
+    # resp = rabbit_client.call(json.dumps(transaction.to_dict()))
+    # r = json.loads(resp)
+    # Simulating response from the backend
+    r = request.json
+    r['estado'] = 'success'
 
     event_received = Event(
         transaction_id=transaction.id,
@@ -69,6 +69,7 @@ def create_orden():
     db.session.add(event_created)
     db.session.add(event_received)
     db.session.commit()
+    r['estado'] = Estado.convert_to_stp_state(transaction.estado)
 
     return make_response(jsonify(r), 201)
 
