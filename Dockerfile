@@ -28,6 +28,5 @@ EXPOSE $PORT
 #Copy aptible file
 ADD .aptible.yml /.aptible/.aptible.yml
 
-#CMD honcho start
 CMD chmod -R a+rxw /etc/hosts && /etc/init.d/celeryd start \
     && gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:$PORT --workers=3 speid:app
