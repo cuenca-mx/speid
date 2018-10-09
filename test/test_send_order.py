@@ -42,7 +42,7 @@ class TestSendOrder:
             speid_id='SOME_RANDOM_ID',
             version=1
         )
-        app = Celery('stp_client')
+        app = Celery('speid')
         app.config_from_object('speid.daemon.celeryconfig')
         app.send_task('speid.daemon.tasks.send_order',
                       kwargs={'order_val': order})

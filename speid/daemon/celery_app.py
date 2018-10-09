@@ -18,7 +18,7 @@ stp_prefijo = os.environ['STP_PREFIJO']
 edit_hosts = os.environ['EDIT_HOSTS']
 
 # Inicia Celery y lo configura usando el archivo celeryconfig.py
-app = Celery('stp_client')
+app = Celery('speid')
 app.config_from_object('speid.daemon.celeryconfig')
 
 # Obtiene la private key de S3
