@@ -1,8 +1,7 @@
 from speid import db
 from speid.models import Event
-from speid.models.exceptions import StpConnectionError, MalformedOrderException
+from speid.models.exceptions import MalformedOrderException
 from speid.models.transaction import TransactionFactory
-from speid.rabbit import QUEUE_BACK
 from speid.rabbit.helpers import send_order_back
 from speid.tables.types import State, Estado
 from .celery_app import app
@@ -21,12 +20,19 @@ def send_order(self, order_val):
 
 
 def execute_task(order_val):
+    try:
+        execute(order_val)
+    except Exception as exc:
+        db.session.rollback()
+        raise exc
+
+
+def execute(order_val):
     # Create event
     event_created = Event(
         type=State.created,
         meta=str(order_val)
     )
-
     try:
         # Get version
         version = 0
@@ -41,7 +47,7 @@ def execute_task(order_val):
         db.session.commit()
 
         if transaction.estado == Estado.error:
-            send_order_back(transaction, QUEUE_BACK)
+            send_order_back(transaction)
             raise MalformedOrderException()
 
         event_created.transaction_id = transaction.id
@@ -49,8 +55,6 @@ def execute_task(order_val):
         # Send order to STP
         order.monto = order.monto / 100
         res = order.registra()
-    except ConnectionError:
-        raise StpConnectionError(ConnectionError)
     finally:
         db.session.add(event_created)
         db.session.commit()
@@ -62,7 +66,7 @@ def execute_task(order_val):
     if res is not None and res.id > 0:
         transaction.orden_id = res.id
         event_complete.type = State.completed
-        send_order_back(transaction, QUEUE_BACK)
+        send_order_back(transaction)
     else:
         event_complete.type = State.error
 
