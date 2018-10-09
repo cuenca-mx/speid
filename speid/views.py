@@ -5,7 +5,6 @@ from flask import jsonify, make_response, request
 from speid import app, db
 from speid.models import Request, Transaction, Event
 from speid.models.exceptions import OrderNotFoundException
-from speid.rabbit import ORDER_EVENTS_QUEUE
 from speid.rabbit.base import RpcClient
 from speid.rabbit.helpers import send_order_back
 from speid.tables.types import Estado, HttpRequestMethod, State
@@ -34,7 +33,7 @@ def create_orden_events():
             type=State.received,
             meta=str(request.json)
         )
-    send_order_back(transaction, ORDER_EVENTS_QUEUE)
+    send_order_back(transaction)
     db.session.add(transaction)
     db.session.add(event)
     db.session.commit()
@@ -53,9 +52,10 @@ def create_orden():
         meta=str(request.json)
     )
 
-    rabbit_client = RpcClient()
+    # rabbit_client = RpcClient()
     # resp = rabbit_client.call(json.dumps(transaction.to_dict()))
     # r = json.loads(resp)
+
     # Simulating response from the backend
     r = request.json
     r['estado'] = 'success'
