@@ -1,7 +1,4 @@
-import json
-
-from speid.rabbit import QUEUE_BACK
-from speid.rabbit.base import ConfirmModeClient
+from speid.queue import app
 
 
 def send_order_back(transaction):
@@ -10,5 +7,4 @@ def send_order_back(transaction):
         speid_id=transaction.speid_id,
         orden_id=transaction.orden_id
     )
-    rabbit_client = ConfirmModeClient(QUEUE_BACK)
-    rabbit_client.call(json.dumps(res))
+    app.send_task('speid.tasks', kwargs={'result': res})

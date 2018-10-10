@@ -2,7 +2,7 @@ import uuid
 
 import pika
 
-from speid.rabbit import RABBIT_URL, RABBIT_URL_TYPE, RPC_QUEUE
+from speid.queue import RABBIT_URL, RABBIT_URL_TYPE, RPC_QUEUE
 
 
 class BaseClient:

@@ -4,7 +4,7 @@ import threading
 
 import pika
 
-from speid.rabbit.base import RPC_QUEUE
+from speid.queue.base import RPC_QUEUE
 
 
 def on_request(ch, method, props, body):
