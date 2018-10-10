@@ -5,8 +5,8 @@ from flask import jsonify, make_response, request
 from speid import app, db
 from speid.models import Request, Transaction, Event
 from speid.models.exceptions import OrderNotFoundException
-from speid.rabbit.base import RpcClient
-from speid.rabbit.helpers import send_order_back
+from speid.queue.base import RpcClient
+from speid.queue.helpers import send_order_back
 from speid.tables.types import Estado, HttpRequestMethod, State
 
 

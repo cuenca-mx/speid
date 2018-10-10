@@ -2,7 +2,7 @@ from speid import db
 from speid.models import Event
 from speid.models.exceptions import MalformedOrderException
 from speid.models.transaction import TransactionFactory
-from speid.rabbit.helpers import send_order_back
+from speid.queue.helpers import send_order_back
 from speid.tables.types import State, Estado
 from .celery_app import app
 
