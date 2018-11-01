@@ -4,8 +4,12 @@ from sqlalchemy.orm import relationship
 from stpmex.helpers import stp_to_spei_bank_code, spei_to_stp_bank_code
 from stpmex.ordenes import ORDEN_FIELDNAMES, Orden
 
+import clabe
+import luhnmod10
+
 from speid.tables import transactions
 from speid.tables.types import Estado
+
 from .base import db
 from .events import Event
 from .helpers import camel_to_snake
@@ -62,7 +66,11 @@ class Transaction(db.Model):
 
     @classmethod
     def is_valid(cls, order_dict):
-        return contain_required_fields(cls.required_fields, order_dict)
+        if contain_required_fields(cls.required_fields, order_dict):
+            if clabe.validate_clabe(order_dict['cuenta_beneficiario']) \
+                    or luhnmod10.valid(order_dict['cuenta_beneficiario']):
+                return True
+        return False
 
     @classmethod
     def transform(cls, trans_dict):

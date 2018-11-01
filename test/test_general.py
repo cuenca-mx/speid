@@ -109,6 +109,22 @@ class TestGeneral:
         with pytest.raises(MalformedOrderException):
             execute_task(order)
 
+    def test_create_order_debit_card(self):
+        order = dict(
+            concepto_pago='DebitCardTest',
+            institucion_ordenante='646',
+            cuenta_beneficiario='4242424242424242',
+            institucion_beneficiaria='072',
+            monto=1020,
+            nombre_beneficiario='Pach',
+            nombre_ordenante='BANCO',
+            cuenta_ordenante='646180157000000004',
+            rfc_curp_ordenante='ND',
+            speid_id='SOME_RANDOM_ID',
+            version=1
+        )
+        execute_task(order)
+
     def test_worker_with_version_1(self):
         order = dict(
             concepto_pago='PRUEBA',
