@@ -29,6 +29,7 @@ def execute_task(order_val):
     except Exception as exc:
         db.session.rollback()
         capture_exception(exc)
+        raise exc
 
 
 def execute(order_val):
@@ -62,6 +63,7 @@ def execute(order_val):
         res = order.registra()
     except Exception as e:
         capture_exception(e)
+        raise e
     finally:
         db.session.add(event_created)
         db.session.commit()
