@@ -4,8 +4,10 @@ import boto3
 from botocore import UNSIGNED
 from botocore.config import Config
 import stpmex
+
 from celery import Celery
 from python_hosts import Hosts, HostsEntry
+
 
 # Obtiene las variables de ambiente
 stp_private_location = os.environ['STP_PRIVATE_LOCATION']
@@ -20,6 +22,7 @@ edit_hosts = os.environ['EDIT_HOSTS']
 # Inicia Celery y lo configura usando el archivo celeryconfig.py
 app = Celery('speid')
 app.config_from_object('speid.daemon.celeryconfig')
+
 
 # Obtiene la private key de S3
 if "AWS_ACCESS_KEY_ID" in os.environ:

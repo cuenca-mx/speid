@@ -5,6 +5,9 @@ from speid.models.transaction import TransactionFactory
 from speid.queue.helpers import send_order_back
 from speid.tables.types import State, Estado
 from .celery_app import app
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk import capture_exception, capture_message
 
 
 def retry_timeout(attempts):
@@ -20,11 +23,12 @@ def send_order(self, order_val):
 
 
 def execute_task(order_val):
+    sentry_sdk.init(integrations=[CeleryIntegration()])
     try:
         execute(order_val)
     except Exception as exc:
         db.session.rollback()
-        raise exc
+        capture_exception(exc)
 
 
 def execute(order_val):
@@ -33,6 +37,7 @@ def execute(order_val):
         type=State.created,
         meta=str(order_val)
     )
+
     try:
         # Get version
         version = 0
@@ -55,6 +60,8 @@ def execute(order_val):
         # Send order to STP
         order.monto = order.monto / 100
         res = order.registra()
+    except Exception as e:
+        capture_exception(e)
     finally:
         db.session.add(event_created)
         db.session.commit()
