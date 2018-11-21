@@ -1,13 +1,19 @@
 import json
+import os
+import requests
 
 from flask import jsonify, make_response, request
 
 from speid import app, db
 from speid.models import Request, Transaction, Event
 from speid.models.exceptions import OrderNotFoundException
-from speid.queue.base import RpcClient
 from speid.queue.helpers import send_order_back
 from speid.tables.types import Estado, HttpRequestMethod, State
+
+
+BACKEND_API = os.getenv('BACKEND_API')
+BACKEND_API_KEY = os.getenv('BACKEND_API_KEY')
+BACKEND_API_SECRET = os.getenv('BACKEND_API_SECRET')
 
 
 @app.route('/')
@@ -33,7 +39,7 @@ def create_orden_events():
             type=State.received,
             meta=str(request.json)
         )
-    send_order_back(transaction)
+    #send_order_back(transaction)
     db.session.add(transaction)
     db.session.add(event)
     db.session.commit()
@@ -51,25 +57,21 @@ def create_orden():
         type=State.created,
         meta=str(request.json)
     )
-
-    # rabbit_client = RpcClient()
-    # resp = rabbit_client.call(json.dumps(transaction.to_dict()))
-    # r = json.loads(resp)
-
-    # Simulating response from the backend
-    r = request.json
-    r['estado'] = 'success'
+    # Consume api
+    response = requests.post(BACKEND_API+'/spei_transactions',
+                             jsonify(transaction),
+                             auth=(BACKEND_API_KEY,BACKEND_API_SECRET))
 
     event_received = Event(
         transaction_id=transaction.id,
         type=State.completed,
-        meta=str(r)
+        meta=str(response)
     )
-    transaction.estado = Estado(r['estado'])
     db.session.add(event_created)
     db.session.add(event_received)
     db.session.commit()
-    r['estado'] = Estado.convert_to_stp_state(transaction.estado)
+    r = request.json
+    r['estado'] = Estado.convert_to_stp_state(Estado(response['estado']))
 
     return make_response(jsonify(r), 201)
 
