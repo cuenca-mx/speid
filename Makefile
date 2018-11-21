@@ -25,6 +25,13 @@ clean-pyc:
 test: clean-pyc lint
 		pytest
 
+travis-test:
+		pip install -q pycodestyle
+		$(MAKE) lint
+		$(MAKE) docker-build
+		$(DOCKER) scripts/test.sh
+		$(MAKE) docker-stop
+
 docker-test: docker-build
 		# Clean up even if there's an error
 		$(DOCKER) scripts/test.sh || $(MAKE) docker-stop

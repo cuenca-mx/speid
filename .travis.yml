@@ -7,4 +7,4 @@ services:
   - docker
 script:
   - cp env.template .env
-  - make docker-test
+  - make travis-test
