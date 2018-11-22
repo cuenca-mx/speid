@@ -27,7 +27,6 @@ def create_orden_events():
         return make_response(jsonify(request.json), 400)
 
     request_id = request.json['id']
-    print('dasd')
     transaction = db.session.query(Transaction).\
         filter_by(orden_id=request_id).one()
     if transaction is not None:
@@ -38,9 +37,9 @@ def create_orden_events():
             type=State.received,
             meta=str(request.json)
         )
-        print(str(transaction.estado))
+
         requests.post(BACKEND_API + '/spei_transactions/' + request_id,
-                      json.dumps(str(transaction.estado)),
+                      str(transaction.estado),
                       auth=(BACKEND_API_KEY, BACKEND_API_SECRET))
         db.session.add(transaction)
         db.session.add(event)
