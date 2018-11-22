@@ -36,7 +36,7 @@ def create_orden_events():
             type=State.received,
             meta=str(request.json)
         )
-        requests.post(BACKEND_API + '/spei_transactions/'+request_id,
+        requests.post(BACKEND_API + '/spei_transactions/' + request_id,
                       jsonify(transaction.estado),
                       auth=(BACKEND_API_KEY, BACKEND_API_SECRET))
         db.session.add(transaction)
@@ -58,9 +58,9 @@ def create_orden():
         meta=str(request.json)
     )
     # Consume api
-    response = requests.post(BACKEND_API+'/spei_transactions',
+    response = requests.post(BACKEND_API + '/spei_transactions',
                              jsonify(transaction),
-                             auth=(BACKEND_API_KEY,BACKEND_API_SECRET))
+                             auth=(BACKEND_API_KEY, BACKEND_API_SECRET))
 
     event_received = Event(
         transaction_id=transaction.id,
