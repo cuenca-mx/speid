@@ -27,17 +27,20 @@ def create_orden_events():
         return make_response(jsonify(request.json), 400)
 
     request_id = request.json['id']
+    print('dasd')
     transaction = db.session.query(Transaction).\
         filter_by(orden_id=request_id).one()
     if transaction is not None:
-        transaction.estado = Estado.get_state_from_stp(request.json['Estado'])
+
+        transaction.estado = Estado.get_state_from_stp(request.json["Estado"])
         event = Event(
             transaction_id=transaction.id,
             type=State.received,
             meta=str(request.json)
         )
+        print(str(transaction.estado))
         requests.post(BACKEND_API + '/spei_transactions/' + request_id,
-                      jsonify(transaction.estado),
+                      json.dumps(str(transaction.estado)),
                       auth=(BACKEND_API_KEY, BACKEND_API_SECRET))
         db.session.add(transaction)
         db.session.add(event)
@@ -59,8 +62,10 @@ def create_orden():
     )
     # Consume api
     response = requests.post(BACKEND_API + '/spei_transactions',
-                             jsonify(transaction),
+                             transaction.__dict__,
                              auth=(BACKEND_API_KEY, BACKEND_API_SECRET))
+
+    response = {'estado': 'success'}
 
     event_received = Event(
         transaction_id=transaction.id,
@@ -72,7 +77,6 @@ def create_orden():
     db.session.commit()
     r = request.json
     r['estado'] = Estado.convert_to_stp_state(Estado(response['estado']))
-
     return make_response(jsonify(r), 201)
 
 

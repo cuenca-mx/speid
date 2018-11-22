@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime
 
 from speid import db
 from speid.daemon.tasks import execute_task
@@ -33,7 +34,7 @@ class TestGeneral:
             "ReferenciaNumerica": 2423,
             "Empresa": "TAMIZI",
             "estado": Estado.success,
-            "speid_id": "SPEI_TEST"
+            "speid_id": 'st' + datetime.now().strftime('%m%d%H%M%S')
         }
         transaction = Transaction.transform(transaction_request)
         db.session.add(transaction)
@@ -120,7 +121,7 @@ class TestGeneral:
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
-            speid_id='SOME_RANDOM_ID',
+            speid_id='co' + datetime.now().strftime('%m%d%H%M%S'),
             version=1
         )
         execute_task(order)
@@ -136,7 +137,7 @@ class TestGeneral:
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
-            speid_id='SOME_RANDOM_ID',
+            speid_id='ww' + datetime.now().strftime('%m%d%H%M%S'),
             version=1
         )
         execute_task(order)
