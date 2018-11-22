@@ -7,7 +7,6 @@ from flask import jsonify, make_response, request
 from speid import app, db
 from speid.models import Request, Transaction, Event
 from speid.models.exceptions import OrderNotFoundException
-from speid.queue.helpers import send_order_back
 from speid.tables.types import Estado, HttpRequestMethod, State
 
 
@@ -30,20 +29,21 @@ def create_orden_events():
     request_id = request.json['id']
     transaction = db.session.query(Transaction).\
         filter_by(orden_id=request_id).one()
-    if transaction is None:
-        raise OrderNotFoundException(f'Order Id: {request_id}')
-    else:
+    if transaction is not None:
         transaction.estado = Estado.get_state_from_stp(request.json['Estado'])
         event = Event(
             transaction_id=transaction.id,
             type=State.received,
             meta=str(request.json)
         )
-    #send_order_back(transaction)
-    db.session.add(transaction)
-    db.session.add(event)
-    db.session.commit()
-    return "got it!"
+        requests.post(BACKEND_API + '/spei_transactions/'+request_id,
+                      jsonify(transaction.estado),
+                      auth=(BACKEND_API_KEY, BACKEND_API_SECRET))
+        db.session.add(transaction)
+        db.session.add(event)
+        db.session.commit()
+        return "got it!"
+    raise OrderNotFoundException(f'Order Id: {request_id}')
 
 
 @app.route('/ordenes', methods=['POST'])
