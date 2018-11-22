@@ -8,4 +8,3 @@ accept_content = ['json']
 task_default_queue = NEW_ORDER_QUEUE
 include = ['speid.daemon.tasks']
 backend = 'amqp'
-
