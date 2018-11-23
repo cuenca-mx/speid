@@ -11,9 +11,9 @@ from speid.queue.helpers import send_order_back
 from speid.tables.types import State, Estado
 from .celery_app import app
 
-BACKEND_API = os.getenv('BACKEND_API')
-BACKEND_API_KEY = os.getenv('BACKEND_API_KEY')
-BACKEND_API_SECRET = os.getenv('BACKEND_API_SECRET')
+CALLBACK_URL = os.getenv('CALLBACK_URL')
+CALLBACK_API_KEY = os.getenv('CALLBACK_API_KEY')
+CALLBACK_API_SECRET = os.getenv('CALLBACK_API_SECRET')
 
 
 def retry_timeout(attempts):
@@ -76,14 +76,15 @@ def execute(order_val):
     if res is not None and res.id > 0:
         transaction.orden_id = res.id
         event_complete.type = State.completed
-        requests.post(BACKEND_API + '/' + transaction.orden_id,
+        callback_url = CALLBACK_URL + '/' + str(transaction.orden_id)
+        requests.post(callback_url,
                       dict(
                           estado=transaction.estado.value,
                           speid_id=transaction.speid_id,
                           orden_id=transaction.orden_id
                       ),
-                      auth=HTTPBasicAuth(BACKEND_API_KEY,
-                                         BACKEND_API_SECRET))
+                      auth=HTTPBasicAuth(CALLBACK_API_KEY,
+                                         CALLBACK_API_SECRET))
     else:
         event_complete.type = State.error
 

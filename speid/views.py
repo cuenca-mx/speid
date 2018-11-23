@@ -11,9 +11,9 @@ from speid.models.exceptions import OrderNotFoundException
 from speid.tables.types import Estado, HttpRequestMethod, State
 
 
-BACKEND_API = os.getenv('BACKEND_API')
-BACKEND_API_KEY = os.getenv('BACKEND_API_KEY')
-BACKEND_API_SECRET = os.getenv('BACKEND_API_SECRET')
+CALLBACK_URL = os.getenv('CALLBACK_URL')
+CALLBACK_API_KEY = os.getenv('CALLBACK_API_KEY')
+CALLBACK_API_SECRET = os.getenv('CALLBACK_API_SECRET')
 
 
 @app.route('/')
@@ -23,8 +23,6 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
-    import pdb
-    pdb.set_trace()
     if "id" not in request.json or int(request.json["id"]) <= 0:
         return make_response(jsonify(request.json), 400)
 
@@ -40,10 +38,10 @@ def create_orden_events():
             meta=str(request.json)
         )
 
-        requests.post(BACKEND_API + '/' + request_id,
+        requests.post(CALLBACK_URL + '/' + request_id,
                       dict(estado=transaction.estado.value),
-                      auth=HTTPBasicAuth(BACKEND_API_KEY,
-                                         BACKEND_API_SECRET))
+                      auth=HTTPBasicAuth(CALLBACK_API_KEY,
+                                         CALLBACK_API_SECRET))
         db.session.add(transaction)
         db.session.add(event)
         db.session.commit()
@@ -64,10 +62,10 @@ def create_orden():
     )
     # Consume api
 
-    response = requests.post(BACKEND_API,
+    response = requests.post(CALLBACK_URL,
                              transaction.__dict__,
-                             auth=HTTPBasicAuth(BACKEND_API_KEY,
-                                                BACKEND_API_SECRET))
+                             auth=HTTPBasicAuth(CALLBACK_API_KEY,
+                                                CALLBACK_API_SECRET))
 
     # Se pone en success hasta que se suba el cambio al api y
     # regrese el estado correcto
