@@ -11,7 +11,7 @@ from speid.models.exceptions import OrderNotFoundException
 from speid.tables.types import Estado, HttpRequestMethod, State
 
 
-CALLBACK_URL = os.getenv('CALLBACK_URL')
+BE_CALLBACK_URL = os.getenv('BE_CALLBACK_URL')
 CALLBACK_API_KEY = os.getenv('CALLBACK_API_KEY')
 CALLBACK_API_SECRET = os.getenv('CALLBACK_API_SECRET')
 
@@ -38,7 +38,7 @@ def create_orden_events():
             meta=str(request.json)
         )
 
-        requests.post('{0}/{1}'.format(CALLBACK_URL, request_id),
+        requests.post('{0}/{1}'.format(BE_CALLBACK_URL, request_id),
                       dict(estado=transaction.estado.value),
                       auth=HTTPBasicAuth(CALLBACK_API_KEY,
                                          CALLBACK_API_SECRET))
@@ -62,7 +62,7 @@ def create_orden():
     )
     # Consume api
 
-    response = requests.post(CALLBACK_URL,
+    response = requests.post(BE_CALLBACK_URL,
                              transaction.__dict__,
                              auth=HTTPBasicAuth(CALLBACK_API_KEY,
                                                 CALLBACK_API_SECRET))
