@@ -40,7 +40,7 @@ def create_orden_events():
             meta=str(request.json)
         )
 
-        requests.post(BACKEND_API + request_id,
+        requests.post(BACKEND_API + '/' + request_id,
                       dict(estado=transaction.estado.value),
                       auth=HTTPBasicAuth(BACKEND_API_KEY,
                                          BACKEND_API_SECRET))
@@ -64,7 +64,7 @@ def create_orden():
     )
     # Consume api
 
-    response = requests.post(BACKEND_API ,
+    response = requests.post(BACKEND_API,
                              transaction.__dict__,
                              auth=HTTPBasicAuth(BACKEND_API_KEY,
                                                 BACKEND_API_SECRET))
