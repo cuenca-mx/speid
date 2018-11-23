@@ -8,3 +8,4 @@ services:
 script:
   - cp env.template .env
   - make travis-test
+  - echo $CALL_BK_URL

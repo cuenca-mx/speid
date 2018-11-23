@@ -11,7 +11,7 @@ from speid.queue.helpers import send_order_back
 from speid.tables.types import State, Estado
 from .celery_app import app
 
-BE_CALLBACK_URL = os.environ['BE_CALLBACK_URL']
+CALL_BK_URL = os.environ['CALL_BK_URL']
 CALLBACK_API_KEY = os.environ['CALLBACK_API_KEY']
 CALLBACK_API_SECRET = os.environ['CALLBACK_API_SECRET']
 
@@ -76,7 +76,7 @@ def execute(order_val):
     if res is not None and res.id > 0:
         transaction.orden_id = res.id
         event_complete.type = State.completed
-        requests.post('{0}/{1}'.format(BE_CALLBACK_URL, transaction.orden_id),
+        requests.post('{0}/{1}'.format(CALL_BK_URL, transaction.orden_id),
                       dict(
                           estado=transaction.estado.value,
                           speid_id=transaction.speid_id,
