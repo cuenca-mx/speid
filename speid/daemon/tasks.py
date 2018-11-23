@@ -11,7 +11,7 @@ from speid.queue.helpers import send_order_back
 from speid.tables.types import State, Estado
 from .celery_app import app
 
-# CALL_BK_URL = os.environ['CALL_BK_URL']
+CALL_BK_URL = os.environ['CALL_BK_URL']
 CALLBACK_API_KEY = os.environ['CALLBACK_API_KEY']
 CALLBACK_API_SECRET = os.environ['CALLBACK_API_SECRET']
 
