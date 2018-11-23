@@ -1,3 +1,8 @@
+import os
+import requests
+
+from requests.auth import HTTPBasicAuth
+
 from speid import db
 from speid.models import Event
 from speid.models.exceptions import MalformedOrderException
@@ -5,6 +10,10 @@ from speid.models.transaction import TransactionFactory
 from speid.queue.helpers import send_order_back
 from speid.tables.types import State, Estado
 from .celery_app import app
+
+BACKEND_API = os.getenv('BACKEND_API')
+BACKEND_API_KEY = os.getenv('BACKEND_API_KEY')
+BACKEND_API_SECRET = os.getenv('BACKEND_API_SECRET')
 
 
 def retry_timeout(attempts):
@@ -67,7 +76,14 @@ def execute(order_val):
     if res is not None and res.id > 0:
         transaction.orden_id = res.id
         event_complete.type = State.completed
-        send_order_back(transaction)
+        requests.post(BACKEND_API + transaction.orden_id,
+                      dict(
+                          estado=transaction.estado.value,
+                          speid_id=transaction.speid_id,
+                          orden_id=transaction.orden_id
+                      ),
+                      auth=HTTPBasicAuth(BACKEND_API_KEY,
+                                         BACKEND_API_SECRET))
     else:
         event_complete.type = State.error
 

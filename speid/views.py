@@ -3,6 +3,7 @@ import os
 import requests
 
 from flask import jsonify, make_response, request
+from requests.auth import HTTPBasicAuth
 
 from speid import app, db
 from speid.models import Request, Transaction, Event
@@ -22,7 +23,8 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
-
+    import pdb
+    pdb.set_trace()
     if "id" not in request.json or int(request.json["id"]) <= 0:
         return make_response(jsonify(request.json), 400)
 
@@ -38,9 +40,10 @@ def create_orden_events():
             meta=str(request.json)
         )
 
-        requests.post(BACKEND_API + '/spei_transactions/' + request_id,
-                      str(transaction.estado),
-                      auth=(BACKEND_API_KEY, BACKEND_API_SECRET))
+        requests.post(BACKEND_API + request_id,
+                      dict(estado=transaction.estado.value),
+                      auth=HTTPBasicAuth(BACKEND_API_KEY,
+                                         BACKEND_API_SECRET))
         db.session.add(transaction)
         db.session.add(event)
         db.session.commit()
@@ -60,10 +63,14 @@ def create_orden():
         meta=str(request.json)
     )
     # Consume api
-    response = requests.post(BACKEND_API + '/spei_transactions',
-                             transaction.__dict__,
-                             auth=(BACKEND_API_KEY, BACKEND_API_SECRET))
 
+    response = requests.post(BACKEND_API ,
+                             transaction.__dict__,
+                             auth=HTTPBasicAuth(BACKEND_API_KEY,
+                                                BACKEND_API_SECRET))
+
+    # Se pone en success hasta que se suba el cambio al api y
+    # regrese el estado correcto
     response = {'estado': 'success'}
 
     event_received = Event(
