@@ -76,13 +76,11 @@ def execute(order_val):
     if res is not None and res.id > 0:
         transaction.orden_id = res.id
         event_complete.type = State.completed
-        callback_url = CALLBACK_URL + '/' + str(transaction.orden_id)
-        requests.post(callback_url,
+        requests.post('{0}/{1}'.format(CALLBACK_URL, transaction.orden_id),
                       dict(
                           estado=transaction.estado.value,
                           speid_id=transaction.speid_id,
-                          orden_id=transaction.orden_id
-                      ),
+                          orden_id=transaction.orden_id),
                       auth=HTTPBasicAuth(CALLBACK_API_KEY,
                                          CALLBACK_API_SECRET))
     else:

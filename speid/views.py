@@ -38,7 +38,7 @@ def create_orden_events():
             meta=str(request.json)
         )
 
-        requests.post(CALLBACK_URL + '/' + request_id,
+        requests.post('{0}/{1}'.format(CALLBACK_URL, request_id),
                       dict(estado=transaction.estado.value),
                       auth=HTTPBasicAuth(CALLBACK_API_KEY,
                                          CALLBACK_API_SECRET))
