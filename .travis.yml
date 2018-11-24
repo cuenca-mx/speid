@@ -7,4 +7,5 @@ services:
 - docker
 script:
 - cp env.template .env
+- echo CALLBACK_URL=$CALLBACK_URL >> .env
 - make travis-test
