@@ -1,19 +1,12 @@
 import json
-import os
-import requests
 
 from flask import jsonify, make_response, request
-from requests.auth import HTTPBasicAuth
 
 from speid import app, db
 from speid.models import Request, Transaction, Event
 from speid.models.exceptions import OrderNotFoundException
 from speid.tables.types import Estado, HttpRequestMethod, State
-
-
-CALLBACK_URL = os.getenv('CALLBACK_URL')
-CALLBACK_API_KEY = os.getenv('CALLBACK_API_KEY')
-CALLBACK_API_SECRET = os.getenv('CALLBACK_API_SECRET')
+from speid.helpers import callback_helper
 
 
 @app.route('/')
@@ -38,10 +31,9 @@ def create_orden_events():
             meta=str(request.json)
         )
 
-        requests.post('{0}/{1}'.format(CALLBACK_URL, request_id),
-                      dict(estado=transaction.estado.value),
-                      auth=HTTPBasicAuth(CALLBACK_API_KEY,
-                                         CALLBACK_API_SECRET))
+        callback_helper.set_status_transaction(
+            request_id,
+            dict(estado=transaction.estado.value))
         db.session.add(transaction)
         db.session.add(event)
         db.session.commit()
@@ -62,14 +54,7 @@ def create_orden():
     )
     # Consume api
 
-    response = requests.post(CALLBACK_URL,
-                             transaction.__dict__,
-                             auth=HTTPBasicAuth(CALLBACK_API_KEY,
-                                                CALLBACK_API_SECRET))
-
-    # Se pone en success hasta que se suba el cambio al api y
-    # regrese el estado correcto
-    response = {'estado': 'success'}
+    response = callback_helper.send_transaction(transaction)
 
     event_received = Event(
         transaction_id=transaction.id,
