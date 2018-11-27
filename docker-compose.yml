@@ -72,8 +72,6 @@ services:
     depends_on:
       - db
       - rabbitmq
-    environment:
-      - CALLBACK_URL
     env_file:
       - .env
 

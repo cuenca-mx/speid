@@ -1,12 +1,16 @@
+import os
 import json
 
 from flask import jsonify, make_response, request
+import sentry_sdk
 
 from speid import app, db
 from speid.models import Request, Transaction, Event
-from speid.models.exceptions import OrderNotFoundException
 from speid.tables.types import Estado, HttpRequestMethod, State
 from speid.helpers import callback_helper
+
+sentry_dsn = os.getenv('SENTRY_DSN')
+sentry_sdk.init(sentry_dsn)
 
 
 @app.route('/')
@@ -20,25 +24,23 @@ def create_orden_events():
         return make_response(jsonify(request.json), 400)
 
     request_id = request.json['id']
-    transaction = db.session.query(Transaction).\
-        filter_by(orden_id=request_id).one()
-    if transaction is not None:
+    transaction = (db.session.query(Transaction).
+                   filter_by(orden_id=request_id).one())
 
-        transaction.estado = Estado.get_state_from_stp(request.json["Estado"])
-        event = Event(
-            transaction_id=transaction.id,
-            type=State.received,
-            meta=str(request.json)
-        )
+    transaction.estado = Estado.get_state_from_stp(request.json["Estado"])
+    event = Event(
+        transaction_id=transaction.id,
+        type=State.received,
+        meta=str(request.json)
+    )
 
-        callback_helper.set_status_transaction(
-            request_id,
-            dict(estado=transaction.estado.value))
-        db.session.add(transaction)
-        db.session.add(event)
-        db.session.commit()
-        return "got it!"
-    raise OrderNotFoundException(f'Order Id: {request_id}')
+    callback_helper.set_status_transaction(
+        transaction.speid_id,
+        dict(estado=transaction.estado.value))
+    db.session.add(transaction)
+    db.session.add(event)
+    db.session.commit()
+    return "got it!"
 
 
 @app.route('/ordenes', methods=['POST'])

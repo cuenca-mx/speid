@@ -10,4 +10,5 @@ script:
 - echo CALLBACK_URL=$CALLBACK_URL >> .env
 - echo CALLBACK_API_KEY=$CALLBACK_API_KEY >> .env
 - echo CALLBACK_API_SECRET=$CALLBACK_API_SECRET >> .env
+- echo SENTRY_DSN=$SENTRY_DSN >> .env
 - make travis-test

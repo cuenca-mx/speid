@@ -48,9 +48,9 @@ def execute(order_val):
         db.session.commit()
 
         if transaction.estado == Estado.error:
-            if transaction.orden_id is not None:
+            if transaction.speid_id is not None:
                 callback_helper.set_status_transaction(
-                    transaction.orden_id,
+                    transaction.speid_id,
                     dict(
                         estado=transaction.estado.value,
                         speid_id=transaction.speid_id,
@@ -76,7 +76,7 @@ def execute(order_val):
         transaction.orden_id = res.id
         event_complete.type = State.completed
         callback_helper.set_status_transaction(
-            transaction.orden_id,
+            transaction.speid_id,
             dict(
                 estado=transaction.estado.value,
                 speid_id=transaction.speid_id,
