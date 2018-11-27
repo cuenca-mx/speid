@@ -1,11 +1,12 @@
+
 import pytest
-from datetime import datetime
 
 from speid import db
 from speid.daemon.tasks import execute_task
 from speid.models import Transaction, Event
 from speid.models.exceptions import MalformedOrderException
 from speid.tables.types import State, Estado
+from test.custom_vcr import my_vcr
 
 
 class TestGeneral:
@@ -14,6 +15,7 @@ class TestGeneral:
         res = app.get('/')
         assert res.status_code == 200
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_save_transaction(self):
         transaction_request = {
             "Clave": 2456303,
@@ -34,7 +36,7 @@ class TestGeneral:
             "ReferenciaNumerica": 2423,
             "Empresa": "TAMIZI",
             "estado": Estado.success,
-            "speid_id": 'st' + datetime.now().strftime('%m%d%H%M%S')
+            "speid_id": 'SPEI_TEST'
         }
         transaction = Transaction.transform(transaction_request)
         db.session.add(transaction)
@@ -49,6 +51,7 @@ class TestGeneral:
         assert transaction.id is not None
         assert event.id is not None
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_worker_with_incorrect_version(self):
         order = dict(
             concepto_pago='PRUEBA',
@@ -65,6 +68,7 @@ class TestGeneral:
         with pytest.raises(MalformedOrderException):
             execute_task(order_val=order)
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_worker_without_version(self):
         order = dict(
             concepto_pago='PRUEBA',
@@ -79,6 +83,7 @@ class TestGeneral:
         )
         execute_task(order)
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_worker_with_version_0(self):
         order = dict(
             concepto_pago='PRUEBA',
@@ -94,6 +99,7 @@ class TestGeneral:
         )
         execute_task(order)
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_malformed_order_worker_with_version_1(self):
         order = dict(
             concepto_pago='PRUEBA',
@@ -110,6 +116,7 @@ class TestGeneral:
         with pytest.raises(MalformedOrderException):
             execute_task(order)
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_create_order_debit_card(self):
         order = dict(
             concepto_pago='DebitCardTest',
@@ -121,11 +128,12 @@ class TestGeneral:
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
-            speid_id='co' + datetime.now().strftime('%m%d%H%M%S'),
+            speid_id='SOME_RANDOM_ID',
             version=1
         )
         execute_task(order)
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_worker_with_version_1(self):
         order = dict(
             concepto_pago='PRUEBA',
@@ -137,7 +145,7 @@ class TestGeneral:
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
-            speid_id='ww' + datetime.now().strftime('%m%d%H%M%S'),
+            speid_id='ANOTHER_RANDOM_ID',
             version=1
         )
         execute_task(order)

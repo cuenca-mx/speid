@@ -55,17 +55,17 @@ def create_orden():
     # Consume api
 
     response = callback_helper.send_transaction(transaction)
-
     event_received = Event(
         transaction_id=transaction.id,
         type=State.completed,
         meta=str(response)
     )
+
     db.session.add(event_created)
     db.session.add(event_received)
     db.session.commit()
     r = request.json
-    r['estado'] = Estado.convert_to_stp_state(Estado(response['estado']))
+    r['estado'] = Estado.convert_to_stp_state(Estado(response['status']))
     return make_response(jsonify(r), 201)
 
 

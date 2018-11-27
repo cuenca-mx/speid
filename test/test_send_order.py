@@ -5,6 +5,8 @@ import pytest
 from celery import Celery
 from sqlalchemy.orm.exc import NoResultFound
 
+from test.custom_vcr import my_vcr
+
 
 class TestSendOrder:
 
@@ -27,6 +29,7 @@ class TestSendOrder:
         app.send_task('speid.daemon.tasks.send_order',
                       kwargs={'order_val': order})
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_create_order_found(self, app):
         data = dict(
             id='2456304',

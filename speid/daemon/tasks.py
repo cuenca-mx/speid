@@ -48,14 +48,15 @@ def execute(order_val):
         db.session.commit()
 
         if transaction.estado == Estado.error:
-            callback_helper.set_status_transaction(
-                transaction.orden_id,
-                dict(
-                    estado=transaction.estado.value,
-                    speid_id=transaction.speid_id,
-                    orden_id=transaction.orden_id
+            if transaction.orden_id is not None:
+                callback_helper.set_status_transaction(
+                    transaction.orden_id,
+                    dict(
+                        estado=transaction.estado.value,
+                        speid_id=transaction.speid_id,
+                        orden_id=transaction.orden_id
+                    )
                 )
-            )
             raise MalformedOrderException()
 
         event_created.transaction_id = transaction.id
