@@ -1,8 +1,11 @@
 import json
+from datetime import datetime
 
 import pytest
 from celery import Celery
 from sqlalchemy.orm.exc import NoResultFound
+
+from test.custom_vcr import my_vcr
 
 
 class TestSendOrder:
@@ -18,7 +21,7 @@ class TestSendOrder:
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
-            speid_id='SOME_RANDOM_ID',
+            speid_id='go' + datetime.now().strftime('%m%d%H%M%S'),
             version=1
         )
         app = Celery('speid')
@@ -26,9 +29,10 @@ class TestSendOrder:
         app.send_task('speid.daemon.tasks.send_order',
                       kwargs={'order_val': order})
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_create_order_found(self, app):
         data = dict(
-            id='2456303',
+            id='2456304',
             Estado='LIQUIDACION',
             Detalle="0"
         )

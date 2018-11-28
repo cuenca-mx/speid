@@ -1,0 +1,79 @@
+interactions:
+- request:
+    body: '{"orden_id": 2456304, "fecha_operacion": "20180618", "institucion_ordenante":
+      "012", "institucion_beneficiaria": "", "clave_rastreo": "PRUEBATAMIZI1", "monto":
+      10000, "nombre_ordenante": "BANCO", "tipo_cuenta_ordenante": 40, "cuenta_ordenante":
+      "846180000500000008", "rfc_curp_ordenante": "ND", "nombre_beneficiario": "TAMIZI",
+      "tipo_cuenta_beneficiario": 40, "cuenta_beneficiario": "646180157000000004",
+      "rfc_curp_beneficiario": "ND", "concepto_pago": "PRUEBA", "referencia_numerica":
+      2423, "empresa": "TAMIZI"}'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Authorization: [Basic dXNlcjpwYXNz]
+      Connection: [keep-alive]
+      Content-Length: ['512']
+      Content-Type: [application/json]
+      User-Agent: [python-requests/2.20.1]
+    method: POST
+    uri: https://testapi/set
+  response:
+    body: {string: '{"status": "success"}'}
+    headers:
+      Connection: [keep-alive]
+      Content-Encoding: [application/x-www-form-urlencoded]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Tue, 27 Nov 2018 00:55:57 GMT']
+    status: {code: 201, message: OK}
+- request:
+    body: '{"status": "success"}'
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Authorization: [Basic QUs3aG]
+      Connection: [keep-alive]
+      Content-Length: ['21']
+      Content-Type: [application/json]
+      User-Agent: [python-requests/2.20.1]
+    method: POST
+    uri: https://testapi/set/5694433
+  response:
+    body: {string: '{"status": "success"}'}
+    headers:
+      Connection: [keep-alive]
+      Content-Encoding: [application/x-www-form-urlencoded]
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Mon, 26 Nov 2018 21:51:18 GMT']
+      Server: [nginx]
+      Transfer-Encoding: [chunked]
+      Vary: [Accept-Encoding]
+    status: {code: 201, message: OK}
+- request:
+    body: "<?xml version='1.0' encoding='utf-8'?>\n<soap-env:Envelope xmlns:soap-env=\"http://schemas.xmlsoap.org/soap/envelope/\"><soap-env:Body><ns0:registraOrden
+      xmlns:ns0=\"http://h2h.integration.spei.enlacefi.lgec.com/\"><ordenPago><claveRastreo>CR1543379730</claveRastreo><conceptoPago>PRUEBA</conceptoPago><cuentaBeneficiario>072691004495711499</cuentaBeneficiario><cuentaOrdenante>646180157000000004</cuentaOrdenante><empresa>TAMIZI</empresa><firma>Q+phwa9uolmnNF/0yCBqbdLifu8Q3giVQBM3MCFXVnrEho0yF52MsG2qE82DGu64lH+awA44xua4ig94qI4anFFNSV3B7L6a4RogSRAcH7rnTO7Fd9PkoeSConSHlPaCQ+KRboldlwB8bd8F8K+FBzlZr0bEqO4ksxIuqYyI/Dk=</firma><institucionContraparte>40072</institucionContraparte><institucionOperante>90646</institucionOperante><medioEntrega>3</medioEntrega><monto>10.2</monto><nombreBeneficiario>Pedro
+      S\xE1nchez</nombreBeneficiario><nombreOrdenante>BANCO</nombreOrdenante><prioridad>1</prioridad><referenciaNumerica>6873826</referenciaNumerica><rfcCurpBeneficiario>ND</rfcCurpBeneficiario><rfcCurpOrdenante>ND</rfcCurpOrdenante><tipoCuentaBeneficiario>40</tipoCuentaBeneficiario><tipoPago>1</tipoPago><topologia>T</topologia></ordenPago></ns0:registraOrden></soap-env:Body></soap-env:Envelope>"
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['1188']
+      Content-Type: [text/xml; charset=utf-8]
+      Cookie: [JSESSIONID=kRxYmjJVCriXVqJkzxoYz1inDtHtK9PToasjLMgO-kd2w5JHoeYK!945263654]
+      SOAPAction: ['""']
+      User-Agent: [Zeep/3.1.0 (www.python-zeep.org)]
+    method: POST
+    uri: https://demo.stpmex.com:7024/speidemo/webservices/SpeiActualizaServices
+  response:
+    body: {string: '<?xml version=''1.0'' encoding=''UTF-8''?><S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"><S:Body><ns0:registraOrdenResponse
+       xmlns:ns0="http://h2h.integration.spei.enlacefi.lgec.com/"><return><id>5554988</id></return></ns0:registraOrdenResponse></S:Body></S:Envelope>'}
+    headers:
+      Cache-Control: ['no-cache, no-store, must-revalidate, pre-check=0, post-check=0,
+         max-age=0, s-maxage=0']
+      Content-Type: [text/xml; charset=utf-8]
+      Date: ['Tue, 18 Sep 2018 20:03:53 GMT']
+      Expires: ['0']
+      Pragma: [no-cache]
+      Strict-Transport-Security: [max-age=31536000; includeSubdomains]
+      X-Frame-Options: [DENY]
+    status: {code: 200, message: OK}
+version: 1

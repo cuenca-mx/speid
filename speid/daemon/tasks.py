@@ -1,13 +1,20 @@
+import sentry_sdk
+import os
+from sentry_sdk import capture_exception
+from sentry_sdk.integrations.celery import CeleryIntegration
+
 from speid import db
 from speid.models import Event
 from speid.models.exceptions import MalformedOrderException
 from speid.models.transaction import TransactionFactory
-from speid.queue.helpers import send_order_back
+from speid.helpers import callback_helper
 from speid.tables.types import State, Estado
 from .celery_app import app
-import sentry_sdk
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk import capture_exception, capture_message
+
+
+sentry_dsn = os.getenv('SENTRY_DSN')
+sentry_sdk.init(sentry_dsn,
+                integrations=[CeleryIntegration()])
 
 
 def retry_timeout(attempts):
@@ -23,12 +30,11 @@ def send_order(self, order_val):
 
 
 def execute_task(order_val):
-    sentry_sdk.init(integrations=[CeleryIntegration()])
     try:
         execute(order_val)
     except Exception as exc:
-        db.session.rollback()
         capture_exception(exc)
+        db.session.rollback()
         raise exc
 
 
@@ -53,7 +59,15 @@ def execute(order_val):
         db.session.commit()
 
         if transaction.estado == Estado.error:
-            send_order_back(transaction)
+            if transaction.speid_id is not None:
+                callback_helper.set_status_transaction(
+                    transaction.speid_id,
+                    dict(
+                        estado=transaction.estado.value,
+                        speid_id=transaction.speid_id,
+                        orden_id=transaction.orden_id
+                    )
+                )
             raise MalformedOrderException()
 
         event_created.transaction_id = transaction.id
@@ -61,9 +75,6 @@ def execute(order_val):
         # Send order to STP
         order.monto = order.monto / 100
         res = order.registra()
-    except Exception as e:
-        capture_exception(e)
-        raise e
     finally:
         db.session.add(event_created)
         db.session.commit()
@@ -75,7 +86,14 @@ def execute(order_val):
     if res is not None and res.id > 0:
         transaction.orden_id = res.id
         event_complete.type = State.completed
-        send_order_back(transaction)
+        callback_helper.set_status_transaction(
+            transaction.speid_id,
+            dict(
+                estado=transaction.estado.value,
+                speid_id=transaction.speid_id,
+                orden_id=transaction.orden_id
+            )
+        )
     else:
         event_complete.type = State.error
 

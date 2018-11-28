@@ -52,6 +52,7 @@ services:
   db:
     image: postgres:10.1
 
+
   rabbitmq:
     image: rabbitmq
     ports:
