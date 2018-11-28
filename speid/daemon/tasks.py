@@ -1,3 +1,8 @@
+import sentry_sdk
+import os
+from sentry_sdk import capture_exception
+from sentry_sdk.integrations.celery import CeleryIntegration
+
 from speid import db
 from speid.models import Event
 from speid.models.exceptions import MalformedOrderException
@@ -5,6 +10,11 @@ from speid.models.transaction import TransactionFactory
 from speid.helpers import callback_helper
 from speid.tables.types import State, Estado
 from .celery_app import app
+
+
+sentry_dsn = os.getenv('SENTRY_DSN')
+sentry_sdk.init(sentry_dsn,
+                integrations=[CeleryIntegration()])
 
 
 def retry_timeout(attempts):
@@ -23,6 +33,7 @@ def execute_task(order_val):
     try:
         execute(order_val)
     except Exception as exc:
+        capture_exception(exc)
         db.session.rollback()
         raise exc
 
