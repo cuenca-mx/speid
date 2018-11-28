@@ -5,6 +5,7 @@ import threading
 import pika
 
 from speid.queue.base import RPC_QUEUE
+from test.custom_vcr import my_vcr
 
 
 def on_request(ch, method, props, body):
@@ -41,6 +42,7 @@ class ConsumerThread(threading.Thread):
 
 class TestReceiveOrder:
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_create_order_event(self, app):
         thread = ConsumerThread()
         thread.start()

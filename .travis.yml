@@ -4,7 +4,11 @@ language: python
 python: 3.6
 sudo: required
 services:
-  - docker
+- docker
 script:
-  - cp env.template .env
-  - make travis-test
+- cp env.template .env
+- echo CALLBACK_URL=$CALLBACK_URL >> .env
+- echo CALLBACK_API_KEY=$CALLBACK_API_KEY >> .env
+- echo CALLBACK_API_SECRET=$CALLBACK_API_SECRET >> .env
+- echo SENTRY_DSN=$SENTRY_DSN >> .env
+- make travis-test

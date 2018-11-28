@@ -1,13 +1,16 @@
+import os
 import json
 
 from flask import jsonify, make_response, request
+import sentry_sdk
 
 from speid import app, db
 from speid.models import Request, Transaction, Event
-from speid.models.exceptions import OrderNotFoundException
-from speid.queue.base import RpcClient
-from speid.queue.helpers import send_order_back
 from speid.tables.types import Estado, HttpRequestMethod, State
+from speid.helpers import callback_helper
+
+sentry_dsn = os.getenv('SENTRY_DSN')
+sentry_sdk.init(sentry_dsn)
 
 
 @app.route('/')
@@ -17,23 +20,23 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
-
     if "id" not in request.json or int(request.json["id"]) <= 0:
         return make_response(jsonify(request.json), 400)
 
     request_id = request.json['id']
-    transaction = db.session.query(Transaction).\
-        filter_by(orden_id=request_id).one()
-    if transaction is None:
-        raise OrderNotFoundException(f'Order Id: {request_id}')
-    else:
-        transaction.estado = Estado.get_state_from_stp(request.json['Estado'])
-        event = Event(
-            transaction_id=transaction.id,
-            type=State.received,
-            meta=str(request.json)
-        )
-    send_order_back(transaction)
+    transaction = (db.session.query(Transaction).
+                   filter_by(orden_id=request_id).one())
+
+    transaction.estado = Estado.get_state_from_stp(request.json["Estado"])
+    event = Event(
+        transaction_id=transaction.id,
+        type=State.received,
+        meta=str(request.json)
+    )
+
+    callback_helper.set_status_transaction(
+        transaction.speid_id,
+        dict(estado=transaction.estado.value))
     db.session.add(transaction)
     db.session.add(event)
     db.session.commit()
@@ -51,26 +54,20 @@ def create_orden():
         type=State.created,
         meta=str(request.json)
     )
+    # Consume api
 
-    # rabbit_client = RpcClient()
-    # resp = rabbit_client.call(json.dumps(transaction.to_dict()))
-    # r = json.loads(resp)
-
-    # Simulating response from the backend
-    r = request.json
-    r['estado'] = 'success'
-
+    response = callback_helper.send_transaction(transaction)
     event_received = Event(
         transaction_id=transaction.id,
         type=State.completed,
-        meta=str(r)
+        meta=str(response)
     )
-    transaction.estado = Estado(r['estado'])
+
     db.session.add(event_created)
     db.session.add(event_received)
     db.session.commit()
-    r['estado'] = Estado.convert_to_stp_state(transaction.estado)
-
+    r = request.json
+    r['estado'] = Estado.convert_to_stp_state(Estado(response['status']))
     return make_response(jsonify(r), 201)
 
 
