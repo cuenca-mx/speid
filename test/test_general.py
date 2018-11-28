@@ -83,7 +83,7 @@ class TestGeneral:
         )
         execute_task(order)
 
-    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
+    @my_vcr.use_cassette('test/cassettes/test_create_order1.yaml')
     def test_worker_with_version_0(self):
         order = dict(
             concepto_pago='PRUEBA',
@@ -91,7 +91,7 @@ class TestGeneral:
             cuenta_beneficiario='072691004495711499',
             institucion_beneficiaria='072',
             monto=1020,
-            nombre_beneficiario='Ricardo Sánchez',
+            nombre_beneficiario='Pedro Sánchez',
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
@@ -116,7 +116,7 @@ class TestGeneral:
         with pytest.raises(MalformedOrderException):
             execute_task(order)
 
-    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
+    @my_vcr.use_cassette('test/cassettes/test_create_order2.yaml')
     def test_create_order_debit_card(self):
         order = dict(
             concepto_pago='DebitCardTest',
@@ -133,7 +133,7 @@ class TestGeneral:
         )
         execute_task(order)
 
-    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
+    @my_vcr.use_cassette('test/cassettes/test_create_order3.yaml')
     def test_worker_with_version_1(self):
         order = dict(
             concepto_pago='PRUEBA',
@@ -141,7 +141,7 @@ class TestGeneral:
             cuenta_beneficiario='072691004495711499',
             institucion_beneficiaria='072',
             monto=1020,
-            nombre_beneficiario='Ricardo Sánchez',
+            nombre_beneficiario='Pablo Sánchez',
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
