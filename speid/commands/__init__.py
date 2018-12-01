@@ -2,6 +2,8 @@ from werkzeug.serving import run_simple
 
 from speid import app
 
+from . import spei
+
 from . import docker
 
 

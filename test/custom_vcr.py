@@ -24,6 +24,6 @@ def set_orden_random_id(response):
 
 my_vcr = vcr.VCR(
     before_record_request=set_orden_id,
-    ignore_hosts={'sentry.io', '127.0.0.1'},
+    ignore_hosts={'sentry.io', 'stpmex.com', '127.0.0.1'},
     ignore_localhost=True
 )
