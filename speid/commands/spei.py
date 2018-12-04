@@ -35,16 +35,16 @@ def re_execute_transactions(speid_id):
                      prefijo=int(stp_prefijo))
     if speid_id is None:
         transactions = (db.session.query(Transaction)
-                        .filter_by(estado='submitted'
-                                   , orden_id=None))
+                        .filter_by(estado='submitted',
+                                   orden_id=None))
         for transaction in transactions:
             send_queue(transaction)
     else:
         transaction = (db.session.query(Transaction)
-                        .filter_by(speid_id=speid_id,
-                                   estado='submitted',
-                                   orden_id=None)
-                        .first())
+                       .filter_by(speid_id=speid_id,
+                                  estado='submitted',
+                                  orden_id=None)
+                       .first())
         send_queue(transaction)
 
 
