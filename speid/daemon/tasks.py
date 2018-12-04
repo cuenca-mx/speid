@@ -74,13 +74,14 @@ def execute(order_val):
                 (db.session
                     .query(Transaction)
                     .filter(Transaction.speid_id == order_val['speid_id'])
-                 .one_or_none())
+                 .first())
 
         if previous_transaction is None:
             # Save transaction
             db.session.add(transaction)
             db.session.commit()
         else:
+            event_created.type = State.retry
             transaction.id = previous_transaction.id
             order.clave_rastreo = previous_transaction.clave_rastreo
 
@@ -88,6 +89,7 @@ def execute(order_val):
 
         # Send order to STP
         order.monto = order.monto / 100
+
         res = order.registra()
 
     finally:
