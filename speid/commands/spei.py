@@ -17,9 +17,6 @@ def re_execute_transactions(speid_id):
     """Retry send a transaction to STP, it takes de values
     of the event created before
     """
-    import pdb
-    pdb.set_trace()
-
     stp_private_location = os.environ['STP_PRIVATE_LOCATION']
     wsdl_path = os.environ['STP_WSDL']
     stp_empresa = os.environ['STP_EMPRESA']
