@@ -3,6 +3,7 @@ import datetime as dt
 from sqlalchemy.orm import relationship
 from stpmex.helpers import stp_to_spei_bank_code, spei_to_stp_bank_code
 from stpmex.ordenes import ORDEN_FIELDNAMES, Orden
+from stpmex.types import AccountType
 
 import clabe
 import luhnmod10
@@ -93,6 +94,10 @@ class Transaction(db.Model):
 
     @classmethod
     def transform_from_order(cls, order_dict):
+
+        if len(order_dict['cuenta_beneficiario']) == 16:
+            order_dict['tipo_cuenta_beneficiario'] = (
+                AccountType.DEBIT_CARD.value)
 
         trans_dict = {k: order_dict[k] for k in
                       filter(lambda r: r in order_dict,
