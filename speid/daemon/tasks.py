@@ -70,11 +70,10 @@ def execute(order_val):
         previous_transaction = None
         # Review if there is another transaction
         if version != 0:
-            previous_transaction = \
-                (db.session
-                    .query(Transaction)
-                    .filter(Transaction.speid_id == order_val['speid_id'])
-                 .first())
+            previous_transaction = (
+                db.session.query(Transaction).filter
+                (Transaction.speid_id == order_val['speid_id'])
+                .first())
 
         if previous_transaction is None:
             # Save transaction

@@ -47,11 +47,11 @@ def re_execute_transactions(speid_id):
 
 def send_queue(transaction):
     try:
-        event = db.session.query(Event). \
-            filter_by(
+        event = (db.session.query(Event).
+                 filter_by(
             transaction_id=transaction.id,
             type=State.created
-        ).order_by(Event.created_at.desc()).first()
+        ).order_by(Event.created_at.desc()).first())
 
         event_retry = Event(
             transaction_id=transaction.id,
