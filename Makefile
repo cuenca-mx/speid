@@ -30,7 +30,6 @@ travis-test:
 		$(MAKE) lint
 		$(MAKE) docker-build
 		$(DOCKER) scripts/test.sh
-		$(MAKE) docker-stop
 
 docker-test: docker-build
 		# Clean up even if there's an error
