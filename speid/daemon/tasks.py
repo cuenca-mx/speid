@@ -74,10 +74,9 @@ def execute(order_val):
                 db.session.query(Transaction).filter
                 (Transaction.speid_id == order_val['speid_id'])
                 .first())
-
+        db.session.add(transaction)
         if previous_transaction is None:
             # Save transaction
-            db.session.add(transaction)
             db.session.commit()
         else:
             event_created.type = State.retry
