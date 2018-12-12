@@ -10,6 +10,7 @@ import luhnmod10
 
 from speid.tables import transactions
 from speid.tables.types import Estado
+from speid.tables.helpers import base62_uuid
 
 from .base import db
 from .events import Event
@@ -86,6 +87,8 @@ class Transaction(db.Model):
         )
         trans_dict['institucion_beneficiaria'] = ''
         transaction = cls(**trans_dict)
+        if transaction.speid_id is None:
+            transaction.speid_id = base62_uuid('SR')()
         transaction.fecha_operacion = dt.datetime.strptime(
             str(transaction.fecha_operacion),
             '%Y%m%d'

@@ -9,7 +9,6 @@ CALLBACK_API_SECRET = os.getenv('CALLBACK_API_SECRET')
 
 
 def send_transaction(transaction):
-
     body = transaction.to_dict()
     response = requests.post(CALLBACK_URL,
                              json=body,
