@@ -45,29 +45,34 @@ def create_orden_events():
 
 @app.route('/ordenes', methods=['POST'])
 def create_orden():
-    transaction = Transaction.transform(request.json)
-    db.session.add(transaction)
-    db.session.commit()
+    try:
+        transaction = Transaction.transform(request.json)
+        db.session.add(transaction)
+        db.session.commit()
 
-    event_created = Event(
-        transaction_id=transaction.id,
-        type=State.created,
-        meta=str(request.json)
-    )
-    # Consume api
+        event_created = Event(
+            transaction_id=transaction.id,
+            type=State.created,
+            meta=str(request.json)
+        )
+        # Consume api
 
-    response = callback_helper.send_transaction(transaction)
-    event_received = Event(
-        transaction_id=transaction.id,
-        type=State.completed,
-        meta=str(response)
-    )
+        response = callback_helper.send_transaction(transaction)
+        event_received = Event(
+            transaction_id=transaction.id,
+            type=State.completed,
+            meta=str(response)
+        )
 
-    db.session.add(event_created)
-    db.session.add(event_received)
-    db.session.commit()
-    r = request.json
-    r['estado'] = Estado.convert_to_stp_state(Estado(response['status']))
+        db.session.add(event_created)
+        db.session.add(event_received)
+        db.session.commit()
+        r = request.json
+        r['estado'] = Estado.convert_to_stp_state(Estado(response['status']))
+    except Exception:
+        r = dict(
+            estado='DEVOLUCION'
+        )
     return make_response(jsonify(r), 201)
 
 
