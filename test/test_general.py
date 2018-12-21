@@ -35,7 +35,7 @@ class TestGeneral:
             "ConceptoPago": "PRUEBA",
             "ReferenciaNumerica": 2423,
             "Empresa": "TAMIZI",
-            "estado": Estado.success,
+            "estado": Estado.succeeded,
             "speid_id": 'SPEI_TEST'
         }
         transaction = Transaction.transform(transaction_request)
