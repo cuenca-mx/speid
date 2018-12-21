@@ -16,21 +16,21 @@ class State(Enum):
 
 class Estado(Enum):
     submitted = 'submitted'  # Sent to STP
-    success = 'success'      # LIQUIDACION from STP
+    succeeded = 'succeeded'      # LIQUIDACION from STP
     failed = 'failed'        # DEVOLUCION from STP
     error = 'error'          # Malformed order
 
     @classmethod
     def get_state_from_stp(cls, stp_state):
         if stp_state == 'LIQUIDACION':
-            return cls.success
+            return cls.succeeded
         if stp_state == 'DEVOLUCION':
             return cls.failed
         return cls.error
 
     @classmethod
     def convert_to_stp_state(cls, state):
-        if state == cls.success:
+        if state == cls.succeeded:
             return 'LIQUIDACION'
         if state == cls.failed:
             return 'DEVOLUCION'
