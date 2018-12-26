@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"orden_id": 2456304, "fecha_operacion": "20180618", "institucion_ordenante":
+    body: '{"orden_id": 1456304, "fecha_operacion": "20180618", "institucion_ordenante":
       "012", "institucion_beneficiaria": "", "clave_rastreo": "PRUEBATAMIZI1", "monto":
       10000, "nombre_ordenante": "BANCO", "tipo_cuenta_ordenante": 40, "cuenta_ordenante":
       "846180000500000008", "rfc_curp_ordenante": "ND", "nombre_beneficiario": "TAMIZI",
