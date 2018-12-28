@@ -3,9 +3,9 @@ import json
 import requests
 from requests.auth import HTTPBasicAuth
 
-CALLBACK_URL = os.getenv('CALLBACK_URL')
-CALLBACK_API_KEY = os.getenv('CALLBACK_API_KEY')
-CALLBACK_API_SECRET = os.getenv('CALLBACK_API_SECRET')
+CALLBACK_URL = os.environ['CALLBACK_URL']
+CALLBACK_API_KEY = os.environ['CALLBACK_API_KEY']
+CALLBACK_API_SECRET = os.environ['CALLBACK_API_SECRET']
 
 
 def send_transaction(transaction):
