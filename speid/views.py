@@ -44,7 +44,6 @@ def create_orden_events():
         db.session.commit()
     except Exception as exc:
         capture_exception(exc)
-        return make_response(jsonify(request.json), 400)
     return "got it!"
 
 
