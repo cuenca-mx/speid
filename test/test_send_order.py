@@ -58,4 +58,4 @@ class TestSendOrder:
 
         res = app.post('/orden_events', data=json.dumps(data),
                        content_type='application/json')
-        assert res.status_code == 400
+        assert res.status_code == 200
