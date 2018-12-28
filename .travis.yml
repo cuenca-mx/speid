@@ -7,5 +7,4 @@ services:
 - docker
 script:
 - cp env.template .env
-- echo SENTRY_DSN=$SENTRY_DSN >> .env
 - make travis-test
