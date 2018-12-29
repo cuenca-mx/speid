@@ -128,7 +128,7 @@ class TestGeneral:
             nombre_ordenante='BANCO',
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
-            speid_id='SOME_RANDOM_ID',
+            speid_id='5694433',
             version=1
         )
         execute_task(order)
