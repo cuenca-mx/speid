@@ -55,6 +55,6 @@ class TestSendOrder:
             Estado='LIQUIDACION',
             Detalle='0'
         )
-        with pytest.raises(NoResultFound):
-            app.post('/orden_events', data=json.dumps(data),
-                     content_type='application/json')
+        res = app.post('/orden_events', data=json.dumps(data),
+                       content_type='application/json')
+        assert res.status_code == 200
