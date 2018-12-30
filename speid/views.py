@@ -2,6 +2,7 @@ import os
 import json
 
 from flask import jsonify, make_response, request
+from sentry_sdk import capture_exception
 import sentry_sdk
 
 from speid import app, db
@@ -20,26 +21,31 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
+
     if "id" not in request.json or int(request.json["id"]) <= 0:
         return make_response(jsonify(request.json), 400)
 
-    request_id = request.json['id']
-    transaction = (db.session.query(Transaction).
-                   filter_by(orden_id=request_id).one())
+    try:
+        request_id = request.json['id']
+        transaction = (db.session.query(Transaction).
+                       filter_by(orden_id=request_id).one())
 
-    transaction.estado = Estado.get_state_from_stp(request.json["Estado"])
-    event = Event(
-        transaction_id=transaction.id,
-        type=State.received,
-        meta=str(request.json)
-    )
+        transaction.estado = Estado.get_state_from_stp(request.json["Estado"])
+        event = Event(
+            transaction_id=transaction.id,
+            type=State.received,
+            meta=str(request.json)
+        )
 
-    callback_helper.set_status_transaction(
-        transaction.speid_id,
-        dict(estado=transaction.estado.value))
-    db.session.add(transaction)
-    db.session.add(event)
-    db.session.commit()
+        callback_helper.set_status_transaction(
+            transaction.speid_id,
+            dict(estado=transaction.estado.value))
+        db.session.add(transaction)
+        db.session.add(event)
+        db.session.commit()
+    except Exception as exc:
+        capture_exception(exc)
+
     return "got it!"
 
 
