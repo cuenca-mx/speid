@@ -4,17 +4,52 @@ import os
 from ast import literal_eval
 import stpmex
 
-from speid import db
+from speid import app, db
 from speid.models import Event
 from speid.models import Transaction
-from speid.tables.types import State
+from speid.helpers import callback_helper
+from speid.tables.types import Estado, State
 from speid.daemon.tasks import execute_task
 
 
-@click.command()
+@app.cli.group('speid')
+def speid_group():
+    """Perform speid actions."""
+    pass
+
+
+@speid_group.command()
+@click.argument('transaction_id', type=str)
+@click.argument('transaction_status', type=str)
+def callback_spei_transaction(transaction_id, transaction_status):
+    """Establece el estado de la transacción,
+    valores permitidos succeeded y failed"""
+    transaction = (db.session.query(Transaction)
+                   .filter_by(id=transaction_id).one())
+    if transaction_status == Estado.succeeded.name:
+        transaction.estado = Estado.succeeded
+        state = State.completed
+    if transaction_status == Estado.failed.name:
+        transaction.estado = Estado.failed
+        state = State.error
+    callback_helper.set_status_transaction(
+        transaction.speid_id,
+        dict(estado=transaction.estado.value)
+    )
+    event = Event(
+        transaction_id=transaction.id,
+        type=state,
+        meta=str('Reverse by command SPEID')
+    )
+    db.session.add(Transaction)
+    db.session.add(event)
+    db.session.commit()
+
+
+@speid_group.command()
 @click.option('--speid_id', default=None, help='Specific speid id to execute')
 def re_execute_transactions(speid_id):
-    """Retry send a transaction to STP, it takes de values
+    """Retry send a transaction to STP, it takes the values
     of the event created before
     """
     stp_private_location = os.environ['STP_PRIVATE_LOCATION']
@@ -67,4 +102,4 @@ def send_queue(transaction):
 
 
 if __name__ == "__main__":
-    re_execute_transactions()
+    callback_spei_transaction()
