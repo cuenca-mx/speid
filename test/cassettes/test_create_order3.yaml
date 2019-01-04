@@ -35,7 +35,7 @@ interactions:
       Content-Length: ['21']
       Content-Type: [application/json]
       User-Agent: [python-requests/2.20.1]
-    method: POST
+    method: PATCH
     uri: https://testapi/set/5694433
   response:
     body: {string: '{"status": "success"}'}
