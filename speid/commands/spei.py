@@ -20,24 +20,30 @@ def speid_group():
 
 @speid_group.command()
 @click.argument('transaction_id', type=str)
-def return_spei_transaction(transaction_id):
-    """Devuelve la transacción, debe estar con ordenId none"""
+@click.argument('transaction_status', type=str)
+def callback_spei_transaction(transaction_id, transaction_status):
+    """Establece el estado de la transacción,
+    valores permitidos succeeded y failed"""
     transaction = (db.session.query(Transaction)
                    .filter_by(id=transaction_id).one())
-    if transaction.orden_id is None and transaction.estado == Estado.submitted:
+    if transaction_status == Estado.succeeded.name:
+        transaction.estado = Estado.succeeded
+        state = State.completed
+    if transaction_status == Estado.failed.name:
         transaction.estado = Estado.failed
-        callback_helper.set_status_transaction(
-            transaction.speid_id,
-            dict(estado=transaction.estado.value)
-        )
-        event = Event(
-            transaction_id=transaction.id,
-            type=State.error,
-            meta=str('Reverse by command SPEID')
-        )
-        db.session.add(Transaction)
-        db.session.add(event)
-        db.session.commit()
+        state = State.error
+    callback_helper.set_status_transaction(
+        transaction.speid_id,
+        dict(estado=transaction.estado.value)
+    )
+    event = Event(
+        transaction_id=transaction.id,
+        type=state,
+        meta=str('Reverse by command SPEID')
+    )
+    db.session.add(Transaction)
+    db.session.add(event)
+    db.session.commit()
 
 
 @speid_group.command()
@@ -96,4 +102,4 @@ def send_queue(transaction):
 
 
 if __name__ == "__main__":
-    return_spei_transaction()
+    callback_spei_transaction()
