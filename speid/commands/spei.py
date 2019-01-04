@@ -22,8 +22,6 @@ def speid_group():
 @click.argument('transaction_id', type=str)
 def return_spei_transaction(transaction_id):
     """Devuelve la transacción, debe estar con ordenId none"""
-    import pdb
-    pdb.set_trace()
     transaction = (db.session.query(Transaction)
                    .filter_by(id=transaction_id).one())
     if transaction.orden_id is None and transaction.estado == Estado.submitted:
