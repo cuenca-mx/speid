@@ -41,7 +41,7 @@ def callback_spei_transaction(transaction_id, transaction_status):
         type=state,
         meta=str('Reverse by command SPEID')
     )
-    db.session.add(Transaction)
+    db.session.add(transaction)
     db.session.add(event)
     db.session.commit()
 
