@@ -101,14 +101,6 @@ def execute(order_val):
     if res is not None and res.id > 0:
         transaction.orden_id = res.id
         event_complete.type = State.completed
-        callback_helper.set_status_transaction(
-            transaction.speid_id,
-            dict(
-                estado=transaction.estado.value,
-                speid_id=transaction.speid_id,
-                orden_id=transaction.orden_id
-            )
-        )
     else:
         event_complete.type = State.error
 
