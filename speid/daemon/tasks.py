@@ -79,6 +79,8 @@ def execute(order_val):
 
         if transaction is None:
             transaction = initial_transaction
+        else:
+            event_created.type = State.retry
 
         db.session.add(transaction)
         db.session.commit()
