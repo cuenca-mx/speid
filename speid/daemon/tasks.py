@@ -2,6 +2,7 @@ import sentry_sdk
 import os
 from sentry_sdk import capture_exception
 from sentry_sdk.integrations.celery import CeleryIntegration
+from zeep.exceptions import TransportError
 
 from speid import db
 from speid.models import Event
@@ -38,6 +39,7 @@ def execute_task(order_val):
     except Exception as exc:
         capture_exception(exc)
         db.session.rollback()
+        execute(order_val)
         raise exc
 
 
@@ -53,36 +55,34 @@ def execute(order_val):
         if "version" in order_val:
             version = order_val['version']
             # Recover orden
-        transaction, order = \
-            TransactionFactory.create_transaction(version, order_val)
 
-        if transaction.estado == Estado.error:
-            if transaction.speid_id is not None:
+        initial_transaction, order = (
+            TransactionFactory.create_transaction(version, order_val))
+
+        if initial_transaction.estado == Estado.error:
+            if initial_transaction.speid_id is not None:
                 callback_helper.set_status_transaction(
-                    transaction.speid_id,
+                    initial_transaction.speid_id,
                     dict(
-                        estado=transaction.estado.value,
-                        speid_id=transaction.speid_id,
-                        orden_id=transaction.orden_id
+                        estado=initial_transaction.estado.value,
+                        speid_id=initial_transaction.speid_id,
+                        orden_id=initial_transaction.orden_id
                     )
                 )
             raise MalformedOrderException()
-        previous_transaction = None
-        # Review if there is another transaction
+
+        transaction = None
         if version != 0:
-            previous_transaction = (
+            transaction = (
                 db.session.query(Transaction).filter
                 (Transaction.speid_id == order_val['speid_id'])
                 .first())
-        db.session.add(transaction)
-        if previous_transaction is None:
-            # Save transaction
-            db.session.commit()
-        else:
-            event_created.type = State.retry
-            transaction.id = previous_transaction.id
-            order.clave_rastreo = previous_transaction.clave_rastreo
 
+        if transaction is None:
+            transaction = initial_transaction
+
+        db.session.add(transaction)
+        db.session.commit()
         event_created.transaction_id = transaction.id
 
         # Send order to STP
