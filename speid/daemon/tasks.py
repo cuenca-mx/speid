@@ -39,7 +39,6 @@ def execute_task(order_val):
     except Exception as exc:
         capture_exception(exc)
         db.session.rollback()
-        execute(order_val)
         raise exc
 
 
