@@ -2,7 +2,6 @@ import sentry_sdk
 import os
 from sentry_sdk import capture_exception
 from sentry_sdk.integrations.celery import CeleryIntegration
-from zeep.exceptions import TransportError
 
 from speid import db
 from speid.models import Event
