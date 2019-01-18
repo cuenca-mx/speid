@@ -75,7 +75,7 @@ def create_orden():
         db.session.commit()
         r = request.json
         r['estado'] = Estado.convert_to_stp_state(Estado(response['status']))
-    except Exception:
+    except Exception as exc:
         r = dict(estado='DEVOLUCION')
         capture_exception(exc)
     return make_response(jsonify(r), 201)
