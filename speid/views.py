@@ -77,6 +77,7 @@ def create_orden():
         r['estado'] = Estado.convert_to_stp_state(Estado(response['status']))
     except Exception:
         r = dict(estado='DEVOLUCION')
+        capture_exception(exc)
     return make_response(jsonify(r), 201)
 
 
