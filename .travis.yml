@@ -1,5 +1,5 @@
 notifications:
-  slack: cuencafinance:6N0IaVciA0KyNylSTq5ZzW4I
+  slack: cuencafinance:Vb7c4Zn7YCpT0wGjOFDwYQUM
 language: python
 python: 3.6
 sudo: required
