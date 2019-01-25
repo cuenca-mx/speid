@@ -1,7 +1,6 @@
 import datetime as dt
 
 from sqlalchemy.orm import relationship
-from stpmex.helpers import stp_to_spei_bank_code, spei_to_stp_bank_code
 from stpmex.ordenes import ORDEN_FIELDNAMES, Orden
 from stpmex.types import AccountType
 
@@ -32,6 +31,8 @@ class TransactionFactory:
             return Transaction.transform_from_order(order_dict)
         if version == 1 and TransactionV1.is_valid(order_dict):
             return TransactionV1.transform_from_order(order_dict)
+        if version == 2 and TransactionV2.is_valid(order_dict):
+            return TransactionV2.transform_from_order(order_dict)
         return Transaction.error(order_dict)
 
 
@@ -79,12 +80,12 @@ class Transaction(db.Model):
         trans_dict = {camel_to_snake(k): v for k, v in trans_dict.items()}
         trans_dict['orden_id'] = trans_dict.pop('clave')
         trans_dict['monto'] = trans_dict['monto'] * 100
-        trans_dict['institucion_ordenante'] = stp_to_spei_bank_code(
-            trans_dict.pop('institucion_ordenante')
-        )
-        trans_dict['institucion_beneficiaria'] = stp_to_spei_bank_code(
-            trans_dict.pop('institucion_beneficiaria')
-        )
+        trans_dict['institucion_ordenante'] = list(
+            trans_dict.keys())[list(trans_dict.values()).index(
+                trans_dict.pop('institucion_ordenante'))]
+        trans_dict['institucion_beneficiaria'] = list(
+            trans_dict.keys())[list(trans_dict.values()).index(
+                trans_dict.pop('institucion_beneficiaria'))]
         trans_dict['institucion_beneficiaria'] = ''
         transaction = cls(**trans_dict)
         if transaction.speid_id is None:
@@ -112,12 +113,10 @@ class Transaction(db.Model):
         transaction = cls(**trans_dict)
         transaction.fecha_operacion = dt.date.today()
         transaction.estado = Estado.submitted
-        order.institucionOperante = spei_to_stp_bank_code(
-            transaction.institucion_ordenante
-        ).value
-        order.institucionContraparte = spei_to_stp_bank_code(
-            transaction.institucion_beneficiaria
-        ).value
+        order.institucionOperante = clabe.BANKS[
+            transaction.institucion_ordenante]
+        order.institucionContraparte = clabe.BANKS[
+            transaction.institucion_beneficiaria]
         transaction.clave_rastreo = order.claveRastreo
         transaction.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
         transaction.rfc_curp_beneficiario = order.rfcCurpBeneficiario,
@@ -142,4 +141,38 @@ class TransactionV1(Transaction):
     def transform_from_order(cls, order_dict):
         transaction, order = super().transform_from_order(order_dict)
         transaction.speid_id = order_dict['speid_id']
+        return transaction, order
+
+
+class TransactionV2(Transaction):
+
+    @classmethod
+    def is_valid(cls, order_dict):
+        return super().is_valid(order_dict)
+
+    @classmethod
+    def transform_from_order(cls, order_dict):
+        if len(order_dict['cuenta_beneficiario']) == 16:
+            order_dict['tipo_cuenta_beneficiario'] = (
+                AccountType.DEBIT_CARD.value)
+
+        trans_dict = {k: order_dict[k] for k in
+                      filter(lambda r: r in order_dict,
+                             transactions.columns.keys())}
+        order_dict = {k: order_dict[camel_to_snake(k)]
+                      for k in filter(
+            lambda r: camel_to_snake(r) in order_dict, ORDEN_FIELDNAMES)}
+        order = Orden(**order_dict)
+        transaction = cls(**trans_dict)
+        transaction.fecha_operacion = dt.date.today()
+        transaction.estado = Estado.submitted
+        order.institucionOperante = transaction.institucion_ordenante
+        order.institucionContraparte = transaction.institucion_beneficiaria
+        transaction.clave_rastreo = order.claveRastreo
+        transaction.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
+        transaction.rfc_curp_beneficiario = order.rfcCurpBeneficiario,
+        transaction.concepto_pago = order.conceptoPago,
+        transaction.referencia_numerica = order.referenciaNumerica,
+        transaction.empresa = order.empresa,
+
         return transaction, order
