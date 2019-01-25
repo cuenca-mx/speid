@@ -152,5 +152,27 @@ class TransactionV2(Transaction):
 
     @classmethod
     def transform_from_order(cls, order_dict):
-        transaction, order = super().transform_from_order(order_dict)
+        if len(order_dict['cuenta_beneficiario']) == 16:
+            order_dict['tipo_cuenta_beneficiario'] = (
+                AccountType.DEBIT_CARD.value)
+
+        trans_dict = {k: order_dict[k] for k in
+                      filter(lambda r: r in order_dict,
+                             transactions.columns.keys())}
+        order_dict = {k: order_dict[camel_to_snake(k)]
+                      for k in filter(
+            lambda r: camel_to_snake(r) in order_dict, ORDEN_FIELDNAMES)}
+        order = Orden(**order_dict)
+        transaction = cls(**trans_dict)
+        transaction.fecha_operacion = dt.date.today()
+        transaction.estado = Estado.submitted
+        order.institucionOperante = transaction.institucion_ordenante
+        order.institucionContraparte = transaction.institucion_beneficiaria
+        transaction.clave_rastreo = order.claveRastreo
+        transaction.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
+        transaction.rfc_curp_beneficiario = order.rfcCurpBeneficiario,
+        transaction.concepto_pago = order.conceptoPago,
+        transaction.referencia_numerica = order.referenciaNumerica,
+        transaction.empresa = order.empresa,
+
         return transaction, order
