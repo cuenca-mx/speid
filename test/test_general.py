@@ -149,3 +149,20 @@ class TestGeneral:
             version=1
         )
         execute_task(order)
+
+    @my_vcr.use_cassette('test/cassettes/test_create_order4.yaml')
+    def test_worker_with_version_2(self):
+        order = dict(
+            concepto_pago='PRUEBA Version 2',
+            institucion_ordenante='90646',
+            cuenta_beneficiario='072691004495711499',
+            institucion_beneficiaria='40072',
+            monto=1020,
+            nombre_beneficiario='Pablo Sánchez',
+            nombre_ordenante='BANCO',
+            cuenta_ordenante='646180157000000004',
+            rfc_curp_ordenante='ND',
+            speid_id='ANOTHER_RANDOM_ID',
+            version=2
+        )
+        execute_task(order)
