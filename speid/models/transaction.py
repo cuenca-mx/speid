@@ -80,7 +80,6 @@ class Transaction(db.Model):
         trans_dict = {camel_to_snake(k): v for k, v in trans_dict.items()}
         trans_dict['orden_id'] = trans_dict.pop('clave')
         trans_dict['monto'] = trans_dict['monto'] * 100
-        trans_dict['institucion_beneficiaria'] = ''
         transaction = cls(**trans_dict)
         if transaction.speid_id is None:
             transaction.speid_id = base62_uuid('SR')()
