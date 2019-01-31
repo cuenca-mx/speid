@@ -69,3 +69,30 @@ class TestReceiveOrder:
                        content_type='application/json')
 
         assert res.status_code == 201
+
+    def test_create_order_without_ordenante(self, app):
+        thread = ConsumerThread()
+        thread.start()
+        data = dict(
+            Clave=7543790,
+            FechaOperacion=20190129,
+            InstitucionOrdenante=40102,
+            InstitucionBeneficiaria=90646,
+            ClaveRastreo='MANU-00000295251',
+            Monto=1000,
+            NombreOrdenante='null',
+            TipoCuentaOrdenante=0,
+            CuentaOrdenante='null',
+            RFCCurpOrdenante='null',
+            NombreBeneficiario='JESUS ADOLFO ORTEGA TURRUBIATES',
+            TipoCuentaBeneficiario=40,
+            CuentaBeneficiario='646180157020812599',
+            RFCCurpBeneficiario='ND',
+            ConceptoPago='FONDEO',
+            ReferenciaNumerica=20137,
+            Empresa='TAMIZI'
+        )
+        res = app.post('/ordenes', data=json.dumps(data),
+                       content_type='application/json')
+
+        assert res.status_code == 201
