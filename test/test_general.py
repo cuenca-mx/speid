@@ -51,6 +51,7 @@ class TestGeneral:
         assert transaction.id is not None
         assert event.id is not None
 
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_save_transaction_participante_tercero(self):
         transaction_request = {
             "Clave": 2456303,

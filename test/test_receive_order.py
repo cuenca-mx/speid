@@ -74,7 +74,7 @@ class TestReceiveOrder:
         thread = ConsumerThread()
         thread.start()
         data = dict(
-            Clave=7543790,
+            Clave=123123233,
             FechaOperacion=20190129,
             InstitucionOrdenante=40102,
             InstitucionBeneficiaria=90646,
@@ -89,7 +89,7 @@ class TestReceiveOrder:
             CuentaBeneficiario='646180157020812599',
             RFCCurpBeneficiario='ND',
             ConceptoPago='FONDEO',
-            ReferenciaNumerica=20137,
+            ReferenciaNumerica=1232134,
             Empresa='TAMIZI'
         )
         res = app.post('/ordenes', data=json.dumps(data),
