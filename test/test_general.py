@@ -52,6 +52,33 @@ class TestGeneral:
         assert event.id is not None
 
     @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
+    def test_save_transaction_participante_tercero(self):
+        transaction_request = {
+            "Clave": 2456303,
+            "FechaOperacion": 20180618,
+            "InstitucionOrdenante": 40012,
+            "InstitucionBeneficiaria": 90646,
+            "ClaveRastreo": "PRUEBATAMIZI1",
+            "Monto": 100.0,
+            "NombreOrdenante": "BANCO",
+            "TipoCuentaOrdenante": 0,
+            "CuentaOrdenante": "",
+            "RFCCurpOrdenante": "ND",
+            "NombreBeneficiario": "TAMIZI",
+            "TipoCuentaBeneficiario": 40,
+            "CuentaBeneficiario": "646180157000000004",
+            "RFCCurpBeneficiario": "ND",
+            "ConceptoPago": "PRUEBA",
+            "ReferenciaNumerica": 2423,
+            "Empresa": "TAMIZI",
+            "estado": Estado.succeeded,
+            "speid_id": 'SPEI_TEST'
+        }
+        transaction = Transaction.transform(transaction_request)
+
+        assert transaction.institucion_ordenante == 40012
+
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_worker_with_incorrect_version(self):
         order = dict(
             concepto_pago='PRUEBA',
