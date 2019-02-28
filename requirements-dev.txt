@@ -3,5 +3,7 @@ ipdb
 pycodestyle
 docker
 pytest
+pytest-cov
 flask-shell-ipython
 werkzeug
+coveralls
