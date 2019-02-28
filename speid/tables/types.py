@@ -22,16 +22,14 @@ class Estado(Enum):
 
     @classmethod
     def get_state_from_stp(cls, stp_state):
-        status_from_stp = {
-            'LIQUIDACION': cls.succeeded,
-            'DEVOLUCION': cls.failed,
-        }
+        status_from_stp = dict(
+            LIQUIDACION=cls.succeeded,
+            DEVOLUCION=cls.failed)
         return status_from_stp.get(stp_state, cls.error)
 
     @classmethod
     def convert_to_stp_state(cls, status):
-        status_to_stp = {
-            cls.succeeded: 'LIQUIDACION',
-            cls.failed: 'DEVOLUCION',
-        }
+        status_to_stp = dict(
+            (cls.succeeded, 'LIQUIDACION'),
+            (cls.failed, 'DEVOLUCION'))
         return status_to_stp.get(status, 'DEVOLUCION')
