@@ -9,4 +9,4 @@ script:
 - cp env.template .env
 - make travis-test
 before_install:
-- echo ARCUS_API_KEY=$ARCUS_API_KEY >> .env
+- echo COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN >> .env
