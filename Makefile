@@ -24,6 +24,7 @@ clean-pyc:
 
 test: clean-pyc lint
 		pytest
+		coveralls
 
 travis-test:
 		pip install -q pycodestyle
