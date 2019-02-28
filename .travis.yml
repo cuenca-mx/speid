@@ -7,6 +7,5 @@ services:
 - docker
 script:
 - cp env.template .env
-- make travis-test
-before_install:
 - echo COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN >> .env
+- make travis-test
