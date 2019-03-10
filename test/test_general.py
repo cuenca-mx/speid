@@ -15,6 +15,10 @@ class TestGeneral:
         res = app.get('/')
         assert res.status_code == 200
 
+    def test_healthcheck(self, app):
+        res = app.get('/healthcheck')
+        assert res.status_code == 200
+
     @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
     def test_save_transaction(self):
         transaction_request = {
