@@ -15,7 +15,7 @@ class TestGeneral:
         res = app.get('/')
         assert res.status_code == 200
 
-    def test_healthcheck(self, app):
+    def test_health_check(self, app):
         res = app.get('/healthcheck')
         assert res.status_code == 200
 
