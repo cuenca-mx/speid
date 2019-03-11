@@ -15,6 +15,7 @@ sentry_sdk.init(sentry_dsn)
 
 
 @app.route('/')
+@app.route('/healthcheck')
 def health_check():
     return "I'm healthy!"
 
