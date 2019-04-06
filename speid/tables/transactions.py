@@ -7,7 +7,7 @@ from . import cols
 transactions = db.Table(
     'transactions',
     cols.id('tr'), cols.created_at(), cols.updated_at(),
-    Column('orden_id', Integer, unique=True),  # STP Ordenes.clave
+    Column('orden_id', Integer, unique=False),  # STP Ordenes.clave
     Column('fecha_operacion', Date, nullable=False),
     Column('institucion_ordenante', String, nullable=False),
     Column('institucion_beneficiaria', String, nullable=False),

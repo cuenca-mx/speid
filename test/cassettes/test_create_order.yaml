@@ -18,7 +18,7 @@ interactions:
     method: POST
     uri: https://testapi/set
   response:
-    body: {string: '{"status": "success"}'}
+    body: {string: '{"status": "succeeded"}'}
     headers:
       Connection: [keep-alive]
       Content-Encoding: [application/x-www-form-urlencoded]
