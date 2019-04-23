@@ -17,7 +17,9 @@ def test_reconciliate(file_recon):
         aws_secret_access_key=os.environ['RECON_AWS_SECRET_ACCESS_KEY'],
     )
     s3.meta.client.put_object(
-        Body=file_recon, Bucket=os.environ['RECON_BUCKET_S3'], Key='reports/report.txt'
+        Body=file_recon,
+        Bucket=os.environ['RECON_BUCKET_S3'],
+        Key='reports/report.txt'
     )
     reconciliate()
     transaction = (
