@@ -95,7 +95,6 @@ def reconciliate_received_stp(transactions: list):
                 db.session.commit()
     except Exception as exc:
         print(exc)
-        print(exc.with_traceback())
 
 
 def get_transactions(file: TextIO) -> int:
