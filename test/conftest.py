@@ -102,5 +102,3 @@ def file_recon():
             "1555989127', 'amount': 10000, 'status': 'succeeded', 'numero_ref"
             "erencia': '206957'}\n\nSPEID/CUENCA others (0):\n")
     return body
-
-
