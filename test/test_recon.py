@@ -1,14 +1,14 @@
 import os
 
 import boto3
-import pytest
 
 from speid import db
 from speid.models import Transaction
 from speid.recon import reconciliate
+from test.custom_vcr import my_vcr
 
 
-@pytest.mark.vcr()
+@my_vcr.use_cassette('test/cassettes/test_recon.yaml')
 def test_reconciliate(file_recon):
     s3 = boto3.resource(
         's3',
