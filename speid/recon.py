@@ -113,22 +113,23 @@ def get_transactions(file: TextIO) -> int:
     return transactions
 
 
-def reconciliate():
-    s3 = boto3.resource(
-        's3',
-        region_name='us-east-1',
-        aws_access_key_id=os.environ['RECON_AWS_ACCESS_KEY_ID'],
-        aws_secret_access_key=os.environ['RECON_AWS_SECRET_ACCESS_KEY'],
-    )
-    try:
-        s3.Bucket(BUCKET_NAME).download_file(KEY, FILEPATH)
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == '404':
-            raise FileNotFoundError('The object does not exist.')
+def reconciliate(**kwargs):
+    if 'test' not in kwargs:
+        s3 = boto3.resource(
+            's3',
+            region_name='us-east-1',
+            aws_access_key_id=os.environ['RECON_AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['RECON_AWS_SECRET_ACCESS_KEY'],
+        )
+        try:
+            s3.Bucket(BUCKET_NAME).download_file(KEY, FILEPATH)
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == '404':
+                raise FileNotFoundError('The object does not exist.')
 
     with open(FILEPATH) as f:
 
-        # 'STP received successfully'
+        # STP received successfully
         transactions = get_transactions(f)
         reconciliate_received_stp(transactions)
 
