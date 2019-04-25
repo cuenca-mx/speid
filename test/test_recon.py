@@ -1,11 +1,8 @@
-import os
-
-import boto3
+from test.custom_vcr import my_vcr
 
 from speid import db
 from speid.models import Transaction
-from speid.recon import reconciliate
-from test.custom_vcr import my_vcr
+from speid.recon import recon_transactions
 
 
 class TestRecon:
@@ -13,7 +10,7 @@ class TestRecon:
     def test_reconciliate(self, file_recon):
         with open('/tmp/report.txt', 'w') as f:
             f.write(file_recon)
-        reconciliate(test=True)
+        recon_transactions()
         transaction = (
             db.session.query(Transaction).filter_by(orden_id=22673742).first()
         )

@@ -4,7 +4,7 @@ import re
 from typing.io import TextIO
 
 import boto3
-import botocore
+
 from clabe import BANKS
 
 from speid import db
@@ -113,22 +113,27 @@ def get_transactions(file: TextIO) -> int:
     return transactions
 
 
-def reconciliate(**kwargs):
-    if 'test' not in kwargs:
-        s3 = boto3.resource(
-            's3',
-            region_name='us-east-1',
-            aws_access_key_id=os.environ['RECON_AWS_ACCESS_KEY_ID'],
-            aws_secret_access_key=os.environ['RECON_AWS_SECRET_ACCESS_KEY'],
-        )
-        try:
-            s3.Bucket(BUCKET_NAME).download_file(KEY, FILEPATH)
-        except botocore.exceptions.ClientError as e:
-            if e.response['Error']['Code'] == '404':
-                raise FileNotFoundError('The object does not exist.')
+def download_report():
+    s3 = boto3.client(
+        's3',
+        region_name='us-east-1',
+        aws_access_key_id=os.environ['RECON_AWS_ACCESS_KEY_ID'],
+        aws_secret_access_key=os.environ['RECON_AWS_SECRET_ACCESS_KEY'],
+    )
+    body = (
+        s3.get_object(
+            Bucket='aws-glue-recon.cuenca.io', Key='reports/report.txt'
+        )['Body']
+        .read()
+        .decode('utf-8')
+    )
 
+    with open(FILEPATH, 'w') as f:
+        f.write(body)
+
+
+def recon_transactions():
     with open(FILEPATH) as f:
-
         # STP received successfully
         transactions = get_transactions(f)
         reconciliate_received_stp(transactions)
@@ -171,3 +176,8 @@ def reconciliate(**kwargs):
 
         # SPEID/CUENCA submitted
         transactions = get_transactions(f)
+
+
+def reconciliate():
+    download_report()
+    recon_transactions()
