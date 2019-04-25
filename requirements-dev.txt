@@ -1,10 +1,9 @@
+ipython	ipython
+ipdb	ipdb
+pycodestyle	pycodestyle
+docker	
+pytest	pytest
+pytest-cov	pytest-cov
+flask-shell-ipython	
+werkzeug	werkzeug
 coveralls
-docker
-flask-shell-ipython
-ipython
-ipdb
-moto
-pycodestyle
-pytest
-pytest-cov
-werkzeug
