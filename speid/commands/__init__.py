@@ -6,6 +6,8 @@ from . import spei
 
 from . import docker
 
+from . import recon
+
 
 @app.cli.command()
 def serve():
