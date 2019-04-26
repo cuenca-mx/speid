@@ -4,6 +4,8 @@ import threading
 
 import pika
 
+from speid import db
+from speid.models import Transaction
 from speid.queue.base import RPC_QUEUE
 from test.custom_vcr import my_vcr
 
@@ -69,6 +71,45 @@ class TestReceiveOrder:
                        content_type='application/json')
 
         assert res.status_code == 201
+
+    @my_vcr.use_cassette('test/cassettes/test_create_order.yaml')
+    def test_create_duplicate_order_event(self, app):
+        thread = ConsumerThread()
+        thread.start()
+        data = dict(
+            Clave=2456309,
+            FechaOperacion=20180618,
+            InstitucionOrdenante=40012,
+            InstitucionBeneficiaria=90646,
+            ClaveRastreo="PRUEBATAMIZI1",
+            Monto=100.0,
+            NombreOrdenante="BANCO",
+            TipoCuentaOrdenante=40,
+            CuentaOrdenante="846180000500000008",
+            RFCCurpOrdenante="ND",
+            NombreBeneficiario="TAMIZI",
+            TipoCuentaBeneficiario=40,
+            CuentaBeneficiario="646180157000000004",
+            RFCCurpBeneficiario="ND",
+            ConceptoPago="PRUEBA",
+            ReferenciaNumerica=2423,
+            Empresa="TAMIZI"
+        )
+        res = app.post('/ordenes', data=json.dumps(data),
+                       content_type='application/json')
+
+        assert res.status_code == 201
+
+        res = app.post('/ordenes', data=json.dumps(data),
+                       content_type='application/json')
+        assert res.status_code == 201
+
+        transaction = db.session.query(
+            Transaction).filter_by(
+            orden_id=2456309,
+            clave_rastreo='PRUEBATAMIZI1'
+        ).one()
+        assert transaction is not None
 
     def test_create_order_without_ordenante(self, app):
         thread = ConsumerThread()
