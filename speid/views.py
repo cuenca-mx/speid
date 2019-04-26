@@ -54,8 +54,18 @@ def create_orden_events():
 def create_orden():
     try:
         transaction = Transaction.transform(request.json)
-        db.session.add(transaction)
-        db.session.commit()
+
+        speid_transaction = db.session.query(
+            Transaction).filter_by(
+            orden_id=transaction.orden_id,
+            clave_rastreo=transaction.clave_rastreo
+        ).first()
+        if speid_transaction is not None:
+            transaction = speid_transaction
+            db.session.add(transaction)
+        else:
+            db.session.add(transaction)
+            db.session.commit()
 
         event_created = Event(
             transaction_id=transaction.id,
