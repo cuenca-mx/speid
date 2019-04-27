@@ -102,4 +102,4 @@ def send_queue(transaction):
 
 
 if __name__ == "__main__":
-    callback_spei_transaction()
+    re_execute_transactions()

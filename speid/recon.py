@@ -79,6 +79,8 @@ def reconciliate_received_stp(transactions: list):
                     trans['cuenta_beneficiario']
                 )
 
+                trans['monto'] = trans['monto'] / 100
+
                 transaction = Transaction.transform(trans)
                 db.session.add(transaction)
                 db.session.commit()
