@@ -12,7 +12,7 @@ def app():
 @pytest.fixture(scope='module')
 def file_recon():
     body = ("STP received successfully (1):\n"
-            "{'id': 22673743, 'institucion': 'STP', 'contraparte': 'BANORTE/I"
+            "{'id': 22673742, 'institucion': 'STP', 'contraparte': 'BANORTE/I"
             "XE', 'rastreo': 'CR1547453521', 'fecha_operacion': 20181213, 'mo"
             "nto': 1232, 'estado_orden': 'Liquidada', 'referencia_numerica': "
             "7382934, 'ordenante': 'BANCO', 'cuenta_ordenante': '072696273648"
