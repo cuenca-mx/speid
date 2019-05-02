@@ -12,6 +12,16 @@ class TestRecon:
             f.write(file_recon)
         recon_transactions()
         transaction = (
-            db.session.query(Transaction).filter_by(orden_id=22673742).first()
+            db.session.query(Transaction).filter_by(
+                orden_id=22673742,
+                clave_rastreo='CR1547453521'
+            ).first()
+        )
+        assert transaction
+        transaction = (
+            db.session.query(Transaction).filter_by(
+                orden_id=22672732,
+                clave_rastreo='HG745321'
+            ).first()
         )
         assert transaction
