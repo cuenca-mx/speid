@@ -11,7 +11,11 @@ class TestRecon:
         with open('/tmp/report.txt', 'w') as f:
             f.write(file_recon)
         recon_transactions()
+        # transaction = (
+        #     db.session.query(Transaction).filter_by(orden_id=22673742).first()
+        # )
+        # assert transaction
         transaction = (
-            db.session.query(Transaction).filter_by(orden_id=22673743).first()
+            db.session.query(Transaction)
         )
-        assert transaction
+        assert transaction.all() == 'testing'
