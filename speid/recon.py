@@ -10,7 +10,7 @@ from sentry_sdk import capture_exception
 from speid import db
 from speid.helpers import callback_helper
 from speid.models import Event, Transaction
-from speid.tables.types import State
+from speid.tables.types import Estado, State
 
 BUCKET_NAME = os.environ['RECON_BUCKET_S3']
 FILEPATH = '/tmp/report.txt'
@@ -52,7 +52,9 @@ def reconciliate_received_stp(transactions: list):
             # Make sure the transaction does not exist in speid
             transaction = (
                 db.session.query(Transaction)
-                .filter_by(orden_id=trans['id'])
+                .filter_by(
+                    orden_id=trans['id'], clave_rastreo=trans['rastreo']
+                )
                 .first()
             )
             beneficiario = trans['cuenta_beneficiario']
@@ -102,7 +104,7 @@ def reconciliate_received_stp(transactions: list):
                         .filter_by(orden_id=trans['clave'])
                         .first()
                     )
-                    transaction.estado = 'failed'
+                    transaction.estado = Estado.failed
                     event_created = Event(
                         transaction_id=transaction.id,
                         type=State.error,

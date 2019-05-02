@@ -11,11 +11,18 @@ def app():
 
 @pytest.fixture(scope='module')
 def file_recon():
-    body = ("STP received successfully (1):\n"
+    body = ("STP received successfully (2):\n"
             "{'id': 22673742, 'institucion': 'STP', 'contraparte': 'BANORTE/I"
             "XE', 'rastreo': 'CR1547453521', 'fecha_operacion': 20181213, 'mo"
             "nto': 1232, 'estado_orden': 'Liquidada', 'referencia_numerica': "
             "7382934, 'ordenante': 'BANCO', 'cuenta_ordenante': '072696273648"
+            "711499', 'rfc_curp_ordenante': 'ND', 'beneficiario': 'Carlos Gon"
+            "zalez', 'cuenta_beneficiario': '646180827000027384', 'rfc_curp_b"
+            "eneficiario': 'ND', 'concepto_pago': 'PRUEBA', 'empresa': 'TAMIZ"
+            "I'}\n{'id': 22672732, 'institucion': 'STP', 'contraparte': 'BANO"
+            "RE/IXE', 'rastreo': 'HG745321', 'fecha_operacion': 20181213, 'mo"
+            "nto': 1435, 'estado_orden': 'Liquidada', 'referencia_numerica': "
+            "7382253, 'ordenante': 'BANCO', 'cuenta_ordenante': '072696273648"
             "711499', 'rfc_curp_ordenante': 'ND', 'beneficiario': 'Carlos Gon"
             "zalez', 'cuenta_beneficiario': '646180827000027384', 'rfc_curp_b"
             "eneficiario': 'ND', 'concepto_pago': 'PRUEBA', 'empresa': 'TAMIZ"
