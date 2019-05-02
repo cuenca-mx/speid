@@ -18,4 +18,7 @@ class TestRecon:
         transaction = (
             db.session.query(Transaction)
         )
-        assert transaction.all() == 'testing'
+        arr = []
+        for trans in transaction.all():
+            arr.append(trans.orden_id)
+        assert arr == 'testing'
