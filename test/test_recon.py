@@ -18,6 +18,12 @@ class TestRecon:
             ).first()
         )
         assert transaction
+
+    @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
+    def test_reconciliate_status_failed(self, file_recon1):
+        with open('/tmp/report.txt', 'w') as f:
+            f.write(file_recon1)
+        recon_transactions()
         transaction = (
             db.session.query(Transaction).filter_by(
                 orden_id=22672732,
