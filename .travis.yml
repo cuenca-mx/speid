@@ -8,4 +8,5 @@ services:
 script:
 - cp env.template .env
 - echo COVERALLS_REPO_TOKEN=$COVERALLS_REPO_TOKEN >> .env
+- echo STP_PREFIJO=$STP_PREFIJO >> .env
 - make travis-test

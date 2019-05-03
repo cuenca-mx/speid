@@ -4,17 +4,18 @@ import re
 from typing.io import TextIO
 
 import boto3
-
 from clabe import BANKS
+from sentry_sdk import capture_exception
 
 from speid import db
 from speid.helpers import callback_helper
 from speid.models import Event, Transaction
-from speid.tables.types import State
+from speid.tables.types import Estado, State
 
 BUCKET_NAME = os.environ['RECON_BUCKET_S3']
 FILEPATH = '/tmp/report.txt'
 KEY = 'reports/report.txt'
+STP_PREFIJO = os.environ['STP_PREFIJO']
 
 
 def serialize(string: str) -> dict:
@@ -36,12 +37,12 @@ def stp_to_spei_bank_code(stp_code: str) -> str:
         return None
 
 
-def get_tipo_cuenta(account: str) -> str:
+def get_account_type(account: str) -> str:
     if account:
-        tipo_cuenta = stp_to_spei_bank_code(account[:3])
-        if tipo_cuenta:
-            tipo_cuenta = tipo_cuenta[:2]
-        return tipo_cuenta
+        account_type = stp_to_spei_bank_code(account[:3])
+        if account_type:
+            account_type = account_type[:2]
+        return account_type
     return None
 
 
@@ -51,10 +52,13 @@ def reconciliate_received_stp(transactions: list):
             # Make sure the transaction does not exist in speid
             transaction = (
                 db.session.query(Transaction)
-                .filter_by(orden_id=trans['id'])
+                .filter_by(
+                    orden_id=trans['id'], clave_rastreo=trans['rastreo']
+                )
                 .first()
             )
-            if not transaction:
+            beneficiario = trans['cuenta_beneficiario']
+            if not transaction and beneficiario[:6] == STP_PREFIJO:
                 del trans['estado_orden']
                 del trans['institucion']
                 del trans['contraparte']
@@ -71,12 +75,12 @@ def reconciliate_received_stp(transactions: list):
 
                 trans['nombre_beneficiario'] = trans.pop('beneficiario')
 
-                trans['tipo_cuenta_ordenante'] = get_tipo_cuenta(
+                trans['tipo_cuenta_ordenante'] = get_account_type(
                     trans['cuenta_ordenante']
                 )
 
-                trans['tipo_cuenta_beneficiario'] = get_tipo_cuenta(
-                    trans['cuenta_beneficiario']
+                trans['tipo_cuenta_beneficiario'] = get_account_type(
+                    beneficiario
                 )
 
                 trans['monto'] = trans['monto'] / 100
@@ -88,15 +92,29 @@ def reconciliate_received_stp(transactions: list):
                 event_created = Event(
                     transaction_id=transaction.id,
                     type=State.created,
-                    meta=str(trans),
+                    meta=f'Created by recon: {str(trans)}',
                 )
-
-                callback_helper.send_transaction(transaction)
-
                 db.session.add(event_created)
                 db.session.commit()
+
+                response = callback_helper.send_transaction(transaction)
+                if response['status'] == 'failed':
+                    transaction = (
+                        db.session.query(Transaction)
+                        .filter_by(orden_id=trans['clave'])
+                        .first()
+                    )
+                    transaction.estado = Estado.failed
+                    event_created = Event(
+                        transaction_id=transaction.id,
+                        type=State.error,
+                        meta=f'{str(response)}',
+                    )
+                    db.session.add(event_created)
+                    db.session.commit()
+
     except Exception as exc:
-        print(exc)
+        capture_exception(exc)
 
 
 def get_transactions(file: TextIO) -> int:
