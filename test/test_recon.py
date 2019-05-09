@@ -23,7 +23,6 @@ class TestRecon:
             .filter_by(orden_id=22673742)
             .first()
         )
-        assert transaction == ''
         assert transaction.estado == Estado.failed
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
