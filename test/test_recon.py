@@ -52,9 +52,3 @@ class TestRecon:
             ).first()
         )
         assert transaction
-
-    def test_reconciliate_exception(self, file_recon3):
-        with open('/tmp/report.txt', 'w') as f:
-            f.write(file_recon3)
-        with pytest.raises(KeyError):
-            recon_transactions()
