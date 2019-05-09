@@ -21,7 +21,16 @@ class TestRecon:
         transaction = (
             db.session.query(Transaction).filter_by(
                 orden_id=22673742,
-                clave_rastreo='CR1547453521'
+                clave_rastreo='CR1547453521',
+                estado='failed'
+            ).first()
+        )
+        assert transaction
+
+        transaction = (
+            db.session.query(Transaction).filter_by(
+                orden_id=22672732,
+                clave_rastreo='HG745321'
             ).first()
         )
         assert transaction
