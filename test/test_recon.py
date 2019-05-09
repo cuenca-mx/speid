@@ -1,12 +1,12 @@
 import logging
 from test.custom_vcr import my_vcr
+
 import pytest
 
 from speid import db
-from speid.models import Transaction, Event
+from speid.models import Event, Transaction
 from speid.recon import recon_transactions
 from speid.tables.types import Estado
-
 
 logging.basicConfig()
 
@@ -20,20 +20,14 @@ class TestRecon:
         with open('/tmp/report.txt', 'w') as f:
             f.write(file_recon)
         recon_transactions()
-        transaction = (
-            db.session.query(Transaction).filter_by(
-                orden_id=22673742
-            ).first()
-        )
-
         events = db.session.query(Event).all()
-        arr = []
+        metas = []
         for event in events:
-            arr.append(event.meta)
-
-        assert arr == []
-        # assert transaction == 'test'
-        assert transaction.estado == Estado.failed
+            metas.append(event.meta)
+        assert (
+            "{'error': 'No user found for this CLABE', 'status': 'failed'}"
+            in metas
+        )
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
     def test_reconciliate_succeeded(self, file_recon1):
@@ -41,10 +35,9 @@ class TestRecon:
             f.write(file_recon1)
         recon_transactions()
         transaction = (
-            db.session.query(Transaction).filter_by(
-                orden_id=22672732,
-                clave_rastreo='HG745321'
-            ).first()
+            db.session.query(Transaction)
+            .filter_by(orden_id=22672732, clave_rastreo='HG745321')
+            .first()
         )
         assert transaction
 
@@ -54,9 +47,8 @@ class TestRecon:
             f.write(file_recon2)
         recon_transactions()
         transaction = (
-            db.session.query(Transaction).filter_by(
-                orden_id=22673745,
-                clave_rastreo='GH458434'
-            ).first()
+            db.session.query(Transaction)
+            .filter_by(orden_id=22673745, clave_rastreo='GH458434')
+            .first()
         )
         assert transaction
