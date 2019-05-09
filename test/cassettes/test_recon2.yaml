@@ -1,0 +1,50 @@
+interactions:
+- request:
+    body: '{"id": "tr4kZcVsWBAjAXdN1ufdEncg", "created_at": "2019-05-03 22:05:26.768929",
+      "updated_at": "2019-05-03 22:05:26.768929", "orden_id": 22673745, "fecha_operacion":
+      "2018-12-13", "institucion_ordenante": "333", "institucion_beneficiaria": "646",
+      "clave_rastreo": "GH458434", "monto": 3000, "nombre_ordenante": "BANCO",
+      "tipo_cuenta_ordenante": 40, "cuenta_ordenante": "072696273648711499", "rfc_curp_ordenante":
+      "ND", "nombre_beneficiario": "Carlos Gonzalez", "tipo_cuenta_beneficiario":
+      90, "cuenta_beneficiario": "646180827000027384", "rfc_curp_beneficiario": "ND",
+      "concepto_pago": "PRUEBA", "referencia_numerica": 7382934, "empresa": "TAMIZI",
+      "estado": null, "version": null, "speid_id": "SR4kZarBtcdH6y2BQWV5Rjb6"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic QUszNkVBUVhJ
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '723'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.21.0
+    method: POST
+    uri: https://testapi/set
+  response:
+    body:
+      string: '{"error":"No user found for this CLABE","status":"failed"}
+
+'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '59'
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 03 May 2019 22:05:26 GMT
+      Server:
+      - nginx
+      X-Cuenca-Version:
+      - '2019-03-10'
+    status:
+      code: 400
+      message: BAD REQUEST
+version: 1

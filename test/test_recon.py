@@ -19,12 +19,20 @@ class TestRecon:
         with open('/tmp/report.txt', 'w') as f:
             f.write(file_recon)
         recon_transactions()
+        # transaction = (
+        #     db.session.query(Transaction).filter_by(
+        #         orden_id=22673742,
+        #         clave_rastreo='CR1547453521',
+        #     ).first()
+        # )
+
         transaction = (
-            db.session.query(Transaction).filter_by(
-                orden_id=22673742,
-                clave_rastreo='CR1547453521',
-            ).first()
+            db.session.query(Transaction).all()
         )
+        trans = []
+        for x in transaction:
+            trans.append(x.orden_id)
+        assert trans == 'test'
         assert transaction.estado == Estado.failed
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
@@ -36,6 +44,19 @@ class TestRecon:
             db.session.query(Transaction).filter_by(
                 orden_id=22672732,
                 clave_rastreo='HG745321'
+            ).first()
+        )
+        assert transaction
+
+    @my_vcr.use_cassette('test/cassettes/test_recon2.yaml')
+    def test_reconciliate_wrong_account(self, file_recon2):
+        with open('/tmp/report.txt', 'w') as f:
+            f.write(file_recon2)
+        recon_transactions()
+        transaction = (
+            db.session.query(Transaction).filter_by(
+                orden_id=22673745,
+                clave_rastreo='GH458434'
             ).first()
         )
         assert transaction
