@@ -1,8 +1,6 @@
 import logging
 from test.custom_vcr import my_vcr
 
-import pytest
-
 from speid import db
 from speid.models import Event, Transaction
 from speid.recon import recon_transactions
@@ -20,15 +18,12 @@ class TestRecon:
         with open('/tmp/report.txt', 'w') as f:
             f.write(file_recon)
         recon_transactions()
-        events = db.session.query(Event).all()
-        metas = []
-        for event in events:
-            metas.append(event.meta)
-        assert metas == []
-        assert (
-            "{'error': 'No user found for this CLABE', 'status': 'failed'}"
-            in metas
+        transaction = (
+            db.session.query(Transaction)
+            .filter_by(orden_id=22673742)
+            .first()
         )
+        assert transaction.estado == Estado.failed
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
     def test_reconciliate_succeeded(self, file_recon1):
