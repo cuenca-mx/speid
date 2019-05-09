@@ -23,10 +23,9 @@ class TestRecon:
             db.session.query(Transaction).filter_by(
                 orden_id=22673742,
                 clave_rastreo='CR1547453521',
-                estado=Estado.failed
             ).first()
         )
-        assert transaction
+        assert transaction.estado == Estado.failed
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
     def test_reconciliate_succeeded(self, file_recon1):
