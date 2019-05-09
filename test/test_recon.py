@@ -25,8 +25,6 @@ class TestRecon:
                 orden_id=22673742
             ).first()
         )
-        assert len(transaction.__dict__) == 24
-
         assert transaction.estado == Estado.failed
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
@@ -40,6 +38,7 @@ class TestRecon:
                 clave_rastreo='HG745321'
             ).first()
         )
+        assert transaction.estado == Estado.failed
         assert transaction
 
     @my_vcr.use_cassette('test/cassettes/test_recon2.yaml')
