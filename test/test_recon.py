@@ -25,8 +25,7 @@ class TestRecon:
                 orden_id=22673742
             ).first()
         )
-        assert transaction == 'hola'
-        assert transaction.estado == Estado.failed
+        assert transaction.estado.value == Estado.failed.value
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
     def test_reconciliate_succeeded(self, file_recon1):
