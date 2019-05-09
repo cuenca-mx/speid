@@ -17,8 +17,14 @@ class TestRecon:
     def test_reconciliate(self, file_recon):
         with open('/tmp/report.txt', 'w') as f:
             f.write(file_recon)
-        r = recon_transactions()
-        assert r == 'test'
+        recon_transactions()
+        transaction = (
+            db.session.query(Transaction).filter_by(
+                orden_id=22672732,
+                clave_rastreo='HG745321'
+            ).first()
+        )
+        assert transaction
         transaction = (
             db.session.query(Transaction).filter_by(
                 orden_id=22673742,
@@ -27,11 +33,3 @@ class TestRecon:
             ).first()
         )
         assert transaction
-
-        # transaction = (
-        #     db.session.query(Transaction).filter_by(
-        #         orden_id=22672732,
-        #         clave_rastreo='HG745321'
-        #     ).first()
-        # )
-        # assert transaction
