@@ -3,7 +3,7 @@ from test.custom_vcr import my_vcr
 import pytest
 
 from speid import db
-from speid.models import Transaction
+from speid.models import Transaction, Event
 from speid.recon import recon_transactions
 from speid.tables.types import Estado
 
@@ -25,7 +25,14 @@ class TestRecon:
                 orden_id=22673742
             ).first()
         )
-        assert transaction == 'test'
+
+        events = db.session.query(Event).all()
+        arr = []
+        for event in events:
+            arr.append(event.meta)
+
+        assert arr == []
+        # assert transaction == 'test'
         assert transaction.estado == Estado.failed
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
