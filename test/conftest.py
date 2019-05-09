@@ -224,3 +224,23 @@ def file_recon2():
             "A succeeded (0):\n\nSPEID/CUENCA different status (0):\n\nSPEID/"
             "CUENCA others (0):\n")
     return body
+
+
+@pytest.fixture(scope='module')
+def file_recon3():
+    body = ("STP received successfully (1):\n"
+            "{'id': 22638506, 'contraparte': 'BANORTE/IXE', 'rastreo': 'LUX29"
+            "304', 'fecha_operacion': 20181213, '"
+            "monto': 4000, 'estado_orden': 'Liquidada', 'referencia_numerica'"
+            ": 2838283, 'ordenante': 'BANCO', 'cuenta_ordenante': '6466962736"
+            "48711499', 'rfc_curp_ordenante': 'ND', 'beneficiario': 'Carlos C"
+            "astro', 'cuenta_beneficiario': '646180827000027384', 'rfc_curp_b"
+            "eneficiario': 'ND', 'concepto_pago': 'PRUEBA', 'empresa': 'TAMIZ"
+            "I'}\n\nSTP sent successfully (0):\n\nSTP others (0):\n\nSPEID su"
+            "ccess (0):\n\nSPEID others (0):\n\nCUENCA created (0):\n\nCUENCA"
+            " submitted (0):\n\nCUENCA succeeded (0):\n\nCUENCA others (0):\n"
+            "\nSTP/CUENCA (0):\n\nSTP/SPEID same status (0):\n\nSTP/SPEID dif"
+            "ferent status (0):\n\nSPEID/CUENCA submitted (0):\n\nSPEID/CUENC"
+            "A succeeded (0):\n\nSPEID/CUENCA different status (0):\n\nSPEID/"
+            "CUENCA others (0):\n")
+    return body

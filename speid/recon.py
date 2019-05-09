@@ -115,6 +115,7 @@ def reconciliate_received_stp(transactions: list):
 
     except Exception as exc:
         capture_exception(exc)
+        raise exc
 
 
 def get_transactions(file: TextIO) -> int:

@@ -1,5 +1,6 @@
 import logging
 from test.custom_vcr import my_vcr
+import pytest
 
 from speid import db
 from speid.models import Transaction
@@ -19,20 +20,11 @@ class TestRecon:
         with open('/tmp/report.txt', 'w') as f:
             f.write(file_recon)
         recon_transactions()
-        # transaction = (
-        #     db.session.query(Transaction).filter_by(
-        #         orden_id=22673742,
-        #         clave_rastreo='CR1547453521',
-        #     ).first()
-        # )
-
         transaction = (
-            db.session.query(Transaction).all()
+            db.session.query(Transaction).filter_by(
+                orden_id=22673742
+            ).first()
         )
-        trans = []
-        for x in transaction:
-            trans.append(x.orden_id)
-        assert trans == 'test'
         assert transaction.estado == Estado.failed
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
@@ -60,3 +52,9 @@ class TestRecon:
             ).first()
         )
         assert transaction
+
+    def test_reconciliate_exception(self, file_recon3):
+        with open('/tmp/report.txt', 'w') as f:
+            f.write(file_recon3)
+        with pytest.raises(KeyError):
+            recon_transactions()
