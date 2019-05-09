@@ -2,7 +2,7 @@ import logging
 from test.custom_vcr import my_vcr
 
 from speid import db
-from speid.models import Event, Transaction
+from speid.models import Transaction
 from speid.recon import recon_transactions
 from speid.tables.types import Estado
 
@@ -23,6 +23,7 @@ class TestRecon:
             .filter_by(orden_id=22673742)
             .first()
         )
+        assert transaction == ''
         assert transaction.estado == Estado.failed
 
     @my_vcr.use_cassette('test/cassettes/test_recon1.yaml')
