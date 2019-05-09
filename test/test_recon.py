@@ -24,6 +24,7 @@ class TestRecon:
         metas = []
         for event in events:
             metas.append(event.meta)
+        assert metas == []
         assert (
             "{'error': 'No user found for this CLABE', 'status': 'failed'}"
             in metas
