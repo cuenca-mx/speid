@@ -114,6 +114,7 @@ def reconciliate_received_stp(transactions: list):
                     db.session.commit()
 
     except Exception as exc:
+        return exc
         capture_exception(exc)
 
 
@@ -156,7 +157,7 @@ def recon_transactions():
     with open(FILEPATH) as f:
         # STP received successfully
         transactions = get_transactions(f)
-        reconciliate_received_stp(transactions)
+        return reconciliate_received_stp(transactions)
 
         # STP sent successfully
         transactions = get_transactions(f)
