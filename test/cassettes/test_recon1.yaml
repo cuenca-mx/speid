@@ -25,7 +25,7 @@ interactions:
       User-Agent:
       - python-requests/2.21.0
     method: POST
-    uri: https://testapi/set
+    uri: http://testapi/set
   response:
     body:
       string: '{"status":"succeeded"}
