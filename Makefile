@@ -23,7 +23,7 @@ clean-pyc:
 		find . -name '*~' -delete
 
 test: clean-pyc lint
-		pytest
+		pytest -vv
 		coveralls
 
 travis-test:
