@@ -1,8 +1,10 @@
+from datetime import datetime
+
 import click
 
 from speid import app
 from speid.helpers import callback_helper
-from speid.models import Event, Transaction
+from speid.models import Event, Request, Transaction
 from speid.types import Estado, EventType
 
 import pandas
@@ -67,15 +69,33 @@ def re_execute_transactions(speid_id):
 
 
 @speid_group.command()
-@click.option('--transacions', default='transactions.csv',
+@click.option('--transactions', default='transactions.csv',
               help='CSV file with transactions')
 @click.option('--events', default='events.csv', help='CSV file with events')
 @click.option('--requests', default='requests.csv',
               help='CSV file with requests')
-def migrate_from_csv(transacions, events, requests):
-    transacions = pandas.read_csv(transacions)
-    events = pandas.read_csv(events)
-    requests = pandas.read_csv(requests)
+def migrate_from_csv(transactions, events, requests):
+    transactions_list = pandas.read_csv(transactions)
+    transactions = [Transaction(**t) for t in transactions_list.iterrows()]
+
+    requests_list = pandas.read_csv(requests)
+    requests = [Request(**r) for r in requests_list.iterrows()]
+
+    events_list = pandas.read_csv(events)
+    for e in events_list.iterrows():
+        trx = next(t for t in transactions if t.id == e['transaction_id'])
+        trx.events.append(
+            Event(
+                type=EventType[e['type']],
+                metadata=e['meta'],
+                created_at=datetime.strptime(e['created_at'] + '00',
+                                             '%Y-%m-%d %H:%M:%S.%f%z')
+            ))
+
+    for transaction in transactions:
+        transaction.save()
+
+    Request.objects.insert(requests)
 
 
 if __name__ == "__main__":

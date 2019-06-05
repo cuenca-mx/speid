@@ -3,6 +3,8 @@ version: '3'
 services:
   db:
     image: mongo:4.0
+    ports:
+      - 5672:5672
 
   rabbitmq:
     image: rabbitmq

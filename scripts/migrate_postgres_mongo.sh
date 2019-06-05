@@ -53,14 +53,14 @@ print_info "Connect to postgres and extract requests"
 psql -U USER -h ${HOST} -P ${PASS} -p ${PORT} -c "\copy (SELECT * FROM public.requests) to 'requests.csv' with csv header"
 
 print_info "Connect to postgres and extract events"
-psql -U USER -h ${HOST} -P ${PASS} -p ${PORT} -c "\copy (SELECT * FROM public.events) to 'requests.csv' with csv header"
+psql -U USER -h ${HOST} -P ${PASS} -p ${PORT} -c "\copy (SELECT * FROM public.events) to 'events.csv' with csv header"
 
 
 # Load data into mongodb
 print_info "Connect to mongodb and send info"
-# mongoimport --uri ${DATABASE_URI} --jsonArray transactions.json
-# mongoimport --uri ${DATABASE_URI} --jsonArray requests.json
+
+flask speid migrate_from_csv --transactions transactions.csv --events events.csv --requests requests.csv
 
 # Wipe data
 print_info "Delete temp files"
-rm -f transactions.json requests.json
+rm -f transactions.csv events.csv requests.csv
