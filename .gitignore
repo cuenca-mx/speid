@@ -9,3 +9,4 @@ __pycache__/
 *.pem
 docker-build
 .coverage
+*.csv
