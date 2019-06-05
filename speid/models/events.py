@@ -1,7 +1,11 @@
-from speid.models.base import db
-from speid.tables import events
+from mongoengine import Document, StringField
+
+from speid.types import EventType
+
+from .helpers import date_now, EnumField
 
 
-class Event(db.Model):
-
-    __table__ = events
+class Event(Document):
+    created_at = date_now()
+    type = EnumField(EventType)
+    metadata = StringField()

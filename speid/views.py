@@ -1,17 +1,12 @@
-import os
 import json
 
 from flask import jsonify, make_response, request
 from sentry_sdk import capture_exception
-import sentry_sdk
 
-from speid import app, db
-from speid.models import Request, Transaction, Event
-from speid.tables.types import Estado, HttpRequestMethod, State
-from speid.helpers import callback_helper
-
-sentry_dsn = os.getenv('SENTRY_DSN')
-sentry_sdk.init(sentry_dsn)
+from speid import app
+from speid.models import Request, Transaction
+from speid.types import Estado, HttpRequestMethod
+from speid.validations import StpTransaction
 
 
 @app.route('/')
@@ -22,28 +17,15 @@ def health_check():
 
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
-
-    if "id" not in request.json or int(request.json["id"]) <= 0:
-        return make_response(jsonify(request.json), 400)
-
     try:
-        request_id = request.json['id']
-        transaction = (db.session.query(Transaction).
-                       filter_by(orden_id=request_id).one())
+        transaction = Transaction.objects(
+            stp_id=request.json['id'], estado=Estado.submitted
+        ).first()
 
-        transaction.estado = Estado.get_state_from_stp(request.json["Estado"])
-        event = Event(
-            transaction_id=transaction.id,
-            type=State.received,
-            meta=str(request.json)
-        )
+        state = Estado.get_state_from_stp(request.json['Estado'])
+        transaction.set_state(state)
 
-        callback_helper.set_status_transaction(
-            transaction.speid_id,
-            dict(estado=transaction.estado.value))
-        db.session.add(transaction)
-        db.session.add(event)
-        db.session.commit()
+        transaction.save()
     except Exception as exc:
         capture_exception(exc)
 
@@ -52,44 +34,20 @@ def create_orden_events():
 
 @app.route('/ordenes', methods=['POST'])
 def create_orden():
+    transaction = Transaction()
     try:
-        transaction = Transaction.transform(request.json)
+        external_transaction = StpTransaction(**request.json)
+        transaction = external_transaction.transform()
 
-        speid_transaction = db.session.query(
-            Transaction).filter_by(
-            orden_id=transaction.orden_id,
-            clave_rastreo=transaction.clave_rastreo
-        ).first()
-        if speid_transaction is not None:
-            transaction = speid_transaction
-            db.session.add(transaction)
-        else:
-            db.session.add(transaction)
-            db.session.commit()
+        transaction.confirm_callback_transaction()
+        transaction.save()
 
-        event_created = Event(
-            transaction_id=transaction.id,
-            type=State.created,
-            meta=str(request.json)
-        )
-        # Consume api
-
-        response = callback_helper.send_transaction(transaction)
-        event_received = Event(
-            transaction_id=transaction.id,
-            type=State.completed,
-            meta=str(response)
-        )
-
-        db.session.add(event_created)
-        db.session.add(event_received)
-        db.session.commit()
         r = request.json
-        r['estado'] = Estado.convert_to_stp_state(Estado(response['status']))
+        r['estado'] = Estado.convert_to_stp_state(transaction.estado)
     except Exception as exc:
         r = dict(estado='LIQUIDACION')
-        transaction.type = State.error
-        db.session.commit()
+        transaction.estado = Estado.error
+        transaction.save()
         capture_exception(exc)
     return make_response(jsonify(r), 201)
 
@@ -102,16 +60,12 @@ def log_posts():
         body = json.dumps(request.json)
     else:
         body = request.data.decode('utf-8') or json.dumps(request.form)
-    path_limit = Request.__table__.c.path.type.length
-    qs_limit = Request.__table__.c.query_string.type.length
     req = Request(
         method=HttpRequestMethod(request.method),
-        path=request.path[:path_limit],
-        query_string=request.query_string.decode()[:qs_limit],
+        path=request.path,
+        query_string=request.query_string.decode(),
         ip_address=request.remote_addr,
         headers=dict(request.headers),
-        body=body
+        body=body,
     )
-
-    db.session.add(req)
-    db.session.commit()
+    req.save()

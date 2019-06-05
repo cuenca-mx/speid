@@ -1,56 +1,94 @@
-## SPEI Daemon 
+## SPEID
 
 [![Build Status](https://travis-ci.com/cuenca-mx/speid.svg?branch=master)](https://travis-ci.com/cuenca-mx/speid)
 [![Coverage Status](https://coveralls.io/repos/github/cuenca-mx/speid/badge.svg?branch=master&t=1b4Ddg)](https://coveralls.io/github/cuenca-mx/speid?branch=master)
+[![](https://images.microbadger.com/badges/image/cuenca/speid:1.9.4.svg)](https://microbadger.com/images/cuenca/speid:1.9.4 "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/cuenca/speid:1.9.4.svg)](https://microbadger.com/images/cuenca/speid:1.9.4 "Get your own version badge on microbadger.com")
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-Envía y recibe órdenes SPEI. Utilizando RabbitMQ y Postgress para almacenar 
-los datos.
+Una forma robusta de comunicarse con STP, utilizando la librería 
+[stpmex](https://pypi.org/project/stpmex/) para el manejo de transferencias 
+eléctronicas. Hay dos puntos importantes:
+
+- **Envío de transferencias** Debe haber un backend que coloque las órdenes de 
+transferencias en una cola de RabbitMQ. SPEID tomará las órdenes de ahí para enviarlas 
+por STP. En caso de cualquier falla, la orden se vuelve a colocar en la cola y se 
+reintenta hasta 3 veces. En caso de que la orden no pueda ser enviada, esta se 
+queda en la cola para poder ser revisada manualmente. Por otro lado, cuando la orden
+ es enviada con éxito, se recibe la respuesta de STP en `orden_events` para hacer el 
+ llamado al backend y confirmar o cancelar la orden.
+
+- **Recepción de transferencias** Las órdenes se reciben en `ordenes` y hace un llamado
+al backend para poder recibir las órdenes, en caso de un error en el backend la orden 
+se confirma pero se mantiene en la base de datos para poder ser reprocesada 
+porteriormente.
+ 
 
 ### Requerimientos
 
+- Una cuenta de STP
 - Python v3 o superior.
-- Postgres
-- RabbitMQ
+- Docker
+- Sentry
+- Un backend de donde recibir y enviar las órdenes
 
 ### Instalación
 
-Primero hay que declarar las variables de ambiente que se encuentran en
-env.template.
+El archivo `env.template` contiene todos los parámetros necesarios para hacer funcionar 
+SPEID, es necesario completar los faltantes como las credenciales de STP, la URL de 
+Sentry o la URL de MongoDB para realizar la conexión.
 
-Ejecutar la migración de base de datos:
+Después de esto, solo es necesario utilizar un gestor de contenedores para ejecutar 
+la imagen de Docker incluida en el proyecto.
 
-```
-flask docker create_db
-flask db upgrade
-flask docker drop_db
-```
-
-
-Se puede usar el archivo docker-compose como:
-
-```
+En caso de ser necesario ejectuarlo en una máquina local, copiar el archivo 
+`env.template` a `.env` y sustituir las credenciales de STP y Sentry. Posteriormente, 
+utilizar el archivo `docker-compose` incluido que levanta todos los servicios necesarios.
+``` bash
 docker-compose up
 ```
 
 ### Test
 
-Para ejecutar los test utlizando el archivo Makefile
+Para ejecutar los test localmente, se puede utilizar y utilizar la variable de ambiente `DATABASE_URI` 
+por `mongomock://localhost:27017/db`:
 
+```bash
+make install-dev
+make test
 ```
-$ make test
+
+Sin embargo, eso implica tener las variables de entorno en el equipo de desarrollo 
+utilizado, tammbién se puede realizar todo en Docker usando la variable de ambiente 
+`DATABASE_URI` con `mongodb://db/db`:
+
+```bash
+cp env.template .env
+make docker-test
 ```
+
+También se puede ejecutar el servicio y dar una línea de comandos dentro del contenedor
+para poder ejecutar instrucciones como el acceso a la base de datos, etc.
+
+```bash
+cp env.template .env
+make docker-shell
+```
+
+Ambos comandos ejecutan todas las instancias necesarias para funcionar y las cierran
+al terminar.
+
 
 ### Uso básico
 
 #### Recibir una orden
 
-Cuando se recibe una nueva orden SPEI, se hace una llamada al
-servicio /ordenes. Se crea una transacción en la tabla `transactions`
-y se asocia un evento tipo `create` a la tabla `Events`. Posteriormente
-se guarda la orden en RabbitMQ para ser utilizado por el backend.
-El servicio aguarda 15 segundos a obtener una respuesta la cual es 
-almacenada en un nuevo Evento asociado a la Transacción y se devuelve la
-respuesta.
+Cuando se recibe una nueva orden SPEI, STP hace una llamada al 
+servicio `/ordenes`. Se crea una transacción en la tabla `transactions`
+y se asocia un evento tipo `create`. Posteriormente, se hace un POST al endpoint 
+definido en la variable de ambiente `CALLBACK_URL`. El servicio aguarda 15 segundos a 
+obtener una respuesta la cual es almacenada en un nuevo Evento asociado a la 
+Transacción y se responde a STP.
 
 El cuerpo del mensaje almacenado en RabbitMQ es como sigue:
 
@@ -79,12 +117,12 @@ El cuerpo del mensaje almacenado en RabbitMQ es como sigue:
 #### Enviar una orden
 
 Si el cliente quiere realizar una transferencia, entonces el backend debe
-colocar la tarea en RabbitMQ como una orden de Celery: 
+colocar la tarea en RabbitMQ: 
 
 ```python
 from celery import Celery
 
-order = order = dict(
+order = dict(
             concepto_pago='PRUEBA',
             institucion_ordenante='646',
             cuenta_beneficiario='072691004495711499',
@@ -95,45 +133,40 @@ order = order = dict(
             cuenta_ordenante='646180157000000004',
             rfc_curp_ordenante='ND',
             speid_id='SOME_RANDOM_ID',
-            version=1
+            version=2
         )
 app = Celery('speid')
-app.config_from_object('speid.daemon.celeryconfig')
-app.send_task('speid.daemon.tasks.send_order',
-              kwargs={'order_val': order})
+app.send_task('speid.tasks.orders', kwargs={'order_val': order})
 ```
-
-Se puede utilizar el archivo de configuración `speid.daemon.celeryconfig` o hacer una configuración
-básica desde el backend para no tener dependencias.
 
 Estos son los campos obligatorios a incluir en la orden:
 
-```javascript
+```python
 {
     "concepto_pago": "Concepto"
     "institucion_ordenante": "Código del banco en SPEI",
     "cuenta_beneficiario": "CLABE del beneficiario",
     "institucion_beneficiaria": "Código del banco en SPEI",
-    "monto": 120, //Cantidad en centavos
+    "monto": 120, # Cantidad en centavos
     "nombre_beneficiario": "Nombre",
     "nombre_ordenante": "Nombre",
     "cuenta_ordenante": "CLABE del ordenante",
     "rfc_curp_ordenante": "RFC",
+    "version": 2 # Actualmente solo es soportada la versión 2
 }
 ```
 
 Campos opcionales:
 
-````javascript
+```python
 {
     "speid_id": "ID generado por el backend para identificar la orden",
-    "version": 1, //Se asume versión 0 si no es especificado
     "empresa": "Default: Aquella que fue ingresada en las credenciales de STP",
     "folio_origen": "",
     "clave_rastreo": "Default: CR{TIME}",
-    "tipo_pago": 1, //Default: 1
+    "tipo_pago": 1, # Default: 1
     "tipo_cuenta_ordenante": "",
-    "tipo_cuenta_beneficiario": 40, //Default: 40
+    "tipo_cuenta_beneficiario": 40, # Default: 40
     "rfc_curp_beneficiario": "Default: ND",
     "email_beneficiario": "",
     "tipo_cuenta_beneficiario2": "",
@@ -145,20 +178,21 @@ Campos opcionales:
     "clave_cat_usuario2": "",
     "clave_pago": "",
     "referencia_cobranza": "",
-    "referencia_numerica": 0, //Default: Número aleatorio
+    "referencia_numerica": 0, # Default: Número aleatorio
     "tipo_operacion": "",
     "topologia": "Default: T",
     "usuario": "",
-    "medio_entrega": 3, //Default: 3
-    "prioridad": 1, //Default: 1
+    "medio_entrega": 3, # Default: 3
+    "prioridad": 1, #Default: 1
     "iva": "",
 }
-````
+```
 
 Al momento de agregar la tarea de Celery, está es ejecutada por el Daemon
 y se genera una nueva transacción con su correspondiente evento,
 posteriormente se envía la orden al proveedor (STP) y el resultado se almacena
-en un nuevo evento y se devuelve a RabbitMQ una notificación:
+en un nuevo evento y se notifica al backend haciendo un PATCH al endpoint 
+definido en la variable de ambiente `CALLBACK_URL` con el ID del request en la URL:
 
 ```python
 {
@@ -170,8 +204,9 @@ en un nuevo evento y se devuelve a RabbitMQ una notificación:
 
 Cuando STP responde con el resultado de la operación, se recibe en el
 servicio `/orden_events` el cual busca la transacción por el ID de la orden y
-almacena un nuevo Evento. Posteriormente se envía a RabbitMQ para ser
-procesado por el Backend.
+almacena un nuevo Evento. Posteriormente se se notifica al backend haciendo un PATCH al 
+endpoint definido en la variable de ambiente `CALLBACK_URL` con el ID del request en la 
+URL.
 
 Este es el cuerpo del mensaje en RabbitMQ:
 
@@ -182,3 +217,6 @@ Este es el cuerpo del mensaje en RabbitMQ:
 'speid_id': 'SOME_ID'
 }
 ````
+
+___
+Hecho con ❤️ en [Cuenca](https://cuenca.com/)

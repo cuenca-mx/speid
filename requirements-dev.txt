@@ -7,3 +7,10 @@ pytest-cov
 flask-shell-ipython
 werkzeug
 coveralls
+pytest-vcr
+moto
+pytest-mock
+black
+isort[requirements]
+mongomock
+pandas
