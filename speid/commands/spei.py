@@ -1,15 +1,13 @@
+from datetime import datetime
+
 import click
-import os
 
-from ast import literal_eval
-import stpmex
-
-from speid import app, db
-from speid.models import Event
-from speid.models import Transaction
+from speid import app
 from speid.helpers import callback_helper
-from speid.tables.types import Estado, State
-from speid.daemon.tasks import execute_task
+from speid.models import Event, Request, Transaction
+from speid.types import Estado, EventType
+
+import pandas
 
 
 @app.cli.group('speid')
@@ -24,26 +22,22 @@ def speid_group():
 def callback_spei_transaction(transaction_id, transaction_status):
     """Establece el estado de la transacción,
     valores permitidos succeeded y failed"""
-    transaction = (db.session.query(Transaction)
-                   .filter_by(id=transaction_id).one())
+    transaction = Transaction.objects.get(id=transaction_id)
     if transaction_status == Estado.succeeded.name:
         transaction.estado = Estado.succeeded
-        state = State.completed
-    if transaction_status == Estado.failed.name:
+        event_type = EventType.completed
+    elif transaction_status == Estado.failed.name:
         transaction.estado = Estado.failed
-        state = State.error
+        event_type = EventType.error
+    else:
+        raise ValueError('Invalid event type')
     callback_helper.set_status_transaction(
-        transaction.speid_id,
-        dict(estado=transaction.estado.value)
+        transaction.speid_id, transaction.estado.name
     )
-    event = Event(
-        transaction_id=transaction.id,
-        type=state,
-        meta=str('Reverse by command SPEID')
-    )
-    db.session.add(transaction)
-    db.session.add(event)
-    db.session.commit()
+    transaction.events.append(Event(type=event_type,
+                                    metadata=str('Reversed by SPEID command')))
+    transaction.save()
+    return transaction
 
 
 @speid_group.command()
@@ -52,53 +46,65 @@ def re_execute_transactions(speid_id):
     """Retry send a transaction to STP, it takes the values
     of the event created before
     """
-    stp_private_location = os.environ['STP_PRIVATE_LOCATION']
-    wsdl_path = os.environ['STP_WSDL']
-    stp_empresa = os.environ['STP_EMPRESA']
-    priv_key_passphrase = os.environ['STP_KEY_PASSPHRASE']
-    stp_prefijo = os.environ['STP_PREFIJO']
+    transaction = Transaction.objects.get(speid_id=speid_id)
 
-    with open(stp_private_location) as fp:
-        private_key = fp.read()
-    stpmex.configure(wsdl_path=wsdl_path,
-                     empresa=stp_empresa,
-                     priv_key=private_key,
-                     priv_key_passphrase=priv_key_passphrase,
-                     prefijo=int(stp_prefijo))
-    if speid_id is None:
-        transactions = (db.session.query(Transaction)
-                        .filter_by(estado='submitted',
-                                   orden_id=None))
-        for transaction in transactions:
-            send_queue(transaction)
+    if transaction is None:
+        raise ValueError('Transaction not found')
+
+    order = transaction.get_order()
+    transaction.save()
+
+    order.monto = order.monto / 100
+
+    res = order.registra()
+
+    if res is not None and res.id > 0:
+        transaction.events.append(Event(type=EventType.completed,
+                                        metadata=str(res)))
     else:
-        transaction = (db.session.query(Transaction)
-                       .filter_by(speid_id=speid_id,
-                                  estado='submitted',
-                                  orden_id=None)
-                       .first())
-        send_queue(transaction)
+        transaction.events.append(Event(type=EventType.error,
+                                        metadata=str(res)))
+
+    transaction.save()
 
 
-def send_queue(transaction):
-    try:
-        event = (db.session.query(Event).
-                 filter_by(
-            transaction_id=transaction.id,
-            type=State.created
-        ).order_by(Event.created_at.desc()).first())
+@speid_group.command()
+@click.option('--transactions', default='transactions.csv',
+              help='CSV file with transactions')
+@click.option('--events', default='events.csv', help='CSV file with events')
+@click.option('--requests', default='requests.csv',
+              help='CSV file with requests')
+def migrate_from_csv(transactions, events, requests):
+    """
+    Hace la migración de una base de datos Postgres a MongoDB, los datos deben
+     ser exportados a CSV antes de ser ejecutado, se puede utilizar el archivo
+     scripts/migrate_postgres_mongo.sh para ejecutar la tarea completa
+    :param transactions: Archivo CSV con los datos de las transacciones
+    :param events: Archivo CSV con los eventos relacionados a las transacciones
+    :param requests: Archivo CSV con los requests
+    :return:
+    """
+    transactions_list = pandas.read_csv(transactions)
+    transactions = [Transaction(**t) for t in transactions_list.iterrows()]
 
-        event_retry = Event(
-            transaction_id=transaction.id,
-            type=State.retry,
-            meta=event.meta
-        )
-        db.session.add(event_retry)
-        db.session.commit()
-        order_val = literal_eval(event.meta)
-        execute_task(order_val)
-    except Exception as exc:
-        print(exc)
+    requests_list = pandas.read_csv(requests)
+    requests = [Request(**r) for r in requests_list.iterrows()]
+
+    events_list = pandas.read_csv(events)
+    for e in events_list.iterrows():
+        trx = next(t for t in transactions if t.id == e['transaction_id'])
+        trx.events.append(
+            Event(
+                type=EventType[e['type']],
+                metadata=e['meta'],
+                created_at=datetime.strptime(e['created_at'] + '00',
+                                             '%Y-%m-%d %H:%M:%S.%f%z')
+            ))
+
+    for transaction in transactions:
+        transaction.save()
+
+    Request.objects.insert(requests)
 
 
 if __name__ == "__main__":

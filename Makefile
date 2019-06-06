@@ -15,7 +15,11 @@ venv:
 		pip install --quiet --upgrade pip
 
 lint:
-		pycodestyle --ignore=E402 speid/ migrations/ test/
+		pycodestyle --ignore=E402 speid/ tests/
+
+polish:
+		black -S -l 79 speid/*
+		isort -rc --atomic speid/*
 
 clean-pyc:
 		find . -name '__pycache__' -exec rm -r "{}" +

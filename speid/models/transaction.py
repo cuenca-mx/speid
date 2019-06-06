@@ -1,171 +1,130 @@
-import datetime as dt
+from mongoengine import (DateTimeField, Document, IntField, ListField,
+                         ReferenceField, StringField)
+from stpmex import Orden
+from stpmex.ordenes import ORDEN_FIELDNAMES
 
-from sqlalchemy.orm import relationship
-from stpmex.ordenes import ORDEN_FIELDNAMES, Orden
-from stpmex.types import AccountType
+from speid.helpers import callback_helper
+from speid.types import Estado, EventType
 
-import clabe
-import luhnmod10
-
-from speid.tables import transactions
-from speid.tables.types import Estado
-from speid.tables.helpers import base62_uuid
-
-from .base import db
 from .events import Event
-from .helpers import camel_to_snake
+from .helpers import (EnumField, date_now, mongo_to_dict, snake_to_camel,
+                      updated_at)
 
 
-def contain_required_fields(required_fields, dict_val):
-    for r in required_fields:
-        if r not in dict_val:
-            return False
-    return True
+@updated_at.apply
+class Transaction(Document):
+    created_at = date_now()
+    updated_at = DateTimeField()
+    stp_id = IntField()
+    fecha_operacion = DateTimeField()
+    institucion_ordenante = StringField()
+    institucion_beneficiaria = StringField()
+    clave_rastreo = StringField()
+    monto = IntField()
+    nombre_ordenante = StringField()
+    tipo_cuenta_ordenante = IntField()
+    cuenta_ordenante = StringField()
+    rfc_curp_ordenante = StringField()
+    nombre_beneficiario = StringField()
+    tipo_cuenta_beneficiario = IntField()
+    cuenta_beneficiario = StringField()
+    rfc_curp_beneficiario = StringField()
+    concepto_pago = StringField()
+    referencia_numerica = IntField()
+    empresa = StringField()
+    estado = EnumField(Estado, default=Estado.submitted)
+    version = IntField()
+    speid_id = StringField()
+    events = ListField(ReferenceField(Event))
+    folio_origen = StringField()
+    tipo_pago = IntField()
+    email_beneficiario = StringField()
+    tipo_cuenta_beneficiario2 = StringField()
+    nombre_beneficiario2 = StringField()
+    cuenta_beneficiario2 = StringField()
+    rfc_curpBeneficiario2 = StringField()
+    concepto_pago2 = StringField()
+    clave_cat_usuario1 = StringField()
+    clave_cat_usuario2 = StringField()
+    clave_pago = StringField()
+    referencia_cobranza = StringField()
+    tipo_operacion = StringField()
+    topologia = StringField()
+    usuario = StringField()
+    medio_entrega = IntField()
+    prioridad = IntField()
+    iva = StringField()
 
+    def to_dict(self):
+        return mongo_to_dict(self, [])
 
-class TransactionFactory:
+    def save(
+        self,
+        force_insert=False,
+        validate=True,
+        clean=True,
+        write_concern=None,
+        cascade=None,
+        cascade_kwargs=None,
+        _refs=None,
+        save_condition=None,
+        signal_kwargs=None,
+        **kwargs
+    ):
+        if len(self.events) > 0:
+            [event.save() for event in self.events]
+        super().save(
+            force_insert,
+            validate,
+            clean,
+            write_concern,
+            cascade,
+            cascade_kwargs,
+            _refs,
+            save_condition,
+            signal_kwargs,
+            **kwargs
+        )
 
-    @classmethod
-    def create_transaction(cls, version, order_dict):
-        if version == 0 and Transaction.is_valid(order_dict):
-            return Transaction.transform_from_order(order_dict)
-        if version == 1 and TransactionV1.is_valid(order_dict):
-            return TransactionV1.transform_from_order(order_dict)
-        if version == 2 and TransactionV2.is_valid(order_dict):
-            return TransactionV2.transform_from_order(order_dict)
-        return Transaction.error(order_dict)
+    def delete(self, signal_kwargs=None, **write_concern):
+        if len(self.events) > 0:
+            [event.delete() for event in self.events]
+        super().delete(signal_kwargs, **write_concern)
 
+    def set_state(self, state: Estado):
+        self.events.append(Event(type=EventType.created))
 
-class Transaction(db.Model):
-    __table__ = transactions
+        callback_helper.set_status_transaction(self.speid_id, state.value)
+        self.estado = state
 
-    events = relationship(Event)
+        self.events.append(Event(type=EventType.completed))
 
-    required_fields = [
-        "concepto_pago",
-        "institucion_ordenante",
-        "cuenta_beneficiario",
-        "institucion_beneficiaria",
-        "monto",
-        "nombre_beneficiario",
-        "nombre_ordenante",
-        "cuenta_ordenante",
-        "rfc_curp_ordenante"
-    ]
+    def confirm_callback_transaction(self):
+        self.events.append(Event(type=EventType.created))
+        self.save()
 
-    @classmethod
-    def error(cls, order_dict):
-        trans_dict = {camel_to_snake(k): v for k, v in order_dict.items()}
-        transaction = Transaction(**trans_dict)
-        transaction.estado = Estado.error
-        transaction.fecha_operacion = dt.date.today()
-        transaction.clave_rastreo = "ND"
-        transaction.tipo_cuenta_beneficiario = 0
-        transaction.rfc_curp_beneficiario = "ND",
-        transaction.concepto_pago = "ND",
-        transaction.referencia_numerica = 0,
-        transaction.empresa = "ND"
-        return transaction, None
+        response = callback_helper.send_transaction(self.to_dict())
+        self.estado = Estado(response['status'])
 
-    @classmethod
-    def is_valid(cls, order_dict):
-        if contain_required_fields(cls.required_fields, order_dict):
-            if clabe.validate_clabe(order_dict['cuenta_beneficiario']) \
-                    or luhnmod10.valid(order_dict['cuenta_beneficiario']):
-                return True
-        return False
+        self.events.append(
+            Event(type=EventType.completed, metadata=str(response))
+        )
 
-    @classmethod
-    def transform(cls, trans_dict):
-        trans_dict = {camel_to_snake(k): v for k, v in trans_dict.items()}
-        trans_dict['orden_id'] = trans_dict.pop('clave')
-        trans_dict['monto'] = trans_dict['monto'] * 100
-        transaction = cls(**trans_dict)
-        if transaction.speid_id is None:
-            transaction.speid_id = base62_uuid('SR')()
-        transaction.fecha_operacion = dt.datetime.strptime(
-            str(transaction.fecha_operacion),
-            '%Y%m%d'
-        ).date()
-        return transaction
-
-    @classmethod
-    def transform_from_order(cls, order_dict):
-
-        if len(order_dict['cuenta_beneficiario']) == 16:
-            order_dict['tipo_cuenta_beneficiario'] = (
-                AccountType.DEBIT_CARD.value)
-
-        trans_dict = {k: order_dict[k] for k in
-                      filter(lambda r: r in order_dict,
-                             transactions.columns.keys())}
-        order_dict = {k: order_dict[camel_to_snake(k)]
-                      for k in filter(
-            lambda r: camel_to_snake(r) in order_dict, ORDEN_FIELDNAMES)}
+    def get_order(self):
+        trx_dict = self.to_dict()
+        order_dict = {
+            snake_to_camel(k): v
+            for k, v in trx_dict.items()
+            if snake_to_camel(k) in ORDEN_FIELDNAMES and (
+                trx_dict[k] is not None)
+        }
         order = Orden(**order_dict)
-        transaction = cls(**trans_dict)
-        transaction.fecha_operacion = dt.date.today()
-        transaction.estado = Estado.submitted
-        order.institucionOperante = clabe.BANKS[
-            transaction.institucion_ordenante]
-        order.institucionContraparte = clabe.BANKS[
-            transaction.institucion_beneficiaria]
-        transaction.clave_rastreo = order.claveRastreo
-        transaction.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
-        transaction.rfc_curp_beneficiario = order.rfcCurpBeneficiario,
-        transaction.concepto_pago = order.conceptoPago,
-        transaction.referencia_numerica = order.referenciaNumerica,
-        transaction.empresa = order.empresa,
+        order.institucionOperante = self.institucion_ordenante
+        order.institucionContraparte = self.institucion_beneficiaria
+        self.clave_rastreo = order.claveRastreo
+        self.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
+        self.rfc_curp_beneficiario = order.rfcCurpBeneficiario
+        self.referencia_numerica = order.referenciaNumerica
+        self.empresa = order.empresa
 
-        return transaction, order
-
-
-class TransactionV1(Transaction):
-
-    required_v1_fields = ['speid_id']
-
-    @classmethod
-    def is_valid(cls, order_dict):
-        return super().is_valid(order_dict) and contain_required_fields(
-            cls.required_v1_fields,
-            order_dict)
-
-    @classmethod
-    def transform_from_order(cls, order_dict):
-        transaction, order = super().transform_from_order(order_dict)
-        transaction.speid_id = order_dict['speid_id']
-        return transaction, order
-
-
-class TransactionV2(Transaction):
-
-    @classmethod
-    def is_valid(cls, order_dict):
-        return super().is_valid(order_dict)
-
-    @classmethod
-    def transform_from_order(cls, order_dict):
-        if len(order_dict['cuenta_beneficiario']) == 16:
-            order_dict['tipo_cuenta_beneficiario'] = (
-                AccountType.DEBIT_CARD.value)
-
-        trans_dict = {k: order_dict[k] for k in
-                      filter(lambda r: r in order_dict,
-                             transactions.columns.keys())}
-        order_dict = {k: order_dict[camel_to_snake(k)]
-                      for k in filter(
-            lambda r: camel_to_snake(r) in order_dict, ORDEN_FIELDNAMES)}
-        order = Orden(**order_dict)
-        transaction = cls(**trans_dict)
-        transaction.fecha_operacion = dt.date.today()
-        transaction.estado = Estado.submitted
-        order.institucionOperante = transaction.institucion_ordenante
-        order.institucionContraparte = transaction.institucion_beneficiaria
-        transaction.clave_rastreo = order.claveRastreo
-        transaction.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
-        transaction.rfc_curp_beneficiario = order.rfcCurpBeneficiario,
-        transaction.concepto_pago = order.conceptoPago,
-        transaction.referencia_numerica = order.referenciaNumerica,
-        transaction.empresa = order.empresa,
-
-        return transaction, order
+        return order
