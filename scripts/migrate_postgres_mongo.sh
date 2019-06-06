@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-export PATH=/bin:/usr/bin:/sbin:/usr/sbin
+#!/bin/bash
 
 # Define basic functions
 function print_info {
@@ -37,7 +36,7 @@ print_info "Install postgres"
 echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get -q -y install "$1"
+DEBIAN_FRONTEND=noninteractive apt-get -q -y install postgresql postgresql-contrib
 
 # Install pandas
 
@@ -47,19 +46,19 @@ make install-dev
 
 # Read data from postgres and put it into a csv file
 print_info "Connect to postgres and extract transactions"
-psql -U USER -h ${HOST} -P ${PASS} -p ${PORT} -c "\copy (SELECT * FROM public.transactions) to 'transactions.csv' with csv header"
+psql "dbname=db host=${HOST} user=${USER} password=${PASS} port=${PORT} sslmode=require" -c "\copy (SELECT * FROM public.transactions) to 'transactions.csv' with csv header"
 
 print_info "Connect to postgres and extract requests"
-psql -U USER -h ${HOST} -P ${PASS} -p ${PORT} -c "\copy (SELECT * FROM public.requests) to 'requests.csv' with csv header"
+psql "dbname=db host=${HOST} user=${USER} password=${PASS} port=${PORT} sslmode=require" -c "\copy (SELECT * FROM public.requests) to 'requests.csv' with csv header"
 
 print_info "Connect to postgres and extract events"
-psql -U USER -h ${HOST} -P ${PASS} -p ${PORT} -c "\copy (SELECT * FROM public.events) to 'events.csv' with csv header"
+psql "dbname=db host=${HOST} user=${USER} password=${PASS} port=${PORT} sslmode=require" -c "\copy (SELECT * FROM public.events) to 'events.csv' with csv header"
 
 
 # Load data into mongodb
 print_info "Connect to mongodb and send info"
 
-flask speid migrate_from_csv --transactions transactions.csv --events events.csv --requests requests.csv
+flask speid migrate-from-csv --transactions transactions.csv --events events.csv --requests requests.csv
 
 # Wipe data
 print_info "Delete temp files"

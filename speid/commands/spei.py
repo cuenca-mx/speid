@@ -75,6 +75,15 @@ def re_execute_transactions(speid_id):
 @click.option('--requests', default='requests.csv',
               help='CSV file with requests')
 def migrate_from_csv(transactions, events, requests):
+    """
+    Hace la migración de una base de datos Postgres a MongoDB, los datos deben
+     ser exportados a CSV antes de ser ejecutado, se puede utilizar el archivo
+     scripts/migrate_postgres_mongo.sh para ejecutar la tarea completa
+    :param transactions: Archivo CSV con los datos de las transacciones
+    :param events: Archivo CSV con los eventos relacionados a las transacciones
+    :param requests: Archivo CSV con los requests
+    :return:
+    """
     transactions_list = pandas.read_csv(transactions)
     transactions = [Transaction(**t) for t in transactions_list.iterrows()]
 

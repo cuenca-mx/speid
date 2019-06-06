@@ -63,6 +63,4 @@ stpmex.configure(
 
 import speid.models
 import speid.views
-
-if not SPEID_ENV.lower() == 'prod':
-    import speid.commands
+import speid.commands
