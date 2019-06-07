@@ -1,7 +1,6 @@
 ipython
 ipdb
 pycodestyle
-docker
 pytest
 pytest-cov
 flask-shell-ipython
@@ -13,4 +12,3 @@ pytest-mock
 black
 isort[requirements]
 mongomock
-pandas
