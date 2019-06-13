@@ -84,27 +84,57 @@ def migrate_from_csv(transactions, events, requests):
     :param requests: Archivo CSV con los requests
     :return:
     """
-    transactions_list = pandas.read_csv(transactions)
-    transactions = [Transaction(**t) for t in transactions_list.iterrows()]
+    transactions_list = pandas.read_csv(
+        transactions,
+        converters=dict(
+            institucion_ordenante=lambda x: str(x),
+            institucion_beneficiaria=lambda x: str(x),
+            cuenta_ordenante=lambda x: str(x),
+            cuenta_beneficiario=lambda x: str(x)
+        ))
+    transactions_list = transactions_list.where(
+        (pandas.notnull(transactions_list)), None)
+    events_list = pandas.read_csv(events)
+    events_list = events_list.where(
+        (pandas.notnull(events_list)), None)
+    transactions = []
+    for _, t in transactions_list.iterrows():
+        t['stp_id'] = t['orden_id']
+        del t['orden_id']
+        if t['estado'] in ['ND', 'success', 'liquidacion']:
+            t['estado'] = 'succeeded'
+        t['institucion_beneficiaria'] = str(t['institucion_beneficiaria'])
+        t['cuenta_ordenante'] = str(t['cuenta_ordenante'])
+        t['cuenta_beneficiario'] = str(t['cuenta_beneficiario'])
+
+        transaction = Transaction(**t)
+
+        transaction_events = events_list[events_list.transaction_id == t['id']]
+        for _, e in transaction_events.iterrows():
+            transaction.events.append(
+                Event(
+                    type=EventType[e['type']],
+                    metadata=e['meta'],
+                    created_at=datetime.strptime(e['created_at'],
+                                                 '%Y-%m-%d %H:%M:%S.%f')
+                ))
+
+        transaction.id = None
+        transactions.append(transaction)
 
     requests_list = pandas.read_csv(requests)
-    requests = [Request(**r) for r in requests_list.iterrows()]
-
-    events_list = pandas.read_csv(events)
-    for e in events_list.iterrows():
-        trx = next(t for t in transactions if t.id == e['transaction_id'])
-        trx.events.append(
-            Event(
-                type=EventType[e['type']],
-                metadata=e['meta'],
-                created_at=datetime.strptime(e['created_at'] + '00',
-                                             '%Y-%m-%d %H:%M:%S.%f%z')
-            ))
-
-    for transaction in transactions:
-        transaction.save()
+    requests_list = requests_list.where(
+        (pandas.notnull(requests_list)), None)
+    requests = []
+    for _, r in requests_list.iterrows():
+        r['method'] = r['method'].upper()
+        request = Request(**r)
+        request.id = None
+        requests.append(request)
 
     Request.objects.insert(requests)
+    for transaction in transactions:
+        transaction.save()
 
 
 if __name__ == "__main__":

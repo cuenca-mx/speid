@@ -10,3 +10,5 @@ vcrpy>=2.0.1
 flask-mongoengine>=0.9.5
 blinker>=1.4
 pydantic>=0.22
+docker>=4.0.1
+pandas>=0.24.2
