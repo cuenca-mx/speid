@@ -1,11 +1,13 @@
 import json
 
-from flask import jsonify, make_response, request
+from flask import jsonify, make_response, request, abort
+from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
 from speid import app
-from speid.models import Request, Transaction
-from speid.types import Estado, HttpRequestMethod
+from speid.models import Event, Request, Transaction
+from speid.types import Estado, EventType, HttpRequestMethod
+from speid.utils import get, patch, post
 from speid.validations import StpTransaction
 
 
@@ -32,7 +34,7 @@ def create_orden_events():
     return "got it!"
 
 
-@app.route('/ordenes', methods=['POST'])
+@post('/ordenes')
 def create_orden():
     transaction = Transaction()
     try:
@@ -49,7 +51,65 @@ def create_orden():
         transaction.estado = Estado.error
         transaction.save()
         capture_exception(exc)
-    return make_response(jsonify(r), 201)
+    return 201, r
+
+
+@get('/transactions')
+def get_orders():
+    estado = request.args.get('estado', default=None, type=str)
+    prefix_ordenante = request.args.get('prefix_ordenante', default=None,
+                                        type=str)
+    prefix_beneficiario = request.args.get('prefix_beneficiario', default=None,
+                                           type=str)
+    query = dict()
+    if estado:
+        query['estado'] = estado
+    if prefix_ordenante:
+        query['cuenta_ordenante__startswith'] = prefix_ordenante
+    if prefix_beneficiario:
+        query['cuenta_beneficiario__startswith'] = prefix_beneficiario
+
+    transactions = Transaction.objects(**query)
+    return 200, transactions
+
+
+@patch('/transactions/<transaction_id>/process')
+def process_transaction(transaction_id):
+    try:
+        transaction = Transaction.objects.get(id=transaction_id)
+    except DoesNotExist:
+        abort(401)
+
+    order = transaction.get_order()
+    transaction.save()
+
+    res = order.registra()
+
+    if res is not None and res.id > 0:
+        transaction.stp_id = res.id
+        transaction.events.append(
+            Event(type=EventType.completed, metadata=str(res))
+        )
+    else:
+        transaction.events.append(
+            Event(type=EventType.error, metadata=str(res))
+        )
+
+    transaction.save()
+    return 201, transaction
+
+
+@patch('/transactions/<transaction_id>/reverse')
+def reverse_transaction(transaction_id):
+    try:
+        transaction = Transaction.objects.get(id=transaction_id)
+    except DoesNotExist:
+        abort(401)
+
+    transaction.set_state(Estado.error)
+    transaction.save()
+
+    return 201, transaction
 
 
 @app.before_request
