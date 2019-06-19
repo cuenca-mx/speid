@@ -11,7 +11,8 @@ def make_celery(app):
         broker=app.config['CELERY_BROKER_URL'],
         include=['speid.tasks.orders'],
         task_default_queue=app.config['CELERY_TASK_DEFAULT_QUEUE'],
-        task_routes=app.config['CELERY_ROUTES']
+        task_routes=(app.config['CELERY_ROUTES']
+                     if app.config['CELERY_ROUTES'] else None)
     )
     celery_app.conf.update(app.config)
 
@@ -26,6 +27,8 @@ def make_celery(app):
 
 app.config['CELERY_BROKER_URL'] = os.environ['AMPQ_ADDRESS']
 app.config['CELERY_TASK_DEFAULT_QUEUE'] = os.environ['TASK_DEFAULT_QUEUE']
-app.config['CELERY_ROUTES'] = os.environ['CELERY_ROUTES']
+if os.environ['CELERY_ROUTES']:
+    app.config['CELERY_ROUTES'] = {
+        'speid.tasks.orders': {'routing_key': os.environ['CELERY_ROUTES']}}
 
 celery = make_celery(app)
