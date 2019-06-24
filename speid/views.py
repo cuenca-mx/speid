@@ -84,6 +84,8 @@ def process_transaction(transaction_id):
     order = transaction.get_order()
     transaction.save()
 
+    order.monto = order.monto / 100
+
     res = order.registra()
 
     if res is not None and res.id > 0:
