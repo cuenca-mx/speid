@@ -119,6 +119,7 @@ class Transaction(Document):
                 trx_dict[k] is not None)
         }
         order = Orden(**order_dict)
+        order.fechaOperacion = None
         order.institucionOperante = self.institucion_ordenante
         order.institucionContraparte = self.institucion_beneficiaria
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
