@@ -69,14 +69,15 @@ def get_orders():
     if prefix_beneficiario:
         query['cuenta_beneficiario__startswith'] = prefix_beneficiario
 
-    transactions = Transaction.objects(**query)
+    transactions = Transaction.objects(**query).order_by('-created_at')
     return 200, transactions
 
 
 @patch('/transactions/<transaction_id>/process')
 def process_transaction(transaction_id):
     try:
-        transaction = Transaction.objects.get(id=transaction_id)
+        transaction = Transaction.objects.get(id=transaction_id,
+                                              estado=Estado.submitted)
     except DoesNotExist:
         abort(401)
 
@@ -90,23 +91,25 @@ def process_transaction(transaction_id):
         transaction.events.append(
             Event(type=EventType.completed, metadata=str(res))
         )
+        transaction.save()
+        return 201, transaction
     else:
         transaction.events.append(
             Event(type=EventType.error, metadata=str(res))
         )
-
-    transaction.save()
-    return 201, transaction
+        transaction.save()
+        return 400, res
 
 
 @patch('/transactions/<transaction_id>/reverse')
 def reverse_transaction(transaction_id):
     try:
-        transaction = Transaction.objects.get(id=transaction_id)
+        transaction = Transaction.objects.get(id=transaction_id,
+                                              estado=Estado.submitted)
     except DoesNotExist:
         abort(401)
 
-    transaction.set_state(Estado.error)
+    transaction.set_state(Estado.failed)
     transaction.save()
 
     return 201, transaction

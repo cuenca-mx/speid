@@ -1,3 +1,5 @@
+import os
+
 import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
@@ -14,7 +16,7 @@ def retry_timeout(attempts):
     return 2 * attempts
 
 
-@celery.task(bind=True, max_retries=5)
+@celery.task(bind=True, max_retries=5, name=os.environ['CELERY_TASK_NAME'])
 def send_order(self, order_val):
     try:
         execute(order_val)
@@ -51,6 +53,7 @@ def execute(order_val):
         transaction = prev_trx
         transaction.events.append(Event(type=EventType.retry))
     except DoesNotExist:
+        transaction.events.append(Event(type=EventType.created))
         pass
 
     order = transaction.get_order()
