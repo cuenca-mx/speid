@@ -176,5 +176,5 @@ def test_reverse_transaction(client, default_outcome_transaction,
     assert resp.status_code == 201
     trx = Transaction.objects.get(id=resp.json["_id"]["$oid"])
 
-    assert trx.estado is Estado.error
+    assert trx.estado is Estado.failed
     trx.delete()
