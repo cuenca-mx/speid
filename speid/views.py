@@ -1,6 +1,6 @@
 import json
 
-from flask import jsonify, make_response, request, abort
+from flask import request, abort
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
