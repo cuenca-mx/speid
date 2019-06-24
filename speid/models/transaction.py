@@ -121,10 +121,13 @@ class Transaction(Document):
         order = Orden(**order_dict)
         order.institucionOperante = self.institucion_ordenante
         order.institucionContraparte = self.institucion_beneficiaria
-        self.clave_rastreo = order.claveRastreo
-        self.tipo_cuenta_beneficiario = order.tipoCuentaBeneficiario
-        self.rfc_curp_beneficiario = order.rfcCurpBeneficiario
-        self.referencia_numerica = order.referenciaNumerica
-        self.empresa = order.empresa
+        self.clave_rastreo = self.clave_rastreo or order.claveRastreo
+        self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (
+            order.tipoCuentaBeneficiario)
+        self.rfc_curp_beneficiario = self.rfc_curp_beneficiario or (
+            order.rfcCurpBeneficiario)
+        self.referencia_numerica = self.referencia_numerica or (
+            order.referenciaNumerica)
+        self.empresa = self.empresa or order.empresa
 
         return order

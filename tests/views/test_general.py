@@ -1,3 +1,5 @@
+import pytest
+
 from speid.models import Transaction
 from speid.types import Estado
 
@@ -110,3 +112,69 @@ def test_create_orden_without_ordenante(client, mock_callback_api):
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
     transaction.delete()
+
+
+def test_get_transactions(client, default_income_transaction,
+                          default_outcome_transaction, mock_callback_api):
+    resp = client.post('/ordenes', json=default_income_transaction)
+    assert resp.status_code == 201
+    trx_in = Transaction.objects.order_by('-created_at').first()
+
+    trx_out = Transaction(**default_outcome_transaction)
+    trx_out.stp_id = DEFAULT_ORDEN_ID
+    trx_out.save()
+
+    resp = client.get('/transactions?'
+                      'status=submitted&prefix_ordenante=6461801570')
+    assert resp.status_code == 200
+    assert str(trx_out.id) == resp.json[0]['_id']['$oid']
+
+    resp = client.get('/transactions?'
+                      'status=submitted&prefix_beneficiario=6461801570')
+    assert resp.status_code == 200
+    assert str(trx_in.id) == resp.json[0]['_id']['$oid']
+
+    resp = client.get('/transactions')
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
+
+
+@pytest.mark.vcr
+def test_process_transaction(client, default_outcome_transaction):
+    trx = Transaction(**default_outcome_transaction)
+    trx.stp_id = DEFAULT_ORDEN_ID
+    trx.save()
+
+    assert trx.estado is Estado.submitted
+
+    resp = client.get('/transactions?'
+                      'status=submitted&prefix_ordenante=6461801570')
+    assert resp.status_code == 200
+
+    resp = client.patch(f'/transactions/{resp.json[0]["_id"]["$oid"]}/process')
+    assert resp.status_code == 201
+    trx = Transaction.objects.get(id=resp.json["_id"]["$oid"])
+
+    assert trx.estado is Estado.submitted
+    assert trx.stp_id is not None
+    trx.delete()
+
+
+def test_reverse_transaction(client, default_outcome_transaction,
+                             mock_callback_api):
+    trx = Transaction(**default_outcome_transaction)
+    trx.stp_id = DEFAULT_ORDEN_ID
+    trx.save()
+
+    assert trx.estado is Estado.submitted
+
+    resp = client.get('/transactions?'
+                      'status=submitted&prefix_ordenante=6461801570')
+    assert resp.status_code == 200
+
+    resp = client.patch(f'/transactions/{resp.json[0]["_id"]["$oid"]}/reverse')
+    assert resp.status_code == 201
+    trx = Transaction.objects.get(id=resp.json["_id"]["$oid"])
+
+    assert trx.estado is Estado.failed
+    trx.delete()

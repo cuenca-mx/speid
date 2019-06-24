@@ -1,4 +1,7 @@
+import datetime as dt
+import json
 import os
+from enum import Enum
 
 import boto3
 import sentry_sdk
@@ -8,6 +11,22 @@ from flask_mongoengine import MongoEngine
 from python_hosts import Hosts, HostsEntry
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
+
+
+class CJSONEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if isinstance(o, Enum):
+            encoded = o.name
+        elif isinstance(o, dt.datetime):
+            encoded = o.isoformat() + 'Z'
+        else:
+            try:
+                encoded = o.to_dict()
+            except AttributeError:
+                encoded = super().default(o)
+        return encoded
+
 
 # Configura sentry
 
@@ -32,6 +51,8 @@ SPEID_ENV = os.getenv('SPEID_ENV', '')
 app = Flask('speid')
 
 app.config['MONGODB_HOST'] = DATABASE_URI
+
+app.json_encoder = CJSONEncoder
 
 db = MongoEngine(app)
 
