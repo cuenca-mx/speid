@@ -75,6 +75,17 @@ def test_create_orden(client, default_income_transaction, mock_callback_api):
     transaction.delete()
 
 
+def test_create_orden_blocked(
+        client, default_blocked_transaction, mock_callback_api):
+    resp = client.post('/ordenes', json=default_blocked_transaction)
+    transaction = Transaction.objects.get(
+        stp_id=default_blocked_transaction['Clave'])
+    assert transaction.estado is Estado.error
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'LIQUIDACION'
+    transaction.delete()
+
+
 def test_create_orden_exception(client, default_income_transaction):
     # Este test no tiene el mock, aún si hay una excepción debería devolver
     # Liquidación para ser validado posteriormente
