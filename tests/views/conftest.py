@@ -32,7 +32,7 @@ def default_outcome_transaction():
 @pytest.fixture
 def default_blocked_transaction():
     return dict(
-        Clave=2456303,
+        Clave=2456304,
         FechaOperacion=20180618,
         InstitucionOrdenante=40012,
         InstitucionBeneficiaria=90646,

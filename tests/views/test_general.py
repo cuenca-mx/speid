@@ -78,7 +78,8 @@ def test_create_orden(client, default_income_transaction, mock_callback_api):
 def test_create_orden_blocked(
         client, default_blocked_transaction, mock_callback_api):
     resp = client.post('/ordenes', json=default_blocked_transaction)
-    transaction = Transaction.objects.order_by('-created_at').first()
+    transaction = Transaction.objects.get(
+        stp_id=default_blocked_transaction['Clave'])
     assert transaction.estado is Estado.error
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
