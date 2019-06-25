@@ -1,14 +1,17 @@
 import json
-
+import os
 from flask import request, abort
 from mongoengine import DoesNotExist
-from sentry_sdk import capture_exception
+from sentry_sdk import capture_exception, capture_message
 
 from speid import app
 from speid.models import Event, Request, Transaction
 from speid.types import Estado, EventType, HttpRequestMethod
 from speid.utils import get, patch, post
 from speid.validations import StpTransaction
+
+
+CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
 
 
 @app.route('/')
@@ -40,6 +43,11 @@ def create_orden():
     try:
         external_transaction = StpTransaction(**request.json)
         transaction = external_transaction.transform()
+        if CLABES_BLOCKED:
+            clabes = CLABES_BLOCKED.split(',')
+            if transaction.cuenta_beneficiario in clabes:
+                capture_message('Transacción retenida')
+                raise Exception
 
         transaction.confirm_callback_transaction()
         transaction.save()
