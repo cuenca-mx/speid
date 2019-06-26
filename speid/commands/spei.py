@@ -59,6 +59,7 @@ def re_execute_transactions(speid_id):
     res = order.registra()
 
     if res is not None and res.id > 0:
+        transaction.stp_id = res.id
         transaction.events.append(Event(type=EventType.completed,
                                         metadata=str(res)))
     else:
