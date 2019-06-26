@@ -23,11 +23,13 @@ def health_check():
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
     try:
-        transaction = Transaction.objects(
-            stp_id=request.json['id']
-        ).first()
+        transaction = Transaction.objects.get(stp_id=request.json['id'])
 
         state = Estado.get_state_from_stp(request.json['Estado'])
+
+        if state is Estado.failed:
+            assert transaction.estado is not Estado.failed
+
         transaction.set_state(state)
 
         transaction.save()

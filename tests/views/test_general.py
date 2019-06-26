@@ -34,6 +34,36 @@ def test_create_order_event(
     trx.delete()
 
 
+def test_create_order_event_failed_twice(
+    mock_callback_api, client, default_outcome_transaction
+):
+    trx = Transaction(**default_outcome_transaction)
+    trx.stp_id = DEFAULT_ORDEN_ID
+    trx.save()
+    id_trx = trx.id
+
+    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    trx = Transaction.objects.get(id=id_trx)
+    assert trx.estado is Estado.failed
+
+    num_events = len(trx.events)
+    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    trx = Transaction.objects.get(id=id_trx)
+    assert trx.estado is Estado.failed
+    assert len(trx.events) == num_events
+    trx.delete()
+
+    trx.delete()
+
+
 def test_invalid_order_event(client, default_outcome_transaction):
     trx = Transaction(**default_outcome_transaction)
     trx.stp_id = DEFAULT_ORDEN_ID
