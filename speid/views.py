@@ -24,7 +24,7 @@ def health_check():
 def create_orden_events():
     try:
         transaction = Transaction.objects(
-            stp_id=request.json['id'], estado=Estado.submitted
+            stp_id=request.json['id']
         ).first()
 
         state = Estado.get_state_from_stp(request.json['Estado'])
