@@ -34,9 +34,39 @@ def test_create_order_event(
     trx.delete()
 
 
+def test_create_order_event_failed_twice(
+    mock_callback_api, client, default_outcome_transaction
+):
+    trx = Transaction(**default_outcome_transaction)
+    trx.stp_id = DEFAULT_ORDEN_ID
+    trx.save()
+    id_trx = trx.id
+
+    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    trx = Transaction.objects.get(id=id_trx)
+    assert trx.estado is Estado.failed
+
+    num_events = len(trx.events)
+    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    trx = Transaction.objects.get(id=id_trx)
+    assert trx.estado is Estado.failed
+    assert len(trx.events) == num_events
+    trx.delete()
+
+    trx.delete()
+
+
 def test_invalid_order_event(client, default_outcome_transaction):
     trx = Transaction(**default_outcome_transaction)
-    trx.orden_id = DEFAULT_ORDEN_ID
+    trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
     id_trx = trx.id
 
@@ -52,7 +82,7 @@ def test_invalid_order_event(client, default_outcome_transaction):
 
 def test_invalid_id_order_event(client, default_outcome_transaction):
     trx = Transaction(**default_outcome_transaction)
-    trx.orden_id = DEFAULT_ORDEN_ID
+    trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
     id_trx = trx.id
 
@@ -66,6 +96,28 @@ def test_invalid_id_order_event(client, default_outcome_transaction):
     trx.delete()
 
 
+def test_order_event_duplicated(client, default_outcome_transaction,
+                                mock_callback_api):
+    trx = Transaction(**default_outcome_transaction)
+    trx.stp_id = DEFAULT_ORDEN_ID
+    trx.save()
+    id_trx = trx.id
+
+    data = dict(id=DEFAULT_ORDEN_ID, Estado='LIQUIDACION', Detalle="0")
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    trx = Transaction.objects.get(id=id_trx)
+    assert trx.estado is Estado.failed
+    trx.delete()
+
+
 def test_create_orden(client, default_income_transaction, mock_callback_api):
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
@@ -73,6 +125,30 @@ def test_create_orden(client, default_income_transaction, mock_callback_api):
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
     transaction.delete()
+
+
+def test_create_orden_duplicated(client, default_income_transaction,
+                                 mock_callback_api):
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.succeeded
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'LIQUIDACION'
+
+    default_income_transaction['Clave'] = 2456304
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transactions = Transaction.objects(
+        clave_rastreo=default_income_transaction['ClaveRastreo']
+    ).order_by('-created_at')
+    assert len(transactions) == 2
+    assert transactions[0].stp_id == 2456304
+    assert transactions[0].estado is Estado.error
+    assert transactions[1].stp_id == 2456303
+    assert transactions[1].estado is Estado.succeeded
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'LIQUIDACION'
+    for t in transactions:
+        t.delete()
 
 
 def test_create_orden_blocked(

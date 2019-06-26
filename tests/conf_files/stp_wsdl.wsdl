@@ -8,13 +8,13 @@
              xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy"
              xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"
              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-             xmlns:tns="http://h2h.integration.spei.enlacefi.lgec.com/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-             xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://h2h.integration.spei.enlacefi.lgec.com/"
+             xmlns:tns="http://speid.test.com/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://speid.test.com/"
              name="SpeiActualizaServicesImpl">
     <types>
         <xsd:schema>
-            <xsd:import namespace="http://h2h.integration.spei.enlacefi.lgec.com/"
-                        schemaLocation="https://demo.stpmex.com:7024/speidemo/webservices/SpeiActualizaServices?xsd=1"/>
+            <xsd:import namespace="http://speid.test.com/"
+                        schemaLocation="SpeiActualizaServices.xsd"/>
         </xsd:schema>
     </types>
     <message name="retornaOrden">
@@ -193,177 +193,177 @@
     </message>
     <portType name="SpeiActualizaServices">
         <operation name="retornaOrden">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/retornaOrdenRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/retornaOrdenRequest"
                    message="tns:retornaOrden"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/retornaOrdenResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/retornaOrdenResponse"
                     message="tns:retornaOrdenResponse"/>
         </operation>
         <operation name="registraOrden">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraOrdenRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/registraOrdenRequest"
                    message="tns:registraOrden"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraOrdenResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/registraOrdenResponse"
                     message="tns:registraOrdenResponse"/>
         </operation>
         <operation name="confirmaAbonoDelay">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaAbonoDelayRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaAbonoDelayRequest"
                    message="tns:confirmaAbonoDelay"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaAbonoDelayResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaAbonoDelayResponse"
                     message="tns:confirmaAbonoDelayResponse"/>
         </operation>
         <operation name="devuelveOrdenRazonRechazo">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/devuelveOrdenRazonRechazoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/devuelveOrdenRazonRechazoRequest"
                    message="tns:devuelveOrdenRazonRechazo"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/devuelveOrdenRazonRechazoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/devuelveOrdenRazonRechazoResponse"
                     message="tns:devuelveOrdenRazonRechazoResponse"/>
         </operation>
         <operation name="regDetalleErrEnvExtemp">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/regDetalleErrEnvExtempRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/regDetalleErrEnvExtempRequest"
                    message="tns:regDetalleErrEnvExtemp"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/regDetalleErrEnvExtempResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/regDetalleErrEnvExtempResponse"
                     message="tns:regDetalleErrEnvExtempResponse"/>
         </operation>
         <operation name="registraDetalleErrorEnvio">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraDetalleErrorEnvioRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/registraDetalleErrorEnvioRequest"
                    message="tns:registraDetalleErrorEnvio"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraDetalleErrorEnvioResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/registraDetalleErrorEnvioResponse"
                     message="tns:registraDetalleErrorEnvioResponse"/>
         </operation>
         <operation name="tiempoEntregaAbonoRastreo">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/tiempoEntregaAbonoRastreoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/tiempoEntregaAbonoRastreoRequest"
                    message="tns:tiempoEntregaAbonoRastreo"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/tiempoEntregaAbonoRastreoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/tiempoEntregaAbonoRastreoResponse"
                     message="tns:tiempoEntregaAbonoRastreoResponse"/>
         </operation>
         <operation name="registraDetalleErrorRecepcion">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraDetalleErrorRecepcionRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/registraDetalleErrorRecepcionRequest"
                    message="tns:registraDetalleErrorRecepcion"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraDetalleErrorRecepcionResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/registraDetalleErrorRecepcionResponse"
                     message="tns:registraDetalleErrorRecepcionResponse"/>
         </operation>
         <operation name="confirmaAbonoId">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaAbonoIdRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaAbonoIdRequest"
                    message="tns:confirmaAbonoId"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaAbonoIdResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaAbonoIdResponse"
                     message="tns:confirmaAbonoIdResponse"/>
         </operation>
         <operation name="reenviaErroresH2H">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/reenviaErroresH2HRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/reenviaErroresH2HRequest"
                    message="tns:reenviaErroresH2H"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/reenviaErroresH2HResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/reenviaErroresH2HResponse"
                     message="tns:reenviaErroresH2HResponse"/>
         </operation>
         <operation name="confirmaAbono">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaAbonoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaAbonoRequest"
                    message="tns:confirmaAbono"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaAbonoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaAbonoResponse"
                     message="tns:confirmaAbonoResponse"/>
         </operation>
         <operation name="registraOrdenes">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraOrdenesRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/registraOrdenesRequest"
                    message="tns:registraOrdenes"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraOrdenesResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/registraOrdenesResponse"
                     message="tns:registraOrdenesResponse"/>
         </operation>
         <operation name="registraOrdenesTraspasos">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraOrdenesTraspasosRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/registraOrdenesTraspasosRequest"
                    message="tns:registraOrdenesTraspasos"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraOrdenesTraspasosResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/registraOrdenesTraspasosResponse"
                     message="tns:registraOrdenesTraspasosResponse"/>
         </operation>
         <operation name="devuelveOrden">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/devuelveOrdenRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/devuelveOrdenRequest"
                    message="tns:devuelveOrden"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/devuelveOrdenResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/devuelveOrdenResponse"
                     message="tns:devuelveOrdenResponse"/>
         </operation>
         <operation name="devuelveOrdenClaveRastreo">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/devuelveOrdenClaveRastreoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/devuelveOrdenClaveRastreoRequest"
                    message="tns:devuelveOrdenClaveRastreo"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/devuelveOrdenClaveRastreoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/devuelveOrdenClaveRastreoResponse"
                     message="tns:devuelveOrdenClaveRastreoResponse"/>
         </operation>
         <operation name="devuelveOrdenExtemporanea">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/devuelveOrdenExtemporaneaRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/devuelveOrdenExtemporaneaRequest"
                    message="tns:devuelveOrdenExtemporanea"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/devuelveOrdenExtemporaneaResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/devuelveOrdenExtemporaneaResponse"
                     message="tns:devuelveOrdenExtemporaneaResponse"/>
         </operation>
         <operation name="confirmaCargo">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaCargoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaCargoRequest"
                    message="tns:confirmaCargo"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaCargoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaCargoResponse"
                     message="tns:confirmaCargoResponse"/>
         </operation>
         <operation name="confirmaCargoRastreo">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaCargoRastreoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaCargoRastreoRequest"
                    message="tns:confirmaCargoRastreo"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/confirmaCargoRastreoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/confirmaCargoRastreoResponse"
                     message="tns:confirmaCargoRastreoResponse"/>
         </operation>
         <operation name="tiempoEntregaAbono">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/tiempoEntregaAbonoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/tiempoEntregaAbonoRequest"
                    message="tns:tiempoEntregaAbono"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/tiempoEntregaAbonoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/tiempoEntregaAbonoResponse"
                     message="tns:tiempoEntregaAbonoResponse"/>
         </operation>
         <operation name="tiempoEntregaCargo">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/tiempoEntregaCargoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/tiempoEntregaCargoRequest"
                    message="tns:tiempoEntregaCargo"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/tiempoEntregaCargoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/tiempoEntregaCargoResponse"
                     message="tns:tiempoEntregaCargoResponse"/>
         </operation>
         <operation name="tiempoEntregaCargoRastreo">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/tiempoEntregaCargoRastreoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/tiempoEntregaCargoRastreoRequest"
                    message="tns:tiempoEntregaCargoRastreo"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/tiempoEntregaCargoRastreoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/tiempoEntregaCargoRastreoResponse"
                     message="tns:tiempoEntregaCargoRastreoResponse"/>
         </operation>
         <operation name="traspasoEntreCuentas">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/traspasoEntreCuentasRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/traspasoEntreCuentasRequest"
                    message="tns:traspasoEntreCuentas"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/traspasoEntreCuentasResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/traspasoEntreCuentasResponse"
                     message="tns:traspasoEntreCuentasResponse"/>
         </operation>
         <operation name="conecta">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/conectaRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/conectaRequest"
                    message="tns:conecta"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/conectaResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/conectaResponse"
                     message="tns:conectaResponse"/>
         </operation>
         <operation name="desconecta">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/desconectaRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/desconectaRequest"
                    message="tns:desconecta"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/desconectaResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/desconectaResponse"
                     message="tns:desconectaResponse"/>
         </operation>
         <operation name="asociaNumeroCelular">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/asociaNumeroCelularRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/asociaNumeroCelularRequest"
                    message="tns:asociaNumeroCelular"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/asociaNumeroCelularResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/asociaNumeroCelularResponse"
                     message="tns:asociaNumeroCelularResponse"/>
         </operation>
         <operation name="altaCuentaTerceros">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/altaCuentaTercerosRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/altaCuentaTercerosRequest"
                    message="tns:altaCuentaTerceros"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/altaCuentaTercerosResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/altaCuentaTercerosResponse"
                     message="tns:altaCuentaTercerosResponse"/>
         </operation>
         <operation name="registraTraspaso">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraTraspasoRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/registraTraspasoRequest"
                    message="tns:registraTraspaso"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraTraspasoResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/registraTraspasoResponse"
                     message="tns:registraTraspasoResponse"/>
         </operation>
         <operation name="aRegistraCobro">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/aRegistraCobroRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/aRegistraCobroRequest"
                    message="tns:aRegistraCobro"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/aRegistraCobroResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/aRegistraCobroResponse"
                     message="tns:aRegistraCobroResponse"/>
         </operation>
         <operation name="aRegistraEstadoCobro">
-            <input wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/aRegistraEstadoCobroRequest"
+            <input wsam:Action="http://speid.test.com/SpeiActualizaServices/aRegistraEstadoCobroRequest"
                    message="tns:aRegistraEstadoCobro"/>
-            <output wsam:Action="http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/aRegistraEstadoCobroResponse"
+            <output wsam:Action="http://speid.test.com/SpeiActualizaServices/aRegistraEstadoCobroResponse"
                     message="tns:aRegistraEstadoCobroResponse"/>
         </operation>
     </portType>

@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from speid.models import Transaction
-from speid.types import Estado
+from speid.models import Event, Transaction
+from speid.types import Estado, EventType
 from speid.validations import SpeidTransaction, StpTransaction
 
 
@@ -19,6 +19,13 @@ def test_transaction():
         rfc_curp_ordenante='ND',
         speid_id='speid_id',
     )
+    transaction.events.append(Event(type=EventType.created))
+    transaction.events.append(Event(type=EventType.received))
+    transaction.events.append(Event(type=EventType.retry))
+    transaction.events.append(Event(type=EventType.retry))
+    transaction.events.append(Event(type=EventType.error))
+    transaction.events.append(Event(type=EventType.completed))
+
     transaction.save()
     trx_saved = Transaction.objects.get(id=transaction.id)
     assert transaction.concepto_pago == trx_saved.concepto_pago
@@ -35,6 +42,7 @@ def test_transaction():
     assert transaction.cuenta_ordenante == trx_saved.cuenta_ordenante
     assert transaction.rfc_curp_ordenante == trx_saved.rfc_curp_ordenante
     assert transaction.speid_id == trx_saved.speid_id
+    assert len(trx_saved.events) == 6
     transaction.delete()
 
 

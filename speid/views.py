@@ -23,11 +23,13 @@ def health_check():
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
     try:
-        transaction = Transaction.objects(
-            stp_id=request.json['id'], estado=Estado.submitted
-        ).first()
+        transaction = Transaction.objects.get(stp_id=request.json['id'])
 
         state = Estado.get_state_from_stp(request.json['Estado'])
+
+        if state is Estado.failed:
+            assert transaction.estado is not Estado.failed
+
         transaction.set_state(state)
 
         transaction.save()
@@ -48,6 +50,14 @@ def create_orden():
             if transaction.cuenta_beneficiario in clabes:
                 capture_message('Transacción retenida')
                 raise Exception
+
+        previous_trx = Transaction.objects(
+            clave_rastreo=transaction.clave_rastreo,
+            cuenta_ordenante=transaction.cuenta_ordenante,
+            cuenta_beneficiario=transaction.cuenta_beneficiario,
+            monto=transaction.monto
+        )
+        assert len(previous_trx) == 0
 
         transaction.confirm_callback_transaction()
         transaction.save()
