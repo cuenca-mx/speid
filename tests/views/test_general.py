@@ -36,7 +36,7 @@ def test_create_order_event(
 
 def test_invalid_order_event(client, default_outcome_transaction):
     trx = Transaction(**default_outcome_transaction)
-    trx.orden_id = DEFAULT_ORDEN_ID
+    trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
     id_trx = trx.id
 
@@ -52,7 +52,7 @@ def test_invalid_order_event(client, default_outcome_transaction):
 
 def test_invalid_id_order_event(client, default_outcome_transaction):
     trx = Transaction(**default_outcome_transaction)
-    trx.orden_id = DEFAULT_ORDEN_ID
+    trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
     id_trx = trx.id
 
@@ -63,6 +63,28 @@ def test_invalid_id_order_event(client, default_outcome_transaction):
 
     trx = Transaction.objects.get(id=id_trx)
     assert trx.estado is Estado.submitted
+    trx.delete()
+
+
+def test_order_event_duplicated(client, default_outcome_transaction,
+                                mock_callback_api):
+    trx = Transaction(**default_outcome_transaction)
+    trx.stp_id = DEFAULT_ORDEN_ID
+    trx.save()
+    id_trx = trx.id
+
+    data = dict(id=DEFAULT_ORDEN_ID, Estado='LIQUIDACION', Detalle="0")
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    trx = Transaction.objects.get(id=id_trx)
+    assert trx.estado is Estado.failed
     trx.delete()
 
 
