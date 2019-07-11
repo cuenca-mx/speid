@@ -122,6 +122,8 @@ class Transaction(Document):
         order.fechaOperacion = None
         order.institucionOperante = self.institucion_ordenante
         order.institucionContraparte = self.institucion_beneficiaria
+        order.nombreBeneficiario = self.nombre_beneficiario[:38]
+        order.nombreOrdenante = self.nombre_ordenante[:38]
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
         self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (
             order.tipoCuentaBeneficiario)
