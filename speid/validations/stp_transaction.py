@@ -9,9 +9,6 @@ from speid.models.helpers import base62_uuid, camel_to_snake
 
 @dataclass
 class StpTransaction:
-    """
-
-    """
     Clave: int
     FechaOperacion: int
     InstitucionOrdenante: str
