@@ -140,3 +140,33 @@ def test_transaction_speid_input_validation_error():
     )
     with pytest.raises(ValidationError):
         SpeidTransaction(**order)
+
+
+def test_get_order():
+    transaction = Transaction(
+        concepto_pago='PRUEBA',
+        institucion_ordenante='646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='072',
+        monto=1020,
+        nombre_beneficiario='Ricardo Sánchez Castillo de la Mancha S.A. de CV',
+        nombre_ordenante='Ricardo Sánchez Castillo de la Mancha S.A. de CV',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='speid_id',
+    )
+
+    order = transaction.get_order()
+
+    assert order.fechaOperacion is None
+    assert order.institucionOperante == transaction.institucion_ordenante
+    assert order.institucionContraparte == transaction.institucion_beneficiaria
+    assert transaction.clave_rastreo == order.claveRastreo
+    assert transaction.tipo_cuenta_beneficiario == order.tipoCuentaBeneficiario
+    assert transaction.rfc_curp_beneficiario == order.rfcCurpBeneficiario
+    assert transaction.referencia_numerica == order.referenciaNumerica
+    assert transaction.empresa == order.empresa
+    assert order.nombreBeneficiario == transaction.nombre_beneficiario[:38]
+    assert order.nombreOrdenante == transaction.nombre_ordenante[:38]
+    assert len(order.nombreBeneficiario) == 38
+    assert len(order.nombreOrdenante) == 38
