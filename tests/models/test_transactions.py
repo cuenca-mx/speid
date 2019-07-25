@@ -166,7 +166,7 @@ def test_get_order():
     assert transaction.rfc_curp_beneficiario == order.rfcCurpBeneficiario
     assert transaction.referencia_numerica == order.referenciaNumerica
     assert transaction.empresa == order.empresa
-    assert order.nombreBeneficiario == transaction.nombre_beneficiario[:38]
-    assert order.nombreOrdenante == transaction.nombre_ordenante[:38]
-    assert len(order.nombreBeneficiario) == 38
-    assert len(order.nombreOrdenante) == 38
+    assert order.nombreBeneficiario == 'Ricardo Sánchez Castillo de la Mancha'
+    assert order.nombreOrdenante == 'Ricardo Sánchez Castillo de la Mancha'
+    assert len(order.nombreBeneficiario) == 37
+    assert len(order.nombreOrdenante) == 37
