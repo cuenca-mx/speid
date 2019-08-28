@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import StrictStr
 from pydantic.dataclasses import dataclass
-from stpmex.types import AccountType
+from stpmex.types import TipoCuenta
 
 from speid.models import Transaction
 from speid.types import Estado
@@ -53,10 +53,11 @@ class SpeidTransaction:
 
     def __post_init__(self):
         if len(self.cuenta_beneficiario) == 16:
-            self.tipo_cuenta_beneficiario = AccountType.DEBIT_CARD.value
+            self.tipo_cuenta_beneficiario = TipoCuenta.card.value
+        else:
+            self.tipo_cuenta_beneficiario = TipoCuenta.clabe.value
 
     def transform(self):
         transaction = Transaction(**self.to_dict())
-        transaction.fecha_operacion = datetime.today()
         transaction.estado = Estado.submitted
         return transaction

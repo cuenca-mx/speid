@@ -4,7 +4,7 @@ from flask import request, abort
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception, capture_message
 
-from speid import app
+from speid import app, stpmex_client
 from speid.models import Event, Request, Transaction
 from speid.types import Estado, EventType, HttpRequestMethod
 from speid.utils import get, patch, post
@@ -102,9 +102,7 @@ def process_transaction(transaction_id):
     order = transaction.get_order()
     transaction.save()
 
-    order.monto = order.monto / 100
-
-    res = order.registra()
+    res = stpmex_client.registrar_orden(order)
 
     if res is not None and res.id > 0:
         transaction.stp_id = res.id

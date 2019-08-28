@@ -1,7 +1,7 @@
 from mongoengine import (DateTimeField, Document, IntField, ListField,
                          ReferenceField, StringField)
 from stpmex import Orden
-from stpmex.ordenes import ORDEN_FIELDNAMES
+from stpmex.auth import ORDEN_FIELDNAMES
 
 from speid.helpers import callback_helper
 from speid.types import Estado, EventType
@@ -118,12 +118,15 @@ class Transaction(Document):
             if snake_to_camel(k) in ORDEN_FIELDNAMES and (
                 trx_dict[k] is not None)
         }
+        order_dict['institucionOperante'] = self.institucion_ordenante
+        order_dict['institucionContraparte'] = self.institucion_beneficiaria
+        order_dict['nombreBeneficiario'] = (self.nombre_beneficiario[:38].
+                                            strip())
+        order_dict['nombreOrdenante'] = self.nombre_ordenante[:38].strip()
+        order_dict['monto'] = self.monto / 100.0
+
         order = Orden(**order_dict)
-        order.fechaOperacion = None
-        order.institucionOperante = self.institucion_ordenante
-        order.institucionContraparte = self.institucion_beneficiaria
-        order.nombreBeneficiario = self.nombre_beneficiario[:38].strip()
-        order.nombreOrdenante = self.nombre_ordenante[:38].strip()
+
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
         self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (
             order.tipoCuentaBeneficiario)
@@ -131,6 +134,6 @@ class Transaction(Document):
             order.rfcCurpBeneficiario)
         self.referencia_numerica = self.referencia_numerica or (
             order.referenciaNumerica)
-        self.empresa = self.empresa or order.empresa
+        self.empresa = self.empresa or 'NA'
 
         return order

@@ -2,7 +2,7 @@ from datetime import datetime
 
 import click
 
-from speid import app
+from speid import app, stpmex_client
 from speid.helpers import callback_helper
 from speid.models import Event, Request, Transaction
 from speid.types import Estado, EventType
@@ -54,9 +54,7 @@ def re_execute_transactions(speid_id):
     order = transaction.get_order()
     transaction.save()
 
-    order.monto = order.monto / 100
-
-    res = order.registra()
+    res = stpmex_client.registrar_orden(order)
 
     if res is not None and res.id > 0:
         transaction.stp_id = res.id

@@ -154,6 +154,7 @@ def test_get_order():
         cuenta_ordenante='646180157000000004',
         rfc_curp_ordenante='ND',
         speid_id='speid_id',
+        tipo_cuenta_beneficiario=40
     )
 
     order = transaction.get_order()
