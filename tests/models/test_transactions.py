@@ -161,6 +161,7 @@ def test_get_order():
 
     assert order.institucionOperante == transaction.institucion_ordenante
     assert order.institucionContraparte == transaction.institucion_beneficiaria
+    assert order.monto == 10.20
     assert transaction.clave_rastreo == order.claveRastreo
     assert transaction.tipo_cuenta_beneficiario == order.tipoCuentaBeneficiario
     assert transaction.rfc_curp_beneficiario == order.rfcCurpBeneficiario
