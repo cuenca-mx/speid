@@ -120,9 +120,8 @@ class Transaction(Document):
         }
         order_dict['institucionOperante'] = self.institucion_ordenante
         order_dict['institucionContraparte'] = self.institucion_beneficiaria
-        order_dict['nombreBeneficiario'] = (self.nombre_beneficiario[:38].
-                                            strip())
-        order_dict['nombreOrdenante'] = self.nombre_ordenante[:38].strip()
+        order_dict['nombreBeneficiario'] = self.nombre_beneficiario
+        order_dict['nombreOrdenante'] = self.nombre_ordenante
         order_dict['monto'] = self.monto / 100.0
 
         order = Orden(**order_dict)
