@@ -52,10 +52,10 @@ class SpeidTransaction:
         }
 
     def __post_init__(self):
-        if len(self.cuenta_beneficiario) == 16:
-            self.tipo_cuenta_beneficiario = TipoCuenta.card.value
-        else:
+        if len(self.cuenta_beneficiario) == 18:
             self.tipo_cuenta_beneficiario = TipoCuenta.clabe.value
+        else:
+            self.tipo_cuenta_beneficiario = TipoCuenta.card.value
 
     def transform(self):
         transaction = Transaction(**self.to_dict())
