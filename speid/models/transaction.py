@@ -3,6 +3,7 @@ from mongoengine import (DateTimeField, Document, IntField, ListField,
 from stpmex import Orden
 from stpmex.auth import ORDEN_FIELDNAMES
 
+from speid import STP_EMPRESA
 from speid.helpers import callback_helper
 from speid.types import Estado, EventType
 
@@ -133,6 +134,6 @@ class Transaction(Document):
             order.rfcCurpBeneficiario)
         self.referencia_numerica = self.referencia_numerica or (
             order.referenciaNumerica)
-        self.empresa = self.empresa or 'NA'
+        self.empresa = self.empresa or STP_EMPRESA
 
         return order
