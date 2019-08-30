@@ -1,11 +1,8 @@
 import json
 from datetime import datetime
 
-from speid.helpers.callback_helper import (
-    auth_header,
-    send_transaction,
-    set_status_transaction,
-)
+from speid.helpers.callback_helper import (auth_header, send_transaction,
+                                           set_status_transaction)
 from speid.models import Transaction
 
 

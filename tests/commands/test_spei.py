@@ -1,9 +1,7 @@
 import pytest
 
-from speid.commands.spei import (
-    callback_spei_transaction,
-    re_execute_transactions,
-)
+from speid.commands.spei import (callback_spei_transaction,
+                                 re_execute_transactions)
 from speid.models import Transaction
 from speid.types import Estado, EventType
 

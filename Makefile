@@ -19,7 +19,7 @@ lint:
 
 polish:
 		black -S -l 79 speid/ tests/
-		isort -rc --atomic speid/*
+		isort -rc --atomic speid/ tests/
 
 clean-pyc:
 		find . -name '__pycache__' -exec rm -r "{}" +
