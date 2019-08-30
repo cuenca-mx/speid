@@ -144,7 +144,8 @@ def mongo_to_dict(obj, exclude_fields: list = None) -> Union[dict, None]:
             return_data[field_name] = data
         else:
             return_data[field_name] = mongo_to_python_type(
-                obj._fields[field_name], data)
+                obj._fields[field_name], data
+            )
 
     return return_data
 

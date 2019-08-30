@@ -116,8 +116,8 @@ class Transaction(Document):
         order_dict = {
             snake_to_camel(k): v
             for k, v in trx_dict.items()
-            if snake_to_camel(k) in ORDEN_FIELDNAMES and (
-                trx_dict[k] is not None)
+            if snake_to_camel(k) in ORDEN_FIELDNAMES
+            and (trx_dict[k] is not None)
         }
         order_dict['institucionOperante'] = self.institucion_ordenante
         order_dict['institucionContraparte'] = self.institucion_beneficiaria
@@ -129,11 +129,14 @@ class Transaction(Document):
 
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
         self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (
-            order.tipoCuentaBeneficiario)
+            order.tipoCuentaBeneficiario
+        )
         self.rfc_curp_beneficiario = self.rfc_curp_beneficiario or (
-            order.rfcCurpBeneficiario)
+            order.rfcCurpBeneficiario
+        )
         self.referencia_numerica = self.referencia_numerica or (
-            order.referenciaNumerica)
+            order.referenciaNumerica
+        )
         self.empresa = self.empresa or STP_EMPRESA
 
         return order

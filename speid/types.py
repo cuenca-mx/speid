@@ -8,7 +8,7 @@ class HttpRequestMethod(Enum):
 
 class EventType(Enum):
     created = 'CREATE'  # When a transaction has been received
-    retry = 'RETRY'   # When the transaction has been retry
+    retry = 'RETRY'  # When the transaction has been retry
     completed = 'COMPLETE'  # The request was processed with no errors
     error = 'ERROR'  # Something happened when the response was obtained
     received = 'RECEIVED'  # When we get the response from a transaction made

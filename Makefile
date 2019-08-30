@@ -18,7 +18,7 @@ lint:
 		pycodestyle --ignore=E402 speid/ tests/
 
 polish:
-		black -S -l 79 speid/*
+		black -S -l 79 speid/ tests/
 		isort -rc --atomic speid/*
 
 clean-pyc:

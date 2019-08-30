@@ -1,7 +1,9 @@
 import pytest
 
-from speid.commands.spei import (callback_spei_transaction,
-                                 re_execute_transactions)
+from speid.commands.spei import (
+    callback_spei_transaction,
+    re_execute_transactions,
+)
 from speid.models import Transaction
 from speid.types import Estado, EventType
 
@@ -24,9 +26,10 @@ def test_callback_spei_transaction(runner, mock_callback_api):
     id_trx = transaction.id
     assert transaction.estado is Estado.submitted
 
-    runner.invoke(callback_spei_transaction,
-                  ['transaction_id', id_trx,
-                   'transaction_status', 'succeeded'])
+    runner.invoke(
+        callback_spei_transaction,
+        ['transaction_id', id_trx, 'transaction_status', 'succeeded'],
+    )
 
     transaction = Transaction.objects.get(id=id_trx)
     assert transaction.estado is Estado.succeeded

@@ -2,7 +2,7 @@ from mongoengine import DictField, Document, StringField
 
 from speid.types import HttpRequestMethod
 
-from .helpers import date_now, EnumField
+from .helpers import EnumField, date_now
 
 
 class Request(Document):

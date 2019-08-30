@@ -154,7 +154,7 @@ def test_get_order():
         cuenta_ordenante='646180157000000004',
         rfc_curp_ordenante='ND',
         speid_id='speid_id',
-        tipo_cuenta_beneficiario=40
+        tipo_cuenta_beneficiario=40,
     )
 
     order = transaction.get_order()
@@ -166,8 +166,9 @@ def test_get_order():
     assert transaction.tipo_cuenta_beneficiario == order.tipoCuentaBeneficiario
     assert transaction.rfc_curp_beneficiario == order.rfcCurpBeneficiario
     assert transaction.referencia_numerica == order.referenciaNumerica
-    assert order.nombreBeneficiario == ('Ricardo Sanchez Castillo de la Mancha'
-                                        ' S')
+    assert order.nombreBeneficiario == (
+        'Ricardo Sanchez Castillo de la Mancha' ' S'
+    )
     assert order.nombreOrdenante == 'Ricardo Sanchez Castillo de la Mancha S'
     assert len(order.nombreBeneficiario) == 39
     assert len(order.nombreOrdenante) == 39

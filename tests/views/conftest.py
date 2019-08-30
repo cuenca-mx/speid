@@ -49,7 +49,7 @@ def default_blocked_transaction():
         RFCCurpBeneficiario="ND",
         ConceptoPago="PRUEBA BLOQUEO",
         ReferenciaNumerica=2423,
-        Empresa="TAMIZI"
+        Empresa="TAMIZI",
     )
 
 

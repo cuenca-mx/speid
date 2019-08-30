@@ -5,16 +5,19 @@ from enum import Enum
 
 import boto3
 import sentry_sdk
-from stpmex import Client
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from python_hosts import Hosts, HostsEntry
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
+from stpmex import Client
+
+import speid.commands
+import speid.models
+import speid.views
 
 
 class CJSONEncoder(json.JSONEncoder):
-
     def default(self, o):
         if isinstance(o, Enum):
             encoded = o.name
@@ -78,9 +81,5 @@ stpmex_client = Client(
     empresa=STP_EMPRESA,
     priv_key=private_key,
     priv_key_passphrase=STP_KEY_PASSPHRASE,
-    demo=SPEID_ENV is not 'prod'
+    demo=SPEID_ENV is not 'prod',
 )
-
-import speid.models
-import speid.views
-import speid.commands
