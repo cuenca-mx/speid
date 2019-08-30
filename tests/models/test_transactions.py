@@ -1,5 +1,6 @@
 import pytest
 from pydantic import ValidationError
+from stpmex.types import TipoCuenta
 
 from speid.models import Event, Transaction
 from speid.types import Estado, EventType
@@ -139,6 +140,60 @@ def test_transaction_speid_input_validation_error():
         version=1,
     )
     with pytest.raises(ValidationError):
+        SpeidTransaction(**order)
+
+
+def test_transaction_speid_clabe_cuenta_beneficiario():
+    order = dict(
+        concepto_pago='PRUEBA',
+        institucion_ordenante='646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='072',
+        monto=1020,
+        nombre_beneficiario='Ricardo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='speid_id',
+        version=1,
+    )
+    input = SpeidTransaction(**order)
+    assert input.cuenta_beneficiario is TipoCuenta.clabe.value
+
+
+def test_transaction_speid_card_cuenta_beneficiario():
+    order = dict(
+        concepto_pago='PRUEBA',
+        institucion_ordenante='646',
+        cuenta_beneficiario='5439240312453006',
+        institucion_beneficiaria='072',
+        monto=1020,
+        nombre_beneficiario='Ricardo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='speid_id',
+        version=1,
+    )
+    input = SpeidTransaction(**order)
+    assert input.cuenta_beneficiario is TipoCuenta.card.value
+
+
+def test_transaction_speid_non_valid_cuenta_beneficiario():
+    order = dict(
+        concepto_pago='PRUEBA',
+        institucion_ordenante='646',
+        cuenta_beneficiario='12345',
+        institucion_beneficiaria='072',
+        monto=1020,
+        nombre_beneficiario='Ricardo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='speid_id',
+        version=1,
+    )
+    with pytest.raises(ValueError):
         SpeidTransaction(**order)
 
 
