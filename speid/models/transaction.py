@@ -119,18 +119,36 @@ class Transaction(Document):
             tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
             nombreOrdenante=self.nombre_ordenante,
             cuentaOrdenante=self.cuenta_ordenante,
-            institucionOperante=self.institucion_ordenante,
             tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
-            claveRastreo=self.clave_rastreo,
-            referenciaNumerica=self.referencia_numerica,
-            rfcCurpBeneficiario=self.rfc_curp_beneficiario,
-            rfcCurpOrdenante=self.rfc_curp_ordenante,
-            medioEntrega=self.medio_entrega,
-            prioridad=self.prioridad,
-            tipoPago=self.tipo_pago,
-            topologia=self.topologia,
             iva=self.iva,
         )
+
+        if self.institucion_ordenante:
+            order.institucionOperante = self.institucion_ordenante
+
+        if self.clave_rastreo:
+            order.claveRastreo = self.clave_rastreo
+
+        if self.referencia_numerica:
+            order.referenciaNumerica = self.referencia_numerica
+
+        if self.rfc_curp_beneficiario:
+            order.rfcCurpBeneficiario = self.rfc_curp_beneficiario
+
+        if self.rfc_curp_ordenante:
+            order.rfcCurpOrdenante = self.rfc_curp_ordenante
+
+        if self.medio_entrega:
+            order.medioEntrega = self.medio_entrega
+
+        if self.prioridad:
+            order.prioridad = self.prioridad
+
+        if self.tipo_pago:
+            order.tipoPago = self.tipo_pago
+
+        if self.topologia:
+            order.topologia = self.topologia
 
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
         self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (

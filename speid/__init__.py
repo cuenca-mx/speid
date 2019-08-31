@@ -12,10 +12,6 @@ from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
 from stpmex import Client
 
-import speid.commands
-import speid.models
-import speid.views
-
 
 class CJSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -83,3 +79,7 @@ stpmex_client = Client(
     priv_key_passphrase=STP_KEY_PASSPHRASE,
     demo=SPEID_ENV is not 'prod',
 )
+
+import speid.commands
+import speid.models
+import speid.views

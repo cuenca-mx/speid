@@ -158,7 +158,7 @@ def test_transaction_speid_clabe_cuenta_beneficiario():
         version=1,
     )
     input = SpeidTransaction(**order)
-    assert input.cuenta_beneficiario is TipoCuenta.clabe.value
+    assert input.tipo_cuenta_beneficiario is TipoCuenta.clabe.value
 
 
 def test_transaction_speid_card_cuenta_beneficiario():
@@ -176,7 +176,7 @@ def test_transaction_speid_card_cuenta_beneficiario():
         version=1,
     )
     input = SpeidTransaction(**order)
-    assert input.cuenta_beneficiario is TipoCuenta.card.value
+    assert input.tipo_cuenta_beneficiario is TipoCuenta.card.value
 
 
 def test_transaction_speid_non_valid_cuenta_beneficiario():
