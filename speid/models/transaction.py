@@ -119,6 +119,7 @@ class Transaction(Document):
             tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
             nombreOrdenante=self.nombre_ordenante,
             cuentaOrdenante=self.cuenta_ordenante,
+            rfcCurpOrdenante=self.rfc_curp_ordenante,
             tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
             iva=self.iva,
         )
@@ -134,9 +135,6 @@ class Transaction(Document):
 
         if self.rfc_curp_beneficiario:
             order.rfcCurpBeneficiario = self.rfc_curp_beneficiario
-
-        if self.rfc_curp_ordenante:
-            order.rfcCurpOrdenante = self.rfc_curp_ordenante
 
         if self.medio_entrega:
             order.medioEntrega = self.medio_entrega
