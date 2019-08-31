@@ -149,9 +149,6 @@ class Transaction(Document):
             order.topologia = self.topologia
 
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
-        self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (
-            order.tipoCuentaBeneficiario
-        )
         self.rfc_curp_beneficiario = self.rfc_curp_beneficiario or (
             order.rfcCurpBeneficiario
         )
