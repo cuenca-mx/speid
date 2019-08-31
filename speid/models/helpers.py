@@ -45,11 +45,6 @@ def camel_to_snake(s):
     return _underscorer2.sub(r'\1_\2', subbed).lower()
 
 
-def snake_to_camel(s):
-    words = s.split('_')
-    return words[0] + "".join(r.title() for r in words[1:])
-
-
 def handler(event):
     """
     http://docs.mongoengine.org/guide/signals.html?highlight=update

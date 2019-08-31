@@ -1,15 +1,13 @@
 from mongoengine import (DateTimeField, Document, IntField, ListField,
                          ReferenceField, StringField)
 from stpmex import Orden
-from stpmex.auth import ORDEN_FIELDNAMES
 
 from speid import STP_EMPRESA
 from speid.helpers import callback_helper
 from speid.types import Estado, EventType
 
 from .events import Event
-from .helpers import (EnumField, date_now, mongo_to_dict, snake_to_camel,
-                      updated_at)
+from .helpers import date_now, EnumField, mongo_to_dict, updated_at
 
 
 @updated_at.apply
@@ -111,21 +109,28 @@ class Transaction(Document):
             Event(type=EventType.completed, metadata=str(response))
         )
 
-    def get_order(self):
-        trx_dict = self.to_dict()
-        order_dict = {
-            snake_to_camel(k): v
-            for k, v in trx_dict.items()
-            if snake_to_camel(k) in ORDEN_FIELDNAMES
-            and (trx_dict[k] is not None)
-        }
-        order_dict['institucionOperante'] = self.institucion_ordenante
-        order_dict['institucionContraparte'] = self.institucion_beneficiaria
-        order_dict['nombreBeneficiario'] = self.nombre_beneficiario
-        order_dict['nombreOrdenante'] = self.nombre_ordenante
-        order_dict['monto'] = self.monto / 100.0
-
-        order = Orden(**order_dict)
+    def get_order(self) -> Orden:
+        order = Orden(
+            monto=self.monto / 100.0,
+            conceptoPago=self.concepto_pago,
+            nombreBeneficiario=self.nombre_beneficiario,
+            cuentaBeneficiario=self.cuenta_beneficiario,
+            institucionContraparte=self.institucion_beneficiaria,
+            tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
+            nombreOrdenante=self.nombre_ordenante,
+            cuentaOrdenante=self.cuenta_ordenante,
+            institucionOperante=self.institucion_ordenante,
+            tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
+            claveRastreo=self.clave_rastreo,
+            referenciaNumerica=self.referencia_numerica,
+            rfcCurpBeneficiario=self.rfc_curp_beneficiario,
+            rfcCurpOrdenante=self.rfc_curp_ordenante,
+            medioEntrega=self.medio_entrega,
+            prioridad=self.prioridad,
+            tipoPago=self.tipo_pago,
+            topologia=self.topologia,
+            iva=self.iva
+        )
 
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
         self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (
