@@ -7,7 +7,7 @@ from speid.helpers import callback_helper
 from speid.types import Estado, EventType
 
 from .events import Event
-from .helpers import date_now, EnumField, mongo_to_dict, updated_at
+from .helpers import EnumField, date_now, mongo_to_dict, updated_at
 
 
 @updated_at.apply
@@ -129,7 +129,7 @@ class Transaction(Document):
             prioridad=self.prioridad,
             tipoPago=self.tipo_pago,
             topologia=self.topologia,
-            iva=self.iva
+            iva=self.iva,
         )
 
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
