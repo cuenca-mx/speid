@@ -9,7 +9,7 @@ def make_celery(app):
     celery_app = Celery(
         app.import_name,
         broker=app.config['CELERY_BROKER_URL'],
-        include=['speid.tasks.orders']
+        include=['speid.tasks.orders'],
     )
     celery_app.conf.update(app.config)
     celery_app.conf.task_default_queue = os.environ['TASK_DEFAULT_QUEUE']

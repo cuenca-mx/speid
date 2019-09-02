@@ -96,8 +96,9 @@ def test_invalid_id_order_event(client, default_outcome_transaction):
     trx.delete()
 
 
-def test_order_event_duplicated(client, default_outcome_transaction,
-                                mock_callback_api):
+def test_order_event_duplicated(
+    client, default_outcome_transaction, mock_callback_api
+):
     trx = Transaction(**default_outcome_transaction)
     trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
@@ -127,8 +128,9 @@ def test_create_orden(client, default_income_transaction, mock_callback_api):
     transaction.delete()
 
 
-def test_create_orden_duplicated(client, default_income_transaction,
-                                 mock_callback_api):
+def test_create_orden_duplicated(
+    client, default_income_transaction, mock_callback_api
+):
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.succeeded
@@ -152,10 +154,12 @@ def test_create_orden_duplicated(client, default_income_transaction,
 
 
 def test_create_orden_blocked(
-        client, default_blocked_transaction, mock_callback_api):
+    client, default_blocked_transaction, mock_callback_api
+):
     resp = client.post('/ordenes', json=default_blocked_transaction)
     transaction = Transaction.objects.get(
-        stp_id=default_blocked_transaction['Clave'])
+        stp_id=default_blocked_transaction['Clave']
+    )
     assert transaction.estado is Estado.error
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
@@ -201,8 +205,12 @@ def test_create_orden_without_ordenante(client, mock_callback_api):
     transaction.delete()
 
 
-def test_get_transactions(client, default_income_transaction,
-                          default_outcome_transaction, mock_callback_api):
+def test_get_transactions(
+    client,
+    default_income_transaction,
+    default_outcome_transaction,
+    mock_callback_api,
+):
     resp = client.post('/ordenes', json=default_income_transaction)
     assert resp.status_code == 201
     trx_in = Transaction.objects.order_by('-created_at').first()
@@ -211,13 +219,15 @@ def test_get_transactions(client, default_income_transaction,
     trx_out.stp_id = DEFAULT_ORDEN_ID
     trx_out.save()
 
-    resp = client.get('/transactions?'
-                      'status=submitted&prefix_ordenante=6461801570')
+    resp = client.get(
+        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
+    )
     assert resp.status_code == 200
     assert str(trx_out.id) == resp.json[0]['_id']['$oid']
 
-    resp = client.get('/transactions?'
-                      'status=submitted&prefix_beneficiario=6461801570')
+    resp = client.get(
+        '/transactions?' 'status=submitted&prefix_beneficiario=6461801570'
+    )
     assert resp.status_code == 200
     assert str(trx_in.id) == resp.json[0]['_id']['$oid']
 
@@ -234,8 +244,9 @@ def test_process_transaction(client, default_outcome_transaction):
 
     assert trx.estado is Estado.submitted
 
-    resp = client.get('/transactions?'
-                      'status=submitted&prefix_ordenante=6461801570')
+    resp = client.get(
+        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
+    )
     assert resp.status_code == 200
 
     resp = client.patch(f'/transactions/{resp.json[0]["_id"]["$oid"]}/process')
@@ -247,16 +258,18 @@ def test_process_transaction(client, default_outcome_transaction):
     trx.delete()
 
 
-def test_reverse_transaction(client, default_outcome_transaction,
-                             mock_callback_api):
+def test_reverse_transaction(
+    client, default_outcome_transaction, mock_callback_api
+):
     trx = Transaction(**default_outcome_transaction)
     trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
 
     assert trx.estado is Estado.submitted
 
-    resp = client.get('/transactions?'
-                      'status=submitted&prefix_ordenante=6461801570')
+    resp = client.get(
+        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
+    )
     assert resp.status_code == 200
 
     resp = client.patch(f'/transactions/{resp.json[0]["_id"]["$oid"]}/reverse')

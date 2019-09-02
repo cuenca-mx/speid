@@ -5,6 +5,7 @@ import luhnmod10
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
+from speid import stpmex_client
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
 from speid.tasks import celery
@@ -60,9 +61,7 @@ def execute(order_val):
     transaction.save()
 
     # Send order to STP
-    order.monto = order.monto / 100
-
-    res = order.registra()
+    res = stpmex_client.registrar_orden(order)
 
     if res is not None and res.id > 0:
         transaction.stp_id = res.id
