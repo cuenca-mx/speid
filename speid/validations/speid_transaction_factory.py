@@ -2,7 +2,6 @@ class TransactionFactory:
     """
     from: https://realpython.com/factory-method-python/
     """
-
     def __init__(self):
         self._builders = dict()
 

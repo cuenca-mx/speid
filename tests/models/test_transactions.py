@@ -1,6 +1,5 @@
 import pytest
 from pydantic import ValidationError
-from stpmex.types import TipoCuenta
 
 from speid.models import Event, Transaction
 from speid.types import Estado, EventType
@@ -143,87 +142,31 @@ def test_transaction_speid_input_validation_error():
         SpeidTransaction(**order)
 
 
-def test_transaction_speid_clabe_cuenta_beneficiario():
-    order = dict(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='646',
-        cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        version=1,
-    )
-    input = SpeidTransaction(**order)
-    assert input.tipo_cuenta_beneficiario is TipoCuenta.clabe.value
-
-
-def test_transaction_speid_card_cuenta_beneficiario():
-    order = dict(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='646',
-        cuenta_beneficiario='5439240312453006',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        version=1,
-    )
-    input = SpeidTransaction(**order)
-    assert input.tipo_cuenta_beneficiario is TipoCuenta.card.value
-
-
-def test_transaction_speid_non_valid_cuenta_beneficiario():
-    order = dict(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='646',
-        cuenta_beneficiario='12345',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        version=1,
-    )
-    with pytest.raises(ValueError):
-        SpeidTransaction(**order)
-
-
 def test_get_order():
     transaction = Transaction(
         concepto_pago='PRUEBA',
-        institucion_ordenante='90646',
+        institucion_ordenante='646',
         cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='40072',
+        institucion_beneficiaria='072',
         monto=1020,
         nombre_beneficiario='Ricardo Sánchez Castillo de la Mancha S.A. de CV',
-        nombre_ordenante='   Ricardo Sánchez Castillo de la Mancha S.A. de CV',
+        nombre_ordenante='Ricardo Sánchez Castillo de la Mancha S.A. de CV',
         cuenta_ordenante='646180157000000004',
         rfc_curp_ordenante='ND',
         speid_id='speid_id',
-        tipo_cuenta_beneficiario=40,
     )
 
     order = transaction.get_order()
 
+    assert order.fechaOperacion is None
     assert order.institucionOperante == transaction.institucion_ordenante
     assert order.institucionContraparte == transaction.institucion_beneficiaria
-    assert order.monto == 10.20
     assert transaction.clave_rastreo == order.claveRastreo
     assert transaction.tipo_cuenta_beneficiario == order.tipoCuentaBeneficiario
     assert transaction.rfc_curp_beneficiario == order.rfcCurpBeneficiario
     assert transaction.referencia_numerica == order.referenciaNumerica
-    assert order.nombreBeneficiario == (
-        'Ricardo Sanchez Castillo de la Mancha' ' S'
-    )
-    assert order.nombreOrdenante == 'Ricardo Sanchez Castillo de la Mancha S'
-    assert len(order.nombreBeneficiario) == 39
-    assert len(order.nombreOrdenante) == 39
+    assert transaction.empresa == order.empresa
+    assert order.nombreBeneficiario == 'Ricardo Sánchez Castillo de la Mancha'
+    assert order.nombreOrdenante == 'Ricardo Sánchez Castillo de la Mancha'
+    assert len(order.nombreBeneficiario) == 37
+    assert len(order.nombreOrdenante) == 37
