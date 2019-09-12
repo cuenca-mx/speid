@@ -14,5 +14,4 @@ ADD . /speid/
 ENV PORT 3000
 EXPOSE $PORT
 
-CMD celery worker -A speid.tasks.celery -D --loglevel=info -c 5 && \
-    gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:3000 --workers=5 speid:app
+CMD gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:3000 --workers=5 speid:app
