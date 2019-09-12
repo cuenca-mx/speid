@@ -1,12 +1,13 @@
 from datetime import datetime
 
 import click
-import pandas
 
-from speid import app, stpmex_client
+from speid import app
 from speid.helpers import callback_helper
 from speid.models import Event, Request, Transaction
 from speid.types import Estado, EventType
+
+import pandas
 
 
 @app.cli.group('speid')
@@ -33,9 +34,8 @@ def callback_spei_transaction(transaction_id, transaction_status):
     callback_helper.set_status_transaction(
         transaction.speid_id, transaction.estado.name
     )
-    transaction.events.append(
-        Event(type=event_type, metadata=str('Reversed by SPEID command'))
-    )
+    transaction.events.append(Event(type=event_type,
+                                    metadata=str('Reversed by SPEID command')))
     transaction.save()
     return transaction
 
@@ -54,31 +54,27 @@ def re_execute_transactions(speid_id):
     order = transaction.get_order()
     transaction.save()
 
-    res = stpmex_client.registrar_orden(order)
+    order.monto = order.monto / 100
+
+    res = order.registra()
 
     if res is not None and res.id > 0:
         transaction.stp_id = res.id
-        transaction.events.append(
-            Event(type=EventType.completed, metadata=str(res))
-        )
+        transaction.events.append(Event(type=EventType.completed,
+                                        metadata=str(res)))
     else:
-        transaction.events.append(
-            Event(type=EventType.error, metadata=str(res))
-        )
+        transaction.events.append(Event(type=EventType.error,
+                                        metadata=str(res)))
 
     transaction.save()
 
 
 @speid_group.command()
-@click.option(
-    '--transactions',
-    default='transactions.csv',
-    help='CSV file with transactions',
-)
+@click.option('--transactions', default='transactions.csv',
+              help='CSV file with transactions')
 @click.option('--events', default='events.csv', help='CSV file with events')
-@click.option(
-    '--requests', default='requests.csv', help='CSV file with requests'
-)
+@click.option('--requests', default='requests.csv',
+              help='CSV file with requests')
 def migrate_from_csv(transactions, events, requests):
     """
     Hace la migración de una base de datos Postgres a MongoDB, los datos deben
@@ -95,14 +91,13 @@ def migrate_from_csv(transactions, events, requests):
             institucion_ordenante=lambda x: str(x),
             institucion_beneficiaria=lambda x: str(x),
             cuenta_ordenante=lambda x: str(x),
-            cuenta_beneficiario=lambda x: str(x),
-        ),
-    )
+            cuenta_beneficiario=lambda x: str(x)
+        ))
     transactions_list = transactions_list.where(
-        (pandas.notnull(transactions_list)), None
-    )
+        (pandas.notnull(transactions_list)), None)
     events_list = pandas.read_csv(events)
-    events_list = events_list.where((pandas.notnull(events_list)), None)
+    events_list = events_list.where(
+        (pandas.notnull(events_list)), None)
     transactions = []
     for _, t in transactions_list.iterrows():
         t['stp_id'] = t['orden_id']
@@ -121,17 +116,16 @@ def migrate_from_csv(transactions, events, requests):
                 Event(
                     type=EventType[e['type']],
                     metadata=e['meta'],
-                    created_at=datetime.strptime(
-                        e['created_at'], '%Y-%m-%d %H:%M:%S.%f'
-                    ),
-                )
-            )
+                    created_at=datetime.strptime(e['created_at'],
+                                                 '%Y-%m-%d %H:%M:%S.%f')
+                ))
 
         transaction.id = None
         transactions.append(transaction)
 
     requests_list = pandas.read_csv(requests)
-    requests_list = requests_list.where((pandas.notnull(requests_list)), None)
+    requests_list = requests_list.where(
+        (pandas.notnull(requests_list)), None)
     requests = []
     for _, r in requests_list.iterrows():
         r['method'] = r['method'].upper()

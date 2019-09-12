@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from pydantic import StrictStr
 from pydantic.dataclasses import dataclass
-from stpmex.types import TipoCuenta
+from stpmex.types import AccountType
 
 from speid.models import Transaction
 from speid.types import Estado
@@ -50,15 +52,11 @@ class SpeidTransaction:
         }
 
     def __post_init__(self):
-        cuenta_len = len(self.cuenta_beneficiario)
-        if cuenta_len == 18:
-            self.tipo_cuenta_beneficiario = TipoCuenta.clabe.value
-        elif cuenta_len in {15, 16}:
-            self.tipo_cuenta_beneficiario = TipoCuenta.card.value
-        else:
-            raise ValueError(f'{cuenta_len} is not a valid cuenta length')
+        if len(self.cuenta_beneficiario) == 16:
+            self.tipo_cuenta_beneficiario = AccountType.DEBIT_CARD.value
 
     def transform(self):
         transaction = Transaction(**self.to_dict())
+        transaction.fecha_operacion = datetime.today()
         transaction.estado = Estado.submitted
         return transaction

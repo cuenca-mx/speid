@@ -1,13 +1,14 @@
 from mongoengine import (DateTimeField, Document, IntField, ListField,
                          ReferenceField, StringField)
 from stpmex import Orden
+from stpmex.ordenes import ORDEN_FIELDNAMES
 
-from speid import STP_EMPRESA
 from speid.helpers import callback_helper
 from speid.types import Estado, EventType
 
 from .events import Event
-from .helpers import EnumField, date_now, mongo_to_dict, updated_at
+from .helpers import (EnumField, date_now, mongo_to_dict, snake_to_camel,
+                      updated_at)
 
 
 @updated_at.apply
@@ -109,52 +110,27 @@ class Transaction(Document):
             Event(type=EventType.completed, metadata=str(response))
         )
 
-    def get_order(self) -> Orden:
-        order = Orden(
-            monto=self.monto / 100.0,
-            conceptoPago=self.concepto_pago,
-            nombreBeneficiario=self.nombre_beneficiario,
-            cuentaBeneficiario=self.cuenta_beneficiario,
-            institucionContraparte=self.institucion_beneficiaria,
-            tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
-            nombreOrdenante=self.nombre_ordenante,
-            cuentaOrdenante=self.cuenta_ordenante,
-            rfcCurpOrdenante=self.rfc_curp_ordenante,
-            tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
-            iva=self.iva,
-        )
-
-        if self.institucion_ordenante:
-            order.institucionOperante = self.institucion_ordenante
-
-        if self.clave_rastreo:
-            order.claveRastreo = self.clave_rastreo
-
-        if self.referencia_numerica:
-            order.referenciaNumerica = self.referencia_numerica
-
-        if self.rfc_curp_beneficiario:
-            order.rfcCurpBeneficiario = self.rfc_curp_beneficiario
-
-        if self.medio_entrega:
-            order.medioEntrega = self.medio_entrega
-
-        if self.prioridad:
-            order.prioridad = self.prioridad
-
-        if self.tipo_pago:
-            order.tipoPago = self.tipo_pago
-
-        if self.topologia:
-            order.topologia = self.topologia
-
+    def get_order(self):
+        trx_dict = self.to_dict()
+        order_dict = {
+            snake_to_camel(k): v
+            for k, v in trx_dict.items()
+            if snake_to_camel(k) in ORDEN_FIELDNAMES and (
+                trx_dict[k] is not None)
+        }
+        order = Orden(**order_dict)
+        order.fechaOperacion = None
+        order.institucionOperante = self.institucion_ordenante
+        order.institucionContraparte = self.institucion_beneficiaria
+        order.nombreBeneficiario = self.nombre_beneficiario[:38].strip()
+        order.nombreOrdenante = self.nombre_ordenante[:38].strip()
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
+        self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (
+            order.tipoCuentaBeneficiario)
         self.rfc_curp_beneficiario = self.rfc_curp_beneficiario or (
-            order.rfcCurpBeneficiario
-        )
+            order.rfcCurpBeneficiario)
         self.referencia_numerica = self.referencia_numerica or (
-            order.referenciaNumerica
-        )
-        self.empresa = self.empresa or STP_EMPRESA
+            order.referenciaNumerica)
+        self.empresa = self.empresa or order.empresa
 
         return order

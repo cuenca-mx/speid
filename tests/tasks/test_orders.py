@@ -55,9 +55,9 @@ def test_malformed_order_worker(mock_callback_api):
 def test_create_order_debit_card():
     order = dict(
         concepto_pago='DebitCardTest',
-        institucion_ordenante='90646',
+        institucion_ordenante='646',
         cuenta_beneficiario='4242424242424242',
-        institucion_beneficiaria='40072',
+        institucion_beneficiaria='072',
         monto=1020,
         nombre_beneficiario='Pach',
         nombre_ordenante='BANCO',

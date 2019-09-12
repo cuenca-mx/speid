@@ -18,8 +18,8 @@ lint:
 		pycodestyle --ignore=E402 speid/ tests/
 
 polish:
-		black -S -l 79 speid/ tests/
-		isort -rc --atomic speid/ tests/
+		black -S -l 79 speid/*
+		isort -rc --atomic speid/*
 
 clean-pyc:
 		find . -name '__pycache__' -exec rm -r "{}" +

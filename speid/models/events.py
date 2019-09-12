@@ -2,7 +2,7 @@ from mongoengine import Document, StringField
 
 from speid.types import EventType
 
-from .helpers import EnumField, date_now
+from .helpers import date_now, EnumField
 
 
 class Event(Document):
