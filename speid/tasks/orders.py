@@ -13,7 +13,7 @@ from speid.types import Estado, EventType
 from speid.validations import factory
 
 
-MAX_AMOUNT = os.getenv('MAX_AMOUNT', '')
+MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', ''))
 
 
 def retry_timeout(attempts):
