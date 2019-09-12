@@ -12,6 +12,9 @@ from speid.types import Estado, EventType
 from speid.validations import factory
 
 
+MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
+
+
 def retry_timeout(attempts):
     return 2 * attempts
 
@@ -55,6 +58,11 @@ def execute(order_val):
     except DoesNotExist:
         transaction.events.append(Event(type=EventType.created))
         pass
+
+    if transaction.monto > MAX_AMOUNT:
+        transaction.events.append(Event(type=EventType.error))
+        transaction.save()
+        raise MalformedOrderException()
 
     order = transaction.get_order()
     transaction.save()
