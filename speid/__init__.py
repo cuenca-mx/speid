@@ -5,16 +5,15 @@ from enum import Enum
 
 import boto3
 import sentry_sdk
-import stpmex
 from flask import Flask
 from flask_mongoengine import MongoEngine
 from python_hosts import Hosts, HostsEntry
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
+from stpmex import Client
 
 
 class CJSONEncoder(json.JSONEncoder):
-
     def default(self, o):
         if isinstance(o, Enum):
             encoded = o.name
@@ -74,14 +73,13 @@ if EDIT_HOSTS == 'true':
 with open(STP_PRIVATE_LOCATION) as fp:
     private_key = fp.read()
 
-stpmex.configure(
-    wsdl_path=STP_WSDL,
+stpmex_client = Client(
     empresa=STP_EMPRESA,
     priv_key=private_key,
     priv_key_passphrase=STP_KEY_PASSPHRASE,
-    prefijo=int(STP_PREFIJO),
+    demo=SPEID_ENV is not 'prod',
 )
 
+import speid.commands
 import speid.models
 import speid.views
-import speid.commands

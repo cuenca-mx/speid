@@ -16,11 +16,12 @@ def client():
 def default_outcome_transaction():
     return dict(
         concepto_pago='PRUEBA',
-        institucion_ordenante='646',
+        institucion_ordenante='90646',
         cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='072',
+        institucion_beneficiaria='40072',
         monto=2511,
         nombre_beneficiario='Ricardo Sánchez',
+        tipo_cuenta_beneficiario=40,
         nombre_ordenante='BANCO',
         cuenta_ordenante='646180157000000004',
         rfc_curp_ordenante='ND',
@@ -48,7 +49,7 @@ def default_blocked_transaction():
         RFCCurpBeneficiario="ND",
         ConceptoPago="PRUEBA BLOQUEO",
         ReferenciaNumerica=2423,
-        Empresa="TAMIZI"
+        Empresa="TAMIZI",
     )
 
 
