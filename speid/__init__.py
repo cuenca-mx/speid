@@ -1,3 +1,5 @@
+__all__ = ['commands', 'models', 'views']
+
 import datetime as dt
 import json
 import os
@@ -77,9 +79,7 @@ stpmex_client = Client(
     empresa=STP_EMPRESA,
     priv_key=private_key,
     priv_key_passphrase=STP_KEY_PASSPHRASE,
-    demo=SPEID_ENV is not 'prod',
+    demo=SPEID_ENV != 'prod',
 )
 
-import speid.commands
-import speid.models
-import speid.views
+from . import commands, models, views  # noqa: E402 isort:skip

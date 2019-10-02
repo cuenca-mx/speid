@@ -12,7 +12,6 @@ from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import factory
 
-
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 
 

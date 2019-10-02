@@ -1,5 +1,11 @@
-from mongoengine import (DateTimeField, Document, IntField, ListField,
-                         ReferenceField, StringField)
+from mongoengine import (
+    DateTimeField,
+    Document,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 from stpmex import Orden
 
 from speid import STP_EMPRESA
@@ -68,7 +74,7 @@ class Transaction(Document):
         _refs=None,
         save_condition=None,
         signal_kwargs=None,
-        **kwargs
+        **kwargs,
     ):
         if len(self.events) > 0:
             [event.save() for event in self.events]
@@ -82,7 +88,7 @@ class Transaction(Document):
             _refs,
             save_condition,
             signal_kwargs,
-            **kwargs
+            **kwargs,
         )
 
     def delete(self, signal_kwargs=None, **write_concern):

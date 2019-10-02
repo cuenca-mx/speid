@@ -3,10 +3,20 @@ import uuid
 from datetime import datetime
 from typing import Union
 
-from mongoengine import (BooleanField, ComplexDateTimeField, DateTimeField,
-                         DecimalField, DictField, Document, EmbeddedDocument,
-                         EmbeddedDocumentField, FloatField, IntField,
-                         ListField, signals)
+from mongoengine import (
+    BooleanField,
+    ComplexDateTimeField,
+    DateTimeField,
+    DecimalField,
+    DictField,
+    Document,
+    EmbeddedDocument,
+    EmbeddedDocumentField,
+    FloatField,
+    IntField,
+    ListField,
+    signals,
+)
 from mongoengine.base import BaseField
 
 _underscorer1 = re.compile(r'(.)([A-Z][a-z]+)')
