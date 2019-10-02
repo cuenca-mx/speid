@@ -1,10 +1,9 @@
 SHELL := bash
-PATH := ./venv/bin:${PATH}
-DOCKER = docker-compose run --rm
-PYTHON = python3.7
 PROJECT = speid
-isort = isort -rc -ac $(PROJECT) tests
-black = black -S -l 79 --target-version py37 $(PROJECT) tests
+PYTHON = python3.7
+DOCKER = docker-compose run --rm $(PROJECT)
+ISORT = venv/bin/isort -rc -ac $(PROJECT) tests
+BLACK = venv/bin/black -S -l 79 --target-version py37 $(PROJECT) tests
 
 
 
@@ -16,17 +15,16 @@ install-dev: install
 
 venv:
 		$(PYTHON) -m venv --prompt speid venv
-		source venv/bin/activate
-		pip install -qU pip
+		venv/bin/pip install -qU pip
 
 format:
-		$(isort)
-		$(black)
+		$(ISORT)
+		$(BLACK)
 
 lint:
-		flake8 $(PROJECT) tests setup.py
-		$(isort) --check-only
-		$(black) --check
+		venv/bin/flake8 $(PROJECT) tests setup.py
+		$(ISORT) --check-only
+		$(BLACK) --check
 
 clean-pyc:
 		find . -name '__pycache__' -exec rm -r "{}" +
