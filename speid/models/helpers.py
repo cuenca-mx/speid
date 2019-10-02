@@ -73,12 +73,12 @@ def handler(event):
     return decorator
 
 
-def date_now():
+def date_now() -> DateTimeField:
     return DateTimeField(default=datetime.utcnow)
 
 
 @handler(signals.pre_save)
-def updated_at(sender, document):
+def updated_at(_, document):
     document.updated_at = datetime.utcnow()
 
 

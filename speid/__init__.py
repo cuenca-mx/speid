@@ -1,4 +1,4 @@
-__all__ = ['commands', 'models', 'views']
+__all__ = ['STP_EMPRESA', 'commands', 'models', 'views']
 
 import datetime as dt
 import json
@@ -30,14 +30,12 @@ class CJSONEncoder(json.JSONEncoder):
 
 
 # Configura sentry
-
 sentry_sdk.init(
     dsn=os.environ['SENTRY_DSN'],
     integrations=[FlaskIntegration(), CeleryIntegration()],
 )
 
 # Obtiene las variables de ambiente
-
 STP_PRIVATE_LOCATION = os.environ['STP_PRIVATE_LOCATION']
 STP_BUCKET_S3 = os.environ['STP_BUCKET_S3']
 STP_PRIVATE_KEY = os.environ['STP_PRIVATE_KEY']

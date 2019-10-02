@@ -116,6 +116,21 @@ class Transaction(Document):
         )
 
     def get_order(self) -> Orden:
+        optionals = dict(
+            institucionOperante=self.institucion_ordenante,
+            claveRastreo=self.clave_rastreo,
+            referenciaNumerica=self.referencia_numerica,
+            rfcCurpBeneficiario=self.rfc_curp_beneficiario,
+            medioEntrega=self.medio_entrega,
+            prioridad=self.prioridad,
+            tipoPago=self.tipo_pago,
+            topologia=self.topologia,
+        )
+        # remove if value is None
+        for k, v in optionals.items():
+            if v is None:
+                k.pop(v)
+
         order = Orden(
             monto=self.monto / 100.0,
             conceptoPago=self.concepto_pago,
@@ -128,38 +143,15 @@ class Transaction(Document):
             rfcCurpOrdenante=self.rfc_curp_ordenante,
             tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
             iva=self.iva,
+            **optionals,
         )
-
-        if self.institucion_ordenante:
-            order.institucionOperante = self.institucion_ordenante
-
-        if self.clave_rastreo:
-            order.claveRastreo = self.clave_rastreo
-
-        if self.referencia_numerica:
-            order.referenciaNumerica = self.referencia_numerica
-
-        if self.rfc_curp_beneficiario:
-            order.rfcCurpBeneficiario = self.rfc_curp_beneficiario
-
-        if self.medio_entrega:
-            order.medioEntrega = self.medio_entrega
-
-        if self.prioridad:
-            order.prioridad = self.prioridad
-
-        if self.tipo_pago:
-            order.tipoPago = self.tipo_pago
-
-        if self.topologia:
-            order.topologia = self.topologia
 
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
-        self.rfc_curp_beneficiario = self.rfc_curp_beneficiario or (
-            order.rfcCurpBeneficiario
+        self.rfc_curp_beneficiario = (
+            self.rfc_curp_beneficiario or order.rfcCurpBeneficiario
         )
-        self.referencia_numerica = self.referencia_numerica or (
-            order.referenciaNumerica
+        self.referencia_numerica = (
+            self.referencia_numerica or order.referenciaNumerica
         )
         self.empresa = self.empresa or STP_EMPRESA
 
