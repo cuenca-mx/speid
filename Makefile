@@ -2,8 +2,8 @@ SHELL := bash
 PROJECT = speid
 PYTHON = python3.7
 DOCKER = docker-compose run --rm $(PROJECT)
-ISORT = venv/bin/isort -rc -ac $(PROJECT) tests
-BLACK = venv/bin/black -S -l 79 --target-version py37 $(PROJECT) tests
+ISORT = isort -rc -ac $(PROJECT) tests
+BLACK = black -S -l 79 --target-version py37 $(PROJECT) tests
 
 
 
@@ -22,7 +22,7 @@ format:
 		$(BLACK)
 
 lint:
-		venv/bin/flake8 $(PROJECT) tests setup.py
+		flake8 $(PROJECT) tests setup.py
 		$(ISORT) --check-only
 		$(BLACK) --check
 

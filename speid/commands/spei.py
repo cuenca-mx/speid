@@ -119,11 +119,9 @@ def migrate_from_csv(transactions, events, requests):
         for _, e in transaction_events.iterrows():
             transaction.events.append(
                 Event(
+                    created_at=datetime.fromisoformat(e['created_at']),
                     type=EventType[e['type']],
                     metadata=e['meta'],
-                    created_at=datetime.strptime(
-                        e['created_at'], '%Y-%m-%d %H:%M:%S.%f'
-                    ),
                 )
             )
 
