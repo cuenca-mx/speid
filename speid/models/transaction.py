@@ -127,9 +127,12 @@ class Transaction(Document):
             topologia=self.topologia,
         )
         # remove if value is None
+        remove = []
         for k, v in optionals.items():
             if v is None:
-                del optionals[k]
+                remove.append(k)
+        for k in remove:
+            optionals.pop(k)
 
         order = Orden(
             monto=self.monto / 100.0,
