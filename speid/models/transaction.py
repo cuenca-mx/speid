@@ -129,7 +129,7 @@ class Transaction(Document):
         # remove if value is None
         for k, v in optionals.items():
             if v is None:
-                k.pop(v)
+                optionals.pop(v)
 
         order = Orden(
             monto=self.monto / 100.0,
