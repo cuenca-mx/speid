@@ -1,11 +1,12 @@
 import os
 
 from celery import Celery
+from flask.app import Flask
 
 from speid import app
 
 
-def make_celery(app):
+def make_celery(app: Flask) -> Celery:
     celery_app = Celery(
         app.import_name,
         broker=app.config['CELERY_BROKER_URL'],

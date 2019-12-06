@@ -27,7 +27,7 @@ class StpTransaction:
     ReferenciaNumerica: int
     Empresa: StrictStr
 
-    def transform(self):
+    def transform(self) -> Transaction:
         trans_dict = {
             camel_to_snake(k): v
             for k, v in self.__dict__.items()

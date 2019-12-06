@@ -44,7 +44,7 @@ class SpeidTransaction:
     prioridad: int = 1
     iva: str = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             k: v for k, v in self.__dict__.items() if not k.startswith('_')
         }
@@ -58,7 +58,7 @@ class SpeidTransaction:
         else:
             raise ValueError(f'{cuenta_len} is not a valid cuenta length')
 
-    def transform(self):
+    def transform(self) -> Transaction:
         transaction = Transaction(**self.to_dict())
         transaction.estado = Estado.submitted
         return transaction

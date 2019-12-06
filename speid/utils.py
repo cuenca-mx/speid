@@ -5,7 +5,7 @@ from flask import jsonify, make_response
 from speid import app
 
 
-def get(rule, **options):
+def get(rule: str, **options):
     def decorator(view):
         @wraps(view)
         def decorated(*args, **kwargs):
@@ -19,7 +19,7 @@ def get(rule, **options):
     return decorator
 
 
-def patch(rule, **options):
+def patch(rule: str, **options):
     def decorator(view):
         @wraps(view)
         def decorated(*args, **kwargs):
@@ -35,7 +35,7 @@ def patch(rule, **options):
     return decorator
 
 
-def post(rule, **options):
+def post(rule: str, **options):
     def decorator(view):
         @wraps(view)
         def decorated(*args, **kwargs):

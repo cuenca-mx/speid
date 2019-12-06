@@ -1,3 +1,5 @@
+from typing import Union
+
 from mongoengine import (
     DateTimeField,
     Document,
@@ -60,7 +62,7 @@ class Transaction(Document):
     prioridad = IntField()
     iva = StringField()
 
-    def to_dict(self):
+    def to_dict(self) -> Union[dict, None]:
         return mongo_to_dict(self, [])
 
     def save(

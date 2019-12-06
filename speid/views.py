@@ -5,8 +5,9 @@ from flask import abort, request
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception, capture_message
 
-from speid import app, stpmex_client
+from speid import app
 from speid.models import Event, Request, Transaction
+from speid.processors import stpmex_client
 from speid.types import Estado, EventType, HttpRequestMethod
 from speid.utils import get, patch, post
 from speid.validations import StpTransaction

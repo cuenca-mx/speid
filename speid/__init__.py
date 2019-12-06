@@ -12,7 +12,6 @@ from flask_mongoengine import MongoEngine
 from python_hosts import Hosts, HostsEntry
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
-from stpmex import Client
 
 
 class CJSONEncoder(json.JSONEncoder):
@@ -41,11 +40,9 @@ STP_BUCKET_S3 = os.environ['STP_BUCKET_S3']
 STP_PRIVATE_KEY = os.environ['STP_PRIVATE_KEY']
 STP_WSDL = os.environ['STP_WSDL']
 STP_EMPRESA = os.environ['STP_EMPRESA']
-STP_KEY_PASSPHRASE = os.environ['STP_KEY_PASSPHRASE']
 STP_PREFIJO = os.environ['STP_PREFIJO']
 EDIT_HOSTS = os.environ['EDIT_HOSTS']
 DATABASE_URI = os.environ['DATABASE_URI']
-SPEID_ENV = os.getenv('SPEID_ENV', '')
 
 app = Flask('speid')
 
@@ -56,7 +53,7 @@ app.json_encoder = CJSONEncoder
 db = MongoEngine(app)
 
 # Descarga la private key de S3
-if "AWS_ACCESS_KEY_ID" in os.environ:
+if 'AWS_ACCESS_KEY_ID' in os.environ:
     s3 = boto3.client('s3')
     s3.download_file(STP_BUCKET_S3, STP_PRIVATE_KEY, STP_PRIVATE_LOCATION)
 
@@ -72,12 +69,5 @@ if EDIT_HOSTS == 'true':
 # Configura el cliente STP
 with open(STP_PRIVATE_LOCATION) as fp:
     private_key = fp.read()
-
-stpmex_client = Client(
-    empresa=STP_EMPRESA,
-    priv_key=private_key,
-    priv_key_passphrase=STP_KEY_PASSPHRASE,
-    demo=SPEID_ENV != 'prod',
-)
 
 from . import commands, models, views  # noqa: E402 isort:skip

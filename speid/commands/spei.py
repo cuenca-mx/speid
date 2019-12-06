@@ -3,9 +3,10 @@ from datetime import datetime
 import click
 import pandas
 
-from speid import app, stpmex_client
+from speid import app
 from speid.helpers import callback_helper
 from speid.models import Event, Request, Transaction
+from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
 

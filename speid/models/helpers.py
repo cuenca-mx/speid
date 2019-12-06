@@ -1,8 +1,10 @@
 import re
 import uuid
 from datetime import datetime
+from enum import Enum
 from typing import Union
 
+from blinker.base import NamedSignal
 from mongoengine import (
     BooleanField,
     ComplexDateTimeField,
@@ -23,7 +25,7 @@ _underscorer1 = re.compile(r'(.)([A-Z][a-z]+)')
 _underscorer2 = re.compile('([a-z0-9])([A-Z])')
 
 
-def base62_encode(num):
+def base62_encode(num: int) -> str:
     """
     http://stackoverflow.com/questions/1119722/base-62-conversion
     """
@@ -41,13 +43,13 @@ def base62_encode(num):
 
 
 def base62_uuid(prefix=''):
-    def base62_uuid_func():
+    def base62_uuid_func() -> str:
         return prefix + base62_encode(uuid.uuid1().int)
 
     return base62_uuid_func
 
 
-def camel_to_snake(s):
+def camel_to_snake(s: str) -> str:
     """
     https://gist.github.com/jaytaylor/3660565
     """
@@ -55,14 +57,14 @@ def camel_to_snake(s):
     return _underscorer2.sub(r'\1_\2', subbed).lower()
 
 
-def handler(event):
+def handler(event: NamedSignal):
     """
     http://docs.mongoengine.org/guide/signals.html?highlight=update
     Signal decorator to allow use of callback functions as class
     decorators
     """
 
-    def decorator(fn):
+    def decorator(fn: ()):
         def apply(cls):
             event.connect(fn, sender=cls)
             return cls
@@ -91,29 +93,29 @@ class EnumField(BaseField):
         and will be used as possible choices
     """
 
-    def __init__(self, enum, *args, **kwargs):
+    def __init__(self, enum: Enum, *args, **kwargs):
         self.enum = enum
         kwargs['choices'] = [choice for choice in enum]
         super(EnumField, self).__init__(*args, **kwargs)
 
-    def __get_value(self, enum):
+    def __get_value(self, enum: Enum) -> str:
         return enum.value if hasattr(enum, 'value') else enum
 
-    def to_python(self, value):
+    def to_python(self, value: Enum) -> Enum:
         return self.enum(super(EnumField, self).to_python(value))
 
-    def to_mongo(self, value):
+    def to_mongo(self, value: Enum) -> str:
         return self.__get_value(value)
 
-    def prepare_query_value(self, op, value):
+    def prepare_query_value(self, op, value: Enum) -> str:
         return super(EnumField, self).prepare_query_value(
             op, self.__get_value(value)
         )
 
-    def validate(self, value):
+    def validate(self, value: Enum) -> Enum:
         return super(EnumField, self).validate(self.__get_value(value))
 
-    def _validate(self, value, **kwargs):
+    def _validate(self, value: Enum, **kwargs) -> Enum:
         return super(EnumField, self)._validate(
             self.enum(self.__get_value(value)), **kwargs
         )
@@ -155,7 +157,7 @@ def mongo_to_dict(obj, exclude_fields: list = None) -> Union[dict, None]:
     return return_data
 
 
-def list_field_to_dict(list_field):
+def list_field_to_dict(list_field: list) -> list:
     return_data = []
 
     for item in list_field:
