@@ -1,6 +1,5 @@
 ipython
 ipdb
-pycodestyle
 pytest
 pytest-cov
 flask-shell-ipython
@@ -11,4 +10,5 @@ moto
 pytest-mock
 black
 isort[requirements]
+flake8
 mongomock

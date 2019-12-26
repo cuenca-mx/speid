@@ -1,15 +1,16 @@
 import json
 import os
-from flask import request, abort
+
+from flask import abort, request
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception, capture_message
 
 from speid import app
 from speid.models import Event, Request, Transaction
+from speid.processors import stpmex_client
 from speid.types import Estado, EventType, HttpRequestMethod
 from speid.utils import get, patch, post
 from speid.validations import StpTransaction
-
 
 CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
 
@@ -55,7 +56,7 @@ def create_orden():
             clave_rastreo=transaction.clave_rastreo,
             cuenta_ordenante=transaction.cuenta_ordenante,
             cuenta_beneficiario=transaction.cuenta_beneficiario,
-            monto=transaction.monto
+            monto=transaction.monto,
         )
         assert len(previous_trx) == 0
 
@@ -75,10 +76,12 @@ def create_orden():
 @get('/transactions')
 def get_orders():
     estado = request.args.get('estado', default=None, type=str)
-    prefix_ordenante = request.args.get('prefix_ordenante', default=None,
-                                        type=str)
-    prefix_beneficiario = request.args.get('prefix_beneficiario', default=None,
-                                           type=str)
+    prefix_ordenante = request.args.get(
+        'prefix_ordenante', default=None, type=str
+    )
+    prefix_beneficiario = request.args.get(
+        'prefix_beneficiario', default=None, type=str
+    )
     query = dict()
     if estado:
         query['estado'] = estado
@@ -94,17 +97,16 @@ def get_orders():
 @patch('/transactions/<transaction_id>/process')
 def process_transaction(transaction_id):
     try:
-        transaction = Transaction.objects.get(id=transaction_id,
-                                              estado=Estado.submitted)
+        transaction = Transaction.objects.get(
+            id=transaction_id, estado=Estado.submitted
+        )
     except DoesNotExist:
         abort(401)
 
     order = transaction.get_order()
     transaction.save()
 
-    order.monto = order.monto / 100
-
-    res = order.registra()
+    res = stpmex_client.registrar_orden(order)
 
     if res is not None and res.id > 0:
         transaction.stp_id = res.id
@@ -124,8 +126,9 @@ def process_transaction(transaction_id):
 @patch('/transactions/<transaction_id>/reverse')
 def reverse_transaction(transaction_id):
     try:
-        transaction = Transaction.objects.get(id=transaction_id,
-                                              estado=Estado.submitted)
+        transaction = Transaction.objects.get(
+            id=transaction_id, estado=Estado.submitted
+        )
     except DoesNotExist:
         abort(401)
 

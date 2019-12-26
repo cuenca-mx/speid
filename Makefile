@@ -1,6 +1,10 @@
 SHELL := bash
-DOCKER=docker-compose run --rm speid
-PYTHON=python3.7
+PROJECT = speid
+PYTHON = python3.7
+DOCKER = docker-compose run --rm $(PROJECT)
+ISORT = isort -rc -ac $(PROJECT) tests
+BLACK = black -S -l 79 --target-version py37 $(PROJECT) tests
+
 
 
 install:
@@ -11,15 +15,16 @@ install-dev: install
 
 venv:
 		$(PYTHON) -m venv --prompt speid venv
-		source venv/bin/activate
-		pip install --quiet --upgrade pip
+		venv/bin/pip install -qU pip
+
+format:
+		$(ISORT)
+		$(BLACK)
 
 lint:
-		pycodestyle --ignore=E402 speid/ tests/
-
-polish:
-		black -S -l 79 speid/*
-		isort -rc --atomic speid/*
+		flake8 $(PROJECT) tests setup.py
+		$(ISORT) --check-only
+		$(BLACK) --check
 
 clean-pyc:
 		find . -name '__pycache__' -exec rm -r "{}" +
@@ -31,7 +36,7 @@ test: clean-pyc lint
 		coveralls
 
 travis-test:
-		pip install -q pycodestyle
+		pip install -q isort black flake8
 		$(MAKE) lint
 		$(MAKE) docker-build
 		$(DOCKER) scripts/test.sh

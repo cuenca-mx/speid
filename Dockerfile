@@ -4,8 +4,8 @@ MAINTAINER Cuenca <dev@cuenca.com>
 # Install app
 ADD Makefile requirements.txt /speid/
 WORKDIR /speid
-RUN pip install -q --upgrade pip
-RUN pip install --quiet gunicorn
+RUN pip install -qU pip
+RUN pip install -q gunicorn
 RUN make install
 
 # Add repo contents to image

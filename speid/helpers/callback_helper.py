@@ -4,6 +4,7 @@ import os
 
 import requests
 from requests.auth import HTTPBasicAuth
+from requests.models import Response
 from sentry_sdk import capture_message
 
 CALLBACK_URL = os.environ['CALLBACK_URL']
@@ -27,7 +28,7 @@ def send_transaction(transaction: dict) -> dict:
     return json.loads(response.text)
 
 
-def set_status_transaction(request_id: int, status: str):
+def set_status_transaction(request_id: int, status: str) -> Response:
     auth = auth_header(CALLBACK_API_KEY, CALLBACK_API_SECRET)
     response = requests.patch(
         '{0}/{1}'.format(CALLBACK_URL, request_id),

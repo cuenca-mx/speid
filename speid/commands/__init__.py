@@ -1,3 +1,5 @@
+__all__ = ['docker', 'spei']
+
 from werkzeug.serving import run_simple
 
 from speid import app

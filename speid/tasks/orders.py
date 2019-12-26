@@ -7,20 +7,20 @@ from sentry_sdk import capture_exception
 
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
+from speid.processors import stpmex_client
 from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import factory
 
-
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 
 
-def retry_timeout(attempts):
+def retry_timeout(attempts: int) -> int:
     return 2 * attempts
 
 
 @celery.task(bind=True, max_retries=5, name=os.environ['CELERY_TASK_NAME'])
-def send_order(self, order_val):
+def send_order(self, order_val: dict):
     try:
         execute(order_val)
     except MalformedOrderException as exc:
@@ -31,7 +31,7 @@ def send_order(self, order_val):
         self.retry(countdown=retry_timeout(self.request.retries), exc=exc)
 
 
-def execute(order_val):
+def execute(order_val: dict):
     # Get version
     version = 0
     if "version" in order_val:
@@ -68,9 +68,7 @@ def execute(order_val):
     transaction.save()
 
     # Send order to STP
-    order.monto = order.monto / 100
-
-    res = order.registra()
+    res = stpmex_client.registrar_orden(order)
 
     if res is not None and res.id > 0:
         transaction.stp_id = res.id

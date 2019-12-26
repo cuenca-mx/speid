@@ -1,14 +1,21 @@
-from mongoengine import (DateTimeField, Document, IntField, ListField,
-                         ReferenceField, StringField)
-from stpmex import Orden
-from stpmex.ordenes import ORDEN_FIELDNAMES
+from typing import Union
 
+from mongoengine import (
+    DateTimeField,
+    Document,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
+from stpmex import Orden
+
+from speid import STP_EMPRESA
 from speid.helpers import callback_helper
 from speid.types import Estado, EventType
 
 from .events import Event
-from .helpers import (EnumField, date_now, mongo_to_dict, snake_to_camel,
-                      updated_at)
+from .helpers import EnumField, date_now, mongo_to_dict, updated_at
 
 
 @updated_at.apply
@@ -55,7 +62,7 @@ class Transaction(Document):
     prioridad = IntField()
     iva = StringField()
 
-    def to_dict(self):
+    def to_dict(self) -> Union[dict, None]:
         return mongo_to_dict(self, [])
 
     def save(
@@ -69,7 +76,7 @@ class Transaction(Document):
         _refs=None,
         save_condition=None,
         signal_kwargs=None,
-        **kwargs
+        **kwargs,
     ):
         if len(self.events) > 0:
             [event.save() for event in self.events]
@@ -83,7 +90,7 @@ class Transaction(Document):
             _refs,
             save_condition,
             signal_kwargs,
-            **kwargs
+            **kwargs,
         )
 
     def delete(self, signal_kwargs=None, **write_concern):
@@ -110,27 +117,47 @@ class Transaction(Document):
             Event(type=EventType.completed, metadata=str(response))
         )
 
-    def get_order(self):
-        trx_dict = self.to_dict()
-        order_dict = {
-            snake_to_camel(k): v
-            for k, v in trx_dict.items()
-            if snake_to_camel(k) in ORDEN_FIELDNAMES and (
-                trx_dict[k] is not None)
-        }
-        order = Orden(**order_dict)
-        order.fechaOperacion = None
-        order.institucionOperante = self.institucion_ordenante
-        order.institucionContraparte = self.institucion_beneficiaria
-        order.nombreBeneficiario = self.nombre_beneficiario[:38].strip()
-        order.nombreOrdenante = self.nombre_ordenante[:38].strip()
+    def get_order(self) -> Orden:
+        optionals = dict(
+            institucionOperante=self.institucion_ordenante,
+            claveRastreo=self.clave_rastreo,
+            referenciaNumerica=self.referencia_numerica,
+            rfcCurpBeneficiario=self.rfc_curp_beneficiario,
+            medioEntrega=self.medio_entrega,
+            prioridad=self.prioridad,
+            tipoPago=self.tipo_pago,
+            topologia=self.topologia,
+        )
+        # remove if value is None
+        remove = []
+        for k, v in optionals.items():
+            if v is None:
+                remove.append(k)
+        for k in remove:
+            optionals.pop(k)
+
+        order = Orden(
+            monto=self.monto / 100.0,
+            conceptoPago=self.concepto_pago,
+            nombreBeneficiario=self.nombre_beneficiario,
+            cuentaBeneficiario=self.cuenta_beneficiario,
+            institucionContraparte=self.institucion_beneficiaria,
+            tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
+            nombreOrdenante=self.nombre_ordenante,
+            cuentaOrdenante=self.cuenta_ordenante,
+            rfcCurpOrdenante=self.rfc_curp_ordenante,
+            tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
+            iva=self.iva,
+            **optionals,
+        )
+
         self.clave_rastreo = self.clave_rastreo or order.claveRastreo
-        self.tipo_cuenta_beneficiario = self.tipo_cuenta_beneficiario or (
-            order.tipoCuentaBeneficiario)
-        self.rfc_curp_beneficiario = self.rfc_curp_beneficiario or (
-            order.rfcCurpBeneficiario)
-        self.referencia_numerica = self.referencia_numerica or (
-            order.referenciaNumerica)
-        self.empresa = self.empresa or order.empresa
+        self.rfc_curp_beneficiario = (
+            self.rfc_curp_beneficiario or order.rfcCurpBeneficiario
+        )
+        self.referencia_numerica = (
+            self.referencia_numerica or order.referenciaNumerica
+        )
+        self.empresa = self.empresa or STP_EMPRESA
 
         return order
