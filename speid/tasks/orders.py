@@ -67,4 +67,4 @@ def execute(order_val: dict):
     try:
         transaction.create_order()
     except StpmexException:
-        ...     # STP exceptions are handled by the retry logic
+        ...  # STP exceptions are handled by the retry logic

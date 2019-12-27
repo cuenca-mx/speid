@@ -197,7 +197,7 @@ def test_transaction_speid_non_valid_cuenta_beneficiario():
         SpeidTransaction(**order)
 
 
-def test_get_order():
+def test_send_order():
     transaction = Transaction(
         concepto_pago='PRUEBA',
         institucion_ordenante='90646',
@@ -212,7 +212,7 @@ def test_get_order():
         tipo_cuenta_beneficiario=40,
     )
 
-    order = transaction.get_order()
+    order = transaction.create_order()
 
     assert order.institucionOperante == transaction.institucion_ordenante
     assert order.institucionContraparte == transaction.institucion_beneficiaria
@@ -227,3 +227,5 @@ def test_get_order():
     assert order.nombreOrdenante == 'Ricardo Sanchez Castillo de la Mancha S'
     assert len(order.nombreBeneficiario) == 39
     assert len(order.nombreOrdenante) == 39
+
+    transaction.delete()

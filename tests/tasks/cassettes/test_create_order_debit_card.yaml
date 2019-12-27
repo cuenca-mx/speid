@@ -1,10 +1,13 @@
 interactions:
 - request:
-    body: '<?xml version=''1.0'' encoding=''utf-8''?>
-
-      <soap-env:Envelope xmlns:soap-env="http://schemas.xmlsoap.org/soap/envelope/"><soap-env:Header
-      xmlns:wsa="http://www.w3.org/2005/08/addressing"><wsa:Action>http://h2h.integration.spei.enlacefi.lgec.com/SpeiActualizaServices/registraOrdenRequest</wsa:Action><wsa:MessageID>urn:uuid:fe499078-4dfb-4ca1-9704-d9fabc76e9f0</wsa:MessageID><wsa:To>https://demo.stpmex.com:7024/speidemo/webservices/SpeiActualizaServices</wsa:To></soap-env:Header><soap-env:Body><ns0:registraOrden
-      xmlns:ns0="http://h2h.integration.spei.enlacefi.lgec.com/"><ordenPago><claveRastreo>CR1555969232</claveRastreo><conceptoPago>DebitCardTest</conceptoPago><cuentaBeneficiario>4242424242424242</cuentaBeneficiario><cuentaOrdenante>646180157000000004</cuentaOrdenante><empresa>TAMIZI</empresa><fechaOperacion>2019-04-22T21:21:15.780000</fechaOperacion><firma>fqNZubMd4kZJg9zdjPgbWr19kS4oxUs6jgoj1zldc6kR0WIw/3G0jBgKj7r4OGtJvIjI/oZkOb/sZNnkbV5gLmK2hTIcbMScP7IfxB/F50LJ9SKi+jDLt3GPe2Lh/ckJGw7ypZsDDQ2KZWxLou71HKS61KEkMHMPGKK87XvpMfg=</firma><institucionContraparte>072</institucionContraparte><institucionOperante>646</institucionOperante><medioEntrega>3</medioEntrega><monto>10.2</monto><nombreBeneficiario>Pach</nombreBeneficiario><nombreOrdenante>BANCO</nombreOrdenante><prioridad>1</prioridad><referenciaNumerica>7675570</referenciaNumerica><rfcCurpBeneficiario>ND</rfcCurpBeneficiario><rfcCurpOrdenante>ND</rfcCurpOrdenante><tipoCuentaBeneficiario>3</tipoCuentaBeneficiario><tipoPago>1</tipoPago><topologia>T</topologia></ordenPago></ns0:registraOrden></soap-env:Body></soap-env:Envelope>'
+    body: '{"monto": 10.2, "conceptoPago": "DebitCardTest", "nombreBeneficiario":
+      "Pach", "cuentaBeneficiario": "4242424242424242", "institucionContraparte":
+      "40072", "tipoCuentaBeneficiario": 3, "nombreOrdenante": "BANCO", "cuentaOrdenante":
+      "646180157000000004", "institucionOperante": "90646", "claveRastreo": "CR1577408680",
+      "referenciaNumerica": 9922162, "rfcCurpBeneficiario": "ND", "rfcCurpOrdenante":
+      "ND", "medioEntrega": 3, "prioridad": 1, "tipoPago": 1, "topologia": "T", "firma":
+      "WkMyszEFHm0qP0e4GGSMIMKW1MuWRwxXAcc8HJ0PloUY54xHBvce/+rwcut/X6rAQ5UFijvet+GCAFLHL6CvUBdaN3eQuAg4OSWoR7mMCqROuEW3xOAy2o73URDZ432Uq2eAt4RQY7i9su5BM+RK7dNYASHKNiqI9GtdiSRvS5M=",
+      "empresa": "TAMIZI"}'
     headers:
       Accept:
       - '*/*'
@@ -13,45 +16,23 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1598'
+      - '677'
       Content-Type:
-      - text/xml; charset=utf-8
-      Cookie:
-      - JSESSIONID=yH1HAYQaaxjysrlPowGsY1qIxooRPSUDQSwVAxXpgEmQXHIcXztN!1770036586
-      SOAPAction:
-      - '""'
+      - application/json
       User-Agent:
-      - Zeep/3.3.1 (www.python-zeep.org)
-    method: POST
-    uri: https://demo.stpmex.com:7024/speidemo/webservices/SpeiActualizaServices
+      - stpmex-python/3.0.0.dev1
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speidemows/rest/ordenPago/registra
   response:
-    body: {string: '<?xml version=''1.0'' encoding=''UTF-8''?><S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"><S:Body><ns0:registraOrdenResponse
-                 xmlns:ns0="http://h2h.integration.spei.enlacefi.lgec.com/"><return><id>5554986</id></return></ns0:registraOrdenResponse></S:Body></S:Envelope>'}
+    body:
+      string: '{"resultado":{"id":7564145}}'
     headers:
-      Cache-Control:
-      - no-cache, no-store, must-revalidate, pre-check=0, post-check=0, max-age=0,
-        s-maxage=0
-      Content-Security-Policy:
-      - default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'
-        'unsafe-eval'
+      Content-Length:
+      - '28'
       Content-Type:
-      - text/xml; charset=utf-8
+      - application/json
       Date:
-      - Mon, 22 Apr 2019 21:44:03 GMT
-      Expires:
-      - '0'
-      Pragma:
-      - no-cache
-      Strict-Transport-Security:
-      - max-age=31536000; includeSubdomains
-      Transfer-Encoding:
-      - chunked
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - DENY
-      X-Xss-Protection:
-      - 1; mode=block
+      - Fri, 27 Dec 2019 01:04:40 GMT
     status:
       code: 200
       message: OK

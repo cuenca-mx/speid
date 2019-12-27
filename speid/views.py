@@ -7,8 +7,8 @@ from sentry_sdk import capture_exception, capture_message
 from stpmex.exc import StpmexException
 
 from speid import app
-from speid.models import Event, Request, Transaction
-from speid.types import Estado, EventType, HttpRequestMethod
+from speid.models import Request, Transaction
+from speid.types import Estado, HttpRequestMethod
 from speid.utils import get, patch, post
 from speid.validations import StpTransaction
 
@@ -106,7 +106,7 @@ def process_transaction(transaction_id):
     try:
         transaction.create_order()
     except StpmexException as e:
-        return 400, e
+        return 400, str(e)
     else:
         return 201, transaction
 

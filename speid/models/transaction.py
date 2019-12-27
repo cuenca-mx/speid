@@ -8,12 +8,12 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
+from stpmex import Orden
 from stpmex.exc import StpmexException
-
-from speid.processors import stpmex_client
 
 from speid import STP_EMPRESA
 from speid.helpers import callback_helper
+from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
 from .events import Event
@@ -119,7 +119,7 @@ class Transaction(Document):
             Event(type=EventType.completed, metadata=str(response))
         )
 
-    def create_order(self):
+    def create_order(self) -> Orden:
         optionals = dict(
             institucionOperante=self.institucion_ordenante,
             claveRastreo=self.clave_rastreo,
@@ -167,6 +167,9 @@ class Transaction(Document):
             self.empresa = self.empresa or STP_EMPRESA
             self.stp_id = order.id
 
-            self.events.append(Event(type=EventType.completed, metadata=str(order)))
+            self.events.append(
+                Event(type=EventType.completed, metadata=str(order))
+            )
 
             self.save()
+            return order
