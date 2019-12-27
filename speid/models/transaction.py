@@ -8,7 +8,9 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
-from stpmex import Orden
+from stpmex.exc import StpmexException
+
+from speid.processors import stpmex_client
 
 from speid import STP_EMPRESA
 from speid.helpers import callback_helper
@@ -117,7 +119,7 @@ class Transaction(Document):
             Event(type=EventType.completed, metadata=str(response))
         )
 
-    def get_order(self) -> Orden:
+    def create_order(self):
         optionals = dict(
             institucionOperante=self.institucion_ordenante,
             claveRastreo=self.clave_rastreo,
@@ -136,28 +138,35 @@ class Transaction(Document):
         for k in remove:
             optionals.pop(k)
 
-        order = Orden(
-            monto=self.monto / 100.0,
-            conceptoPago=self.concepto_pago,
-            nombreBeneficiario=self.nombre_beneficiario,
-            cuentaBeneficiario=self.cuenta_beneficiario,
-            institucionContraparte=self.institucion_beneficiaria,
-            tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
-            nombreOrdenante=self.nombre_ordenante,
-            cuentaOrdenante=self.cuenta_ordenante,
-            rfcCurpOrdenante=self.rfc_curp_ordenante,
-            tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
-            iva=self.iva,
-            **optionals,
-        )
+        try:
+            order = stpmex_client.ordenes.create(
+                monto=self.monto / 100.0,
+                conceptoPago=self.concepto_pago,
+                nombreBeneficiario=self.nombre_beneficiario,
+                cuentaBeneficiario=self.cuenta_beneficiario,
+                institucionContraparte=self.institucion_beneficiaria,
+                tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
+                nombreOrdenante=self.nombre_ordenante,
+                cuentaOrdenante=self.cuenta_ordenante,
+                rfcCurpOrdenante=self.rfc_curp_ordenante,
+                tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
+                iva=self.iva,
+                **optionals,
+            )
+        except StpmexException as e:
+            self.events.append(Event(type=EventType.error, metadata=str(e)))
+            raise e
+        else:
+            self.clave_rastreo = self.clave_rastreo or order.claveRastreo
+            self.rfc_curp_beneficiario = (
+                self.rfc_curp_beneficiario or order.rfcCurpBeneficiario
+            )
+            self.referencia_numerica = (
+                self.referencia_numerica or order.referenciaNumerica
+            )
+            self.empresa = self.empresa or STP_EMPRESA
+            self.stp_id = order.id
 
-        self.clave_rastreo = self.clave_rastreo or order.claveRastreo
-        self.rfc_curp_beneficiario = (
-            self.rfc_curp_beneficiario or order.rfcCurpBeneficiario
-        )
-        self.referencia_numerica = (
-            self.referencia_numerica or order.referenciaNumerica
-        )
-        self.empresa = self.empresa or STP_EMPRESA
+            self.events.append(Event(type=EventType.completed, metadata=str(order)))
 
-        return order
+            self.save()

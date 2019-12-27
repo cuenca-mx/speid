@@ -4,10 +4,10 @@ import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
+from stpmex.exc import StpmexException
 
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
-from speid.processors import stpmex_client
 from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import factory
@@ -64,20 +64,7 @@ def execute(order_val: dict):
         transaction.save()
         raise MalformedOrderException()
 
-    order = transaction.get_order()
-    transaction.save()
-
-    # Send order to STP
-    res = stpmex_client.registrar_orden(order)
-
-    if res is not None and res.id > 0:
-        transaction.stp_id = res.id
-        transaction.events.append(
-            Event(type=EventType.completed, metadata=str(res))
-        )
-    else:
-        transaction.events.append(
-            Event(type=EventType.error, metadata=str(res))
-        )
-
-    transaction.save()
+    try:
+        transaction.create_order()
+    except StpmexException:
+        ...     # STP exceptions are handled by the retry logic

@@ -4,10 +4,10 @@ import os
 from flask import abort, request
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception, capture_message
+from stpmex.exc import StpmexException
 
 from speid import app
 from speid.models import Event, Request, Transaction
-from speid.processors import stpmex_client
 from speid.types import Estado, EventType, HttpRequestMethod
 from speid.utils import get, patch, post
 from speid.validations import StpTransaction
@@ -103,24 +103,12 @@ def process_transaction(transaction_id):
     except DoesNotExist:
         abort(401)
 
-    order = transaction.get_order()
-    transaction.save()
-
-    res = stpmex_client.registrar_orden(order)
-
-    if res is not None and res.id > 0:
-        transaction.stp_id = res.id
-        transaction.events.append(
-            Event(type=EventType.completed, metadata=str(res))
-        )
-        transaction.save()
-        return 201, transaction
+    try:
+        transaction.create_order()
+    except StpmexException as e:
+        return 400, e
     else:
-        transaction.events.append(
-            Event(type=EventType.error, metadata=str(res))
-        )
-        transaction.save()
-        return 400, res
+        return 201, transaction
 
 
 @patch('/transactions/<transaction_id>/reverse')
