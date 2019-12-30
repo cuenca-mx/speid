@@ -98,7 +98,7 @@ def get_orders():
 def process_transaction(transaction_id):
     try:
         transaction = Transaction.objects.get(
-            id=transaction_id, estado=Estado.submitted
+            id=transaction_id, estado=Estado.created
         )
     except DoesNotExist:
         abort(401)
@@ -115,7 +115,7 @@ def process_transaction(transaction_id):
 def reverse_transaction(transaction_id):
     try:
         transaction = Transaction.objects.get(
-            id=transaction_id, estado=Estado.submitted
+            id=transaction_id, estado=Estado.created
         )
     except DoesNotExist:
         abort(401)

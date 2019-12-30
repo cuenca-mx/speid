@@ -1,12 +1,18 @@
 from typing import Union
 
-from mongoengine import DateTimeField, IntField, StringField
+from mongoengine import (
+    DateTimeField,
+    Document,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 from stpmex.exc import StpmexException
 from stpmex.resources import Orden
 
 from speid import STP_EMPRESA
 from speid.helpers import callback_helper
-from speid.models import DocumentBaseMixin
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
@@ -15,7 +21,7 @@ from .helpers import EnumField, date_now, mongo_to_dict, updated_at
 
 
 @updated_at.apply
-class Transaction(DocumentBaseMixin):
+class Transaction(Document):
     created_at = date_now()
     updated_at = DateTimeField()
     stp_id = IntField()
@@ -56,6 +62,41 @@ class Transaction(DocumentBaseMixin):
     medio_entrega = IntField()
     prioridad = IntField()
     iva = StringField()
+
+    events = ListField(ReferenceField(Event))
+
+    def save(
+        self,
+        force_insert=False,
+        validate=True,
+        clean=True,
+        write_concern=None,
+        cascade=None,
+        cascade_kwargs=None,
+        _refs=None,
+        save_condition=None,
+        signal_kwargs=None,
+        **kwargs,
+    ):
+        if len(self.events) > 0:
+            [event.save() for event in self.events]
+        super().save(
+            force_insert,
+            validate,
+            clean,
+            write_concern,
+            cascade,
+            cascade_kwargs,
+            _refs,
+            save_condition,
+            signal_kwargs,
+            **kwargs,
+        )
+
+    def delete(self, signal_kwargs=None, **write_concern):
+        if len(self.events) > 0:
+            [event.delete() for event in self.events]
+        super().delete(signal_kwargs, **write_concern)
 
     def to_dict(self) -> Union[dict, None]:
         return mongo_to_dict(self, [])
@@ -130,6 +171,6 @@ class Transaction(DocumentBaseMixin):
             self.events.append(
                 Event(type=EventType.completed, metadata=str(order))
             )
-
+            self.estado = Estado.submitted
             self.save()
             return order

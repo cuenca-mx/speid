@@ -1,16 +1,24 @@
-from mongoengine import DateTimeField, IntField, StringField
+from mongoengine import (
+    DateTimeField,
+    Document,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
+)
 from stpmex.exc import StpmexException
 from stpmex.resources import Cuenta
 from stpmex.types import Genero
 
-from speid.models import DocumentBaseMixin, Event
-from speid.models.helpers import EnumField, date_now, updated_at
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
+from .events import Event
+from .helpers import EnumField, date_now, updated_at
+
 
 @updated_at.apply
-class Account(DocumentBaseMixin):
+class Account(Document):
     created_at = date_now()
     updated_at = DateTimeField()
     stp_id = IntField()
@@ -36,6 +44,45 @@ class Account(DocumentBaseMixin):
     pais: IntField(default=None)
     email: StringField(default=None)
     id_identificacion: StringField(default=None)
+
+    events = ListField(ReferenceField(Event))
+
+    def __init__(self, *args, **values):
+        self.events.append(Event(type=EventType.created))
+        super().__init__(*args, **values)
+
+    def save(
+        self,
+        force_insert=False,
+        validate=True,
+        clean=True,
+        write_concern=None,
+        cascade=None,
+        cascade_kwargs=None,
+        _refs=None,
+        save_condition=None,
+        signal_kwargs=None,
+        **kwargs,
+    ):
+        if len(self.events) > 0:
+            [event.save() for event in self.events]
+        super().save(
+            force_insert,
+            validate,
+            clean,
+            write_concern,
+            cascade,
+            cascade_kwargs,
+            _refs,
+            save_condition,
+            signal_kwargs,
+            **kwargs,
+        )
+
+    def delete(self, signal_kwargs=None, **write_concern):
+        if len(self.events) > 0:
+            [event.delete() for event in self.events]
+        super().delete(signal_kwargs, **write_concern)
 
     def create_account(self) -> Cuenta:
         self.estado = Estado.submitted
