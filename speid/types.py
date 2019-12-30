@@ -18,8 +18,8 @@ class Estado(Enum):
     created = 'created'
     submitted = 'submitted'  # Sent to STP
     succeeded = 'succeeded'  # LIQUIDACION from STP
-    failed = 'failed'        # DEVOLUCION from STP
-    error = 'error'          # Malformed order
+    failed = 'failed'  # DEVOLUCION from STP
+    error = 'error'  # Malformed order
 
     @classmethod
     def get_state_from_stp(cls, stp_state: str) -> Enum:

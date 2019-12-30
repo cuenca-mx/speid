@@ -1,10 +1,10 @@
-from mongoengine import DateTimeField, StringField, IntField
+from mongoengine import DateTimeField, IntField, StringField
 from stpmex.exc import StpmexException
 from stpmex.resources import Cuenta
 from stpmex.types import Genero
 
 from speid.models import DocumentBaseMixin, Event
-from speid.models.helpers import date_now, updated_at, EnumField
+from speid.models.helpers import EnumField, date_now, updated_at
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
@@ -42,20 +42,20 @@ class Account(DocumentBaseMixin):
         self.save()
 
         optionals = dict(
-            apellidoMaterno = self.apellido_materno,
-            genero = self.genero,
-            fechaNacimiento = self.fecha_nacimiento,
-            entidadFederativa = self.entidad_federativa,
-            actividadEconomica = self.actividad_economica,
-            calle = self.calle,
-            numeroExterior = self.numero_exterior,
-            numeroInterior = self.numero_interior,
+            apellidoMaterno=self.apellido_materno,
+            genero=self.genero,
+            fechaNacimiento=self.fecha_nacimiento,
+            entidadFederativa=self.entidad_federativa,
+            actividadEconomica=self.actividad_economica,
+            calle=self.calle,
+            numeroExterior=self.numero_exterior,
+            numeroInterior=self.numero_interior,
             colonia=self.colonia,
-            alcaldiaMunicipio = self.alcaldia_municipio,
-            cp = self.cp,
-            pais = self.pais,
-            email = self.email,
-            idIdentificacion = self.id_identificacion
+            alcaldiaMunicipio=self.alcaldia_municipio,
+            cp=self.cp,
+            pais=self.pais,
+            email=self.email,
+            idIdentificacion=self.id_identificacion,
         )
 
         # remove if value is None
@@ -73,7 +73,7 @@ class Account(DocumentBaseMixin):
                 cuenta=self.cuenta,
                 rfcCurp=self.rfc_curp,
                 telefono=self.telefono,
-                **optionals
+                **optionals,
             )
         except StpmexException as e:
             self.events.append(Event(type=EventType.error, metadata=str(e)))

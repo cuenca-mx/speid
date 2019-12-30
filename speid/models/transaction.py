@@ -1,10 +1,6 @@
 from typing import Union
 
-from mongoengine import (
-    DateTimeField,
-    IntField,
-    StringField,
-)
+from mongoengine import DateTimeField, IntField, StringField
 from stpmex.exc import StpmexException
 from stpmex.resources import Orden
 
