@@ -8,8 +8,8 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
-from stpmex import Orden
 from stpmex.exc import StpmexException
+from stpmex.resources import Orden
 
 from speid import STP_EMPRESA
 from speid.helpers import callback_helper
@@ -139,7 +139,7 @@ class Transaction(Document):
             optionals.pop(k)
 
         try:
-            order = stpmex_client.ordenes.create(
+            order = stpmex_client.ordenes.registra(
                 monto=self.monto / 100.0,
                 conceptoPago=self.concepto_pago,
                 nombreBeneficiario=self.nombre_beneficiario,
@@ -149,7 +149,6 @@ class Transaction(Document):
                 nombreOrdenante=self.nombre_ordenante,
                 cuentaOrdenante=self.cuenta_ordenante,
                 rfcCurpOrdenante=self.rfc_curp_ordenante,
-                tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
                 iva=self.iva,
                 **optionals,
             )

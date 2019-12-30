@@ -197,6 +197,7 @@ def test_transaction_speid_non_valid_cuenta_beneficiario():
         SpeidTransaction(**order)
 
 
+@pytest.mark.vcr
 def test_send_order():
     transaction = Transaction(
         concepto_pago='PRUEBA',
