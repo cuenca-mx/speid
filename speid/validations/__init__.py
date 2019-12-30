@@ -1,5 +1,6 @@
-__all__ = ['SpeidTransaction', 'TransactionFactory', 'StpTransaction']
+__all__ = ['Account', 'SpeidTransaction', 'TransactionFactory', 'StpTransaction']
 
+from .account import Account
 from .speid_transaction import SpeidTransaction
 from .speid_transaction_factory import TransactionFactory
 from .stp_transaction import StpTransaction
