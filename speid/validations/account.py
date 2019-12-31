@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic.dataclasses import dataclass
 
-from speid.models import Account
+from speid.models import Account as Model
 from speid.types import Estado
 
 
@@ -12,7 +12,7 @@ class Account:
     nombre: str
     apellido_paterno: str
     cuenta: str
-    rfcCurp: str
+    rfc_curp: str
     telefono: str = None
 
     apellido_materno: Optional[str] = None
@@ -30,7 +30,12 @@ class Account:
     email: Optional[str] = None
     id_identificacion: Optional[str] = None
 
-    def transform(self) -> Account:
-        account = Account(**self.to_dict())
+    def to_dict(self) -> dict:
+        return {
+            k: v for k, v in self.__dict__.items() if not k.startswith('_')
+        }
+
+    def transform(self) -> Model:
+        account = Model(**self.to_dict())
         account.estado = Estado.created
         return account

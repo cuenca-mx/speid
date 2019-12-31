@@ -1,0 +1,34 @@
+interactions:
+- request:
+    body: '{"nombre": "Ricardo", "apellidoPaterno": "Sanchez", "cuenta": "646180157063641989",
+      "rfcCurp": "SACR891125", "telefono": "5567980796", "firma": "dCNKh3eKRe9s4poCRitb9uepAgp4mkcYV3cKfpgCH2sobLACHiYnfYVQQpN0Sqy02jL2QcPSSqyHO6g29iJB9p77ZLvKzT1Ihy5qAlZ08YwJevGVn63+R9Bayjetk1OC2YJWzbjyx3XWHwGTPo6IRb9unnm+UBNRHJ77bYJLISs=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '340'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.0.0.rc1
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
+  response:
+    body:
+      string: '{"descripcion":"rfc/curp invalido","id":1}'
+    headers:
+      Content-Length:
+      - '42'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 31 Dec 2019 01:07:38 GMT
+    status:
+      code: 200
+      message: OK
+version: 1

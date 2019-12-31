@@ -1,3 +1,5 @@
+from typing import Union
+
 from mongoengine import (
     DateTimeField,
     Document,
@@ -14,7 +16,7 @@ from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
 from .events import Event
-from .helpers import EnumField, date_now, updated_at
+from .helpers import EnumField, date_now, mongo_to_dict, updated_at
 
 
 @updated_at.apply
@@ -24,32 +26,28 @@ class Account(Document):
     stp_id = IntField()
     estado = EnumField(Estado, default=Estado.created)
 
-    nombre: StringField()
-    apellido_paterno: StringField()
-    apellido_materno: StringField(default=None)
-    cuenta: StringField()
-    rfc_curp: StringField()
-    telefono: StringField()
-    genero: EnumField(Genero)
+    nombre = StringField()
+    apellido_paterno = StringField()
+    apellido_materno = StringField(required=False)
+    cuenta = StringField()
+    rfc_curp = StringField()
+    telefono = StringField()
 
-    fecha_nacimiento: DateTimeField(default=None)
-    entidad_federativa: IntField(default=None)
-    actividad_economica: IntField(default=None)
-    calle: StringField(default=None)
-    numero_exterior: StringField(default=None)
-    numero_interior: StringField(default=None)
-    colonia: StringField(default=None)
-    alcaldia_municipio: StringField(default=None)
-    cp: StringField(default=None)
-    pais: IntField(default=None)
-    email: StringField(default=None)
-    id_identificacion: StringField(default=None)
+    genero = EnumField(Genero, required=False)
+    fecha_nacimiento = DateTimeField(required=False)
+    entidad_federativa = IntField(required=False)
+    actividad_economica = IntField(required=False)
+    calle = StringField(required=False)
+    numero_exterior = StringField(required=False)
+    numero_interior = StringField(required=False)
+    colonia = StringField(required=False)
+    alcaldia_municipio = StringField(required=False)
+    cp = StringField(required=False)
+    pais = IntField(required=False)
+    email = StringField(required=False)
+    id_identificacion = StringField(required=False)
 
     events = ListField(ReferenceField(Event))
-
-    def __init__(self, *args, **values):
-        self.events.append(Event(type=EventType.created))
-        super().__init__(*args, **values)
 
     def save(
         self,
@@ -83,6 +81,9 @@ class Account(Document):
         if len(self.events) > 0:
             [event.delete() for event in self.events]
         super().delete(signal_kwargs, **write_concern)
+
+    def to_dict(self) -> Union[dict, None]:
+        return mongo_to_dict(self, [])
 
     def create_account(self) -> Cuenta:
         self.estado = Estado.submitted
