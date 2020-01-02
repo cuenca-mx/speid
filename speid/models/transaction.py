@@ -1,3 +1,5 @@
+import os
+
 from mongoengine import (
     DateTimeField,
     Document,
@@ -25,6 +27,10 @@ from .helpers import (
     delete_events,
     save_events,
     updated_at,
+)
+
+SKIP_VALIDATION_PRIOR_SEND_ORDER = (
+    os.getenv('SKIP_VALIDATION_PRIOR_SEND_ORDER', 'false').lower() == 'true'
 )
 
 
@@ -98,7 +104,7 @@ class Transaction(Document, BaseModel):
         # Validate account has already been created
         try:
             account = Account.objects.get(cuenta=self.cuenta_ordenante)
-            assert account.stp_id
+            assert SKIP_VALIDATION_PRIOR_SEND_ORDER or account.stp_id
         except (DoesNotExist, AssertionError):
             self.estado = Estado.error
             self.save()
