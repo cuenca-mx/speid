@@ -27,7 +27,7 @@ def mock_callback_api(monkeypatch):
 @pytest.fixture(scope='module')
 def vcr_config():
     config = dict()
-    # config['record_mode'] = 'none'
+    config['record_mode'] = 'none'
     return config
 
 
