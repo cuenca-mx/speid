@@ -102,16 +102,17 @@ class Transaction(Document, BaseModel):
 
     def create_order(self) -> Orden:
         # Validate account has already been created
-        try:
-            account = Account.objects.get(cuenta=self.cuenta_ordenante)
-            assert SKIP_VALIDATION_PRIOR_SEND_ORDER or account.stp_id
-        except (DoesNotExist, AssertionError):
-            self.estado = Estado.error
-            self.save()
-            raise MalformedOrderException(
-                f'Account has not been registered: {self.cuenta_ordenante}, '
-                f'stp_id: {self.stp_id}'
-            )
+        if not SKIP_VALIDATION_PRIOR_SEND_ORDER:
+            try:
+                account = Account.objects.get(cuenta=self.cuenta_ordenante)
+                assert account.stp_id
+            except (DoesNotExist, AssertionError):
+                self.estado = Estado.error
+                self.save()
+                raise MalformedOrderException(
+                    f'Account has not been registered: {self.cuenta_ordenante}'
+                    f', stp_id: {self.stp_id}'
+                )
 
         optionals = dict(
             institucionOperante=self.institucion_ordenante,

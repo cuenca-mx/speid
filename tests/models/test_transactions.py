@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 from stpmex.types import TipoCuenta
 
+from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
 from speid.types import Estado, EventType
 from speid.validations import SpeidTransaction, StpTransaction
@@ -229,4 +230,28 @@ def test_send_order(create_account):
     assert len(order.nombreBeneficiario) == 39
     assert len(order.nombreOrdenante) == 39
 
+    transaction.delete()
+
+
+def test_fail_send_order_no_account_registered():
+    transaction = Transaction(
+        concepto_pago='PRUEBA',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='40072',
+        monto=1020,
+        nombre_beneficiario='Ricardo Sánchez Castillo de la Mancha S.A. de CV',
+        nombre_ordenante='   Ricardo Sánchez Castillo de la Mancha S.A. de CV',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='speid_id',
+        tipo_cuenta_beneficiario=40,
+    )
+    transaction_id = transaction.save().id
+
+    with pytest.raises(MalformedOrderException):
+        transaction.create_order()
+
+    transaction = Transaction.objects.get(id=transaction_id)
+    assert transaction.estado is Estado.error
     transaction.delete()
