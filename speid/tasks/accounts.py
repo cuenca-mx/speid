@@ -10,10 +10,14 @@ from speid.validations import Account as AccountValidation
 @celery.task(bind=True, max_retries=None)
 def create_account(self, account_dict: dict):
     try:
-        account_val = AccountValidation(**account_dict)
-    except (TypeError, ValueError) as e:
+        execute(account_dict)
+    except Exception as e:
         capture_exception(e)
-        return  # Should not be retried if the're validation errors
+        self.retry(countdown=600, exc=e)  # Reintenta en 10 minutos
+
+
+def execute(account_dict: dict):
+    account_val = AccountValidation(**account_dict)
 
     # Look for previous accounts
     account = account_val.transform()
