@@ -29,7 +29,7 @@ class Account(Document):
     nombre = StringField()
     apellido_paterno = StringField()
     apellido_materno = StringField(required=False)
-    cuenta = StringField()
+    cuenta = StringField(unique=True)
     rfc_curp = StringField()
     telefono = StringField()
 

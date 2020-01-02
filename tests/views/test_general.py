@@ -237,7 +237,9 @@ def test_get_transactions(
 
 
 @pytest.mark.vcr
-def test_process_transaction(client, default_outcome_transaction):
+def test_process_transaction(
+    client, default_outcome_transaction, create_account
+):
     trx = Transaction(**default_outcome_transaction)
     trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()

@@ -52,7 +52,7 @@ def test_malformed_order_worker(mock_callback_api):
 
 
 @pytest.mark.vcr
-def test_create_order_debit_card():
+def test_create_order_debit_card(create_account):
     order = dict(
         concepto_pago='DebitCardTest',
         institucion_ordenante='90646',
@@ -74,7 +74,7 @@ def test_create_order_debit_card():
 
 
 @pytest.mark.vcr
-def test_worker_with_version_2():
+def test_worker_with_version_2(create_account):
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',

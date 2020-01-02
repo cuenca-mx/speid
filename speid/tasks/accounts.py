@@ -25,4 +25,7 @@ def create_account(self, account_dict: dict):
         account = previous_account
         account.events.append(Event(type=EventType.retry))
 
+    if account.stp_id:
+        return
+
     account.create_account()

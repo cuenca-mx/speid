@@ -3,6 +3,7 @@ from typing import Union
 from mongoengine import (
     DateTimeField,
     Document,
+    DoesNotExist,
     IntField,
     ListField,
     ReferenceField,
@@ -12,10 +13,12 @@ from stpmex.exc import StpmexException
 from stpmex.resources import Orden
 
 from speid import STP_EMPRESA
+from speid.exc import MalformedOrderException
 from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
+from .account import Account
 from .events import Event
 from .helpers import EnumField, date_now, mongo_to_dict, updated_at
 
@@ -121,6 +124,18 @@ class Transaction(Document):
         )
 
     def create_order(self) -> Orden:
+        # Validate account has already been created
+        try:
+            account = Account.objects.get(cuenta=self.cuenta_ordenante)
+            assert account.stp_id
+        except (DoesNotExist, AssertionError):
+            self.estado = Estado.error
+            self.save()
+            raise MalformedOrderException(
+                f'Account has not been registered: {self.cuenta_ordenante}, '
+                f'stp_id: {self.stp_id}'
+            )
+
         optionals = dict(
             institucionOperante=self.institucion_ordenante,
             claveRastreo=self.clave_rastreo,
@@ -155,6 +170,7 @@ class Transaction(Document):
             )
         except StpmexException as e:
             self.events.append(Event(type=EventType.error, metadata=str(e)))
+            self.estado = Estado.error
             self.save()
             raise e
         else:
