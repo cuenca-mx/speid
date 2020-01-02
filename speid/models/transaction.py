@@ -82,8 +82,6 @@ class Transaction(Document, BaseModel):
     events = ListField(ReferenceField(Event))
 
     def set_state(self, state: Estado):
-        self.events.append(Event(type=EventType.created))
-
         callback_helper.set_status_transaction(self.speid_id, state.value)
         self.estado = state
 
@@ -113,6 +111,18 @@ class Transaction(Document, BaseModel):
                     f'Account has not been registered: {self.cuenta_ordenante}'
                     f', stp_id: {self.stp_id}'
                 )
+
+        # Don't send if stp_id already exists
+        if self.stp_id:
+            return Orden(
+                id=self.stp_id,
+                monto=self.monto / 100.0,
+                conceptoPago=self.concepto_pago,
+                nombreBeneficiario=self.nombre_beneficiario,
+                cuentaBeneficiario=self.cuenta_beneficiario,
+                institucionContraparte=self.institucion_beneficiaria,
+                cuentaOrdenante=self.cuenta_ordenante,
+            )
 
         optionals = dict(
             institucionOperante=self.institucion_ordenante,

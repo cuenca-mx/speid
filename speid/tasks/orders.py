@@ -1,10 +1,10 @@
+import datetime as dt
 import os
 
 import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
-from stpmex.exc import StpmexException
 
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
@@ -13,13 +13,19 @@ from speid.types import Estado, EventType
 from speid.validations import factory
 
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
+IGNORED_EXCEPTIONS = os.getenv('IGNORED_EXCEPTIONS', '').split(',')
 
 
 def retry_timeout(attempts: int) -> int:
-    return 2 * attempts
+    # Los primeros 30 segundos lo intenta 5 veces
+    if attempts <= 5:
+        return 2 * attempts
+
+    # Después lo intenta cada 20 minutos
+    return 1200
 
 
-@celery.task(bind=True, max_retries=5, name=os.environ['CELERY_TASK_NAME'])
+@celery.task(bind=True, max_retries=12, name=os.environ['CELERY_TASK_NAME'])
 def send_order(self, order_val: dict):
     try:
         execute(order_val)
@@ -27,7 +33,8 @@ def send_order(self, order_val: dict):
         capture_exception(exc)
         pass
     except Exception as exc:
-        capture_exception(exc)
+        if not any([message in str(exc) for message in IGNORED_EXCEPTIONS]):
+            capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries), exc=exc)
 
 
@@ -64,7 +71,9 @@ def execute(order_val: dict):
         transaction.save()
         raise MalformedOrderException()
 
-    try:
+    if transaction.created_at > (dt.datetime.utcnow() - dt.timedelta(hours=2)):
         transaction.create_order()
-    except StpmexException:
-        ...  # STP exceptions are handled by the retry logic
+    else:
+        # Return transaction after 2 hours of creation
+        transaction.set_state(Estado.failed)
+        transaction.save()

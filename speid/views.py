@@ -7,8 +7,8 @@ from sentry_sdk import capture_exception, capture_message
 from stpmex.exc import StpmexException
 
 from speid import app
-from speid.models import Request, Transaction
-from speid.types import Estado, HttpRequestMethod
+from speid.models import Event, Request, Transaction
+from speid.types import Estado, EventType, HttpRequestMethod
 from speid.utils import get, patch, post
 from speid.validations import StpTransaction
 
@@ -65,11 +65,12 @@ def create_orden():
 
         r = request.json
         r['estado'] = Estado.convert_to_stp_state(transaction.estado)
-    except Exception as exc:
+    except Exception as e:
         r = dict(estado='LIQUIDACION')
         transaction.estado = Estado.error
+        transaction.events.append(Event(type=EventType.error, metadata=str(e)))
         transaction.save()
-        capture_exception(exc)
+        capture_exception(e)
     return 201, r
 
 

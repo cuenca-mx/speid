@@ -241,7 +241,6 @@ def test_process_transaction(
     client, default_outcome_transaction, create_account
 ):
     trx = Transaction(**default_outcome_transaction)
-    trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
 
     assert trx.estado is Estado.created
