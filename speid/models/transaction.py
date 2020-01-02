@@ -1,5 +1,3 @@
-from typing import Union
-
 from mongoengine import (
     DateTimeField,
     Document,
@@ -19,12 +17,21 @@ from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
 from .account import Account
+from .base import BaseModel
 from .events import Event
-from .helpers import EnumField, date_now, mongo_to_dict, updated_at
+from .helpers import (
+    EnumField,
+    date_now,
+    delete_events,
+    save_events,
+    updated_at,
+)
 
 
 @updated_at.apply
-class Transaction(Document):
+@save_events.apply
+@delete_events.apply
+class Transaction(Document, BaseModel):
     created_at = date_now()
     updated_at = DateTimeField()
     stp_id = IntField()
@@ -67,42 +74,6 @@ class Transaction(Document):
     iva = StringField()
 
     events = ListField(ReferenceField(Event))
-
-    def save(
-        self,
-        force_insert=False,
-        validate=True,
-        clean=True,
-        write_concern=None,
-        cascade=None,
-        cascade_kwargs=None,
-        _refs=None,
-        save_condition=None,
-        signal_kwargs=None,
-        **kwargs,
-    ):
-        if len(self.events) > 0:
-            [event.save() for event in self.events]
-        super().save(
-            force_insert,
-            validate,
-            clean,
-            write_concern,
-            cascade,
-            cascade_kwargs,
-            _refs,
-            save_condition,
-            signal_kwargs,
-            **kwargs,
-        )
-
-    def delete(self, signal_kwargs=None, **write_concern):
-        if len(self.events) > 0:
-            [event.delete() for event in self.events]
-        super().delete(signal_kwargs, **write_concern)
-
-    def to_dict(self) -> Union[dict, None]:
-        return mongo_to_dict(self, [])
 
     def set_state(self, state: Estado):
         self.events.append(Event(type=EventType.created))
