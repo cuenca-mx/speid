@@ -104,7 +104,7 @@ class Transaction(Document, BaseModel):
         if not SKIP_VALIDATION_PRIOR_SEND_ORDER:
             try:
                 account = Account.objects.get(cuenta=self.cuenta_ordenante)
-                assert account.stp_id
+                assert account.stp_id and account.estado is Estado.succeeded
             except (DoesNotExist, AssertionError):
                 self.estado = Estado.error
                 self.save()

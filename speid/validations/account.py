@@ -13,8 +13,8 @@ class Account:
     apellido_paterno: str
     cuenta: str
     rfc_curp: str
-    telefono: str = None
 
+    telefono: Optional[str] = None
     apellido_materno: Optional[str] = None
     genero: Optional[str] = None
     fecha_nacimiento: Optional[dt.datetime] = None
