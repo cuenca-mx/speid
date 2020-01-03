@@ -33,9 +33,8 @@ def send_order(self, order_val: dict):
         capture_exception(exc)
         pass
     except Exception as exc:
-        if not any([message in str(exc) for message in IGNORED_EXCEPTIONS]):
-            capture_exception(exc)
-        self.retry(countdown=retry_timeout(self.request.retries), exc=exc)
+        capture_exception(exc)
+        self.retry(countdown=retry_timeout(self.request.retries))
 
 
 def execute(order_val: dict):
@@ -64,6 +63,7 @@ def execute(order_val: dict):
         transaction.events.append(Event(type=EventType.retry))
     except DoesNotExist:
         transaction.events.append(Event(type=EventType.created))
+        transaction.save()
         pass
 
     if transaction.monto > MAX_AMOUNT:
