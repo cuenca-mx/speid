@@ -3,7 +3,6 @@ from pydantic.dataclasses import dataclass
 from stpmex.types import TipoCuenta
 
 from speid.models import Transaction
-from speid.types import Estado
 
 
 @dataclass
@@ -60,5 +59,4 @@ class SpeidTransaction:
 
     def transform(self) -> Transaction:
         transaction = Transaction(**self.to_dict())
-        transaction.estado = Estado.submitted
         return transaction

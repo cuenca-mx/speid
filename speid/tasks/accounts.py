@@ -3,7 +3,7 @@ from sentry_sdk import capture_exception
 
 from speid.models import Account, Event
 from speid.tasks import celery
-from speid.types import EventType
+from speid.types import Estado, EventType
 from speid.validations import Account as AccountValidation
 
 
@@ -30,6 +30,9 @@ def execute(account_dict: dict):
         account.events.append(Event(type=EventType.retry))
 
     if account.stp_id:
+        return
+
+    if account.estado is Estado.succeeded:
         return
 
     account.create_account()

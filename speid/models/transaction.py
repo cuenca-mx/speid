@@ -9,8 +9,6 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
-from pydantic import ValidationError
-from stpmex.exc import StpmexException
 from stpmex.resources import Orden
 
 from speid import STP_EMPRESA
@@ -157,7 +155,7 @@ class Transaction(Document, BaseModel):
                 iva=self.iva,
                 **optionals,
             )
-        except (StpmexException, ValueError, ValidationError) as e:
+        except Exception as e:  # Anything can happen here
             self.events.append(Event(type=EventType.error, metadata=str(e)))
             self.estado = Estado.error
             self.save()

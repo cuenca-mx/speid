@@ -120,7 +120,7 @@ def test_transaction_speid_input():
     transaction = input.transform()
     transaction.save()
     trx_saved = Transaction.objects.get(id=transaction.id)
-    assert trx_saved.estado == Estado.submitted
+    assert trx_saved.estado == Estado.created
     assert trx_saved.monto == input.monto
     assert trx_saved.speid_id == input.speid_id
     transaction.delete()
