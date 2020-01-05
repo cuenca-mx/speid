@@ -94,7 +94,7 @@ class Account(Document, BaseModel):
                 telefono=self.telefono,
                 **optionals,
             )
-        except StpmexException as e:
+        except Exception as e:
             self.events.append(Event(type=EventType.error, metadata=str(e)))
             self.estado = Estado.error
             self.save()

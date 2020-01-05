@@ -24,6 +24,7 @@ def execute(account_dict: dict):
     try:
         previous_account = Account.objects.get(cuenta=account.cuenta)
     except DoesNotExist:
+        account.events.append(Event(type=EventType.created))
         account.save()
     else:
         account = previous_account
