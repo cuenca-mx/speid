@@ -5,6 +5,7 @@ import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
+from stpmex.exc import StpmexException
 
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
@@ -32,7 +33,7 @@ def send_order(self, order_val: dict):
     except MalformedOrderException as exc:
         capture_exception(exc)
         pass
-    except Exception as exc:
+    except (Exception, StpmexException) as exc:
         capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries))
 

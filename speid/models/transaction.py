@@ -9,6 +9,7 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
+from stpmex.exc import StpmexException
 from stpmex.resources import Orden
 
 from speid import STP_EMPRESA
@@ -155,7 +156,7 @@ class Transaction(Document, BaseModel):
                 iva=self.iva,
                 **optionals,
             )
-        except Exception as e:  # Anything can happen here
+        except (Exception, StpmexException) as e:  # Anything can happen here
             self.events.append(Event(type=EventType.error, metadata=str(e)))
             self.estado = Estado.error
             self.save()
