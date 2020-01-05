@@ -1,25 +1,43 @@
-from typing import Union
+import os
 
 from mongoengine import (
     DateTimeField,
     Document,
+    DoesNotExist,
     IntField,
     ListField,
     ReferenceField,
     StringField,
 )
-from stpmex import Orden
+from stpmex.exc import StpmexException
+from stpmex.resources import Orden
 
 from speid import STP_EMPRESA
+from speid.exc import MalformedOrderException
 from speid.helpers import callback_helper
+from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
+from .account import Account
+from .base import BaseModel
 from .events import Event
-from .helpers import EnumField, date_now, mongo_to_dict, updated_at
+from .helpers import (
+    EnumField,
+    date_now,
+    delete_events,
+    save_events,
+    updated_at,
+)
+
+SKIP_VALIDATION_PRIOR_SEND_ORDER = (
+    os.getenv('SKIP_VALIDATION_PRIOR_SEND_ORDER', 'false').lower() == 'true'
+)
 
 
 @updated_at.apply
-class Transaction(Document):
+@save_events.apply
+@delete_events.apply
+class Transaction(Document, BaseModel):
     created_at = date_now()
     updated_at = DateTimeField()
     stp_id = IntField()
@@ -39,10 +57,9 @@ class Transaction(Document):
     concepto_pago = StringField()
     referencia_numerica = IntField()
     empresa = StringField()
-    estado = EnumField(Estado, default=Estado.submitted)
+    estado = EnumField(Estado, default=Estado.created)
     version = IntField()
     speid_id = StringField()
-    events = ListField(ReferenceField(Event))
     folio_origen = StringField()
     tipo_pago = IntField()
     email_beneficiario = StringField()
@@ -62,45 +79,9 @@ class Transaction(Document):
     prioridad = IntField()
     iva = StringField()
 
-    def to_dict(self) -> Union[dict, None]:
-        return mongo_to_dict(self, [])
-
-    def save(
-        self,
-        force_insert=False,
-        validate=True,
-        clean=True,
-        write_concern=None,
-        cascade=None,
-        cascade_kwargs=None,
-        _refs=None,
-        save_condition=None,
-        signal_kwargs=None,
-        **kwargs,
-    ):
-        if len(self.events) > 0:
-            [event.save() for event in self.events]
-        super().save(
-            force_insert,
-            validate,
-            clean,
-            write_concern,
-            cascade,
-            cascade_kwargs,
-            _refs,
-            save_condition,
-            signal_kwargs,
-            **kwargs,
-        )
-
-    def delete(self, signal_kwargs=None, **write_concern):
-        if len(self.events) > 0:
-            [event.delete() for event in self.events]
-        super().delete(signal_kwargs, **write_concern)
+    events = ListField(ReferenceField(Event))
 
     def set_state(self, state: Estado):
-        self.events.append(Event(type=EventType.created))
-
         callback_helper.set_status_transaction(self.speid_id, state.value)
         self.estado = state
 
@@ -117,7 +98,32 @@ class Transaction(Document):
             Event(type=EventType.completed, metadata=str(response))
         )
 
-    def get_order(self) -> Orden:
+    def create_order(self) -> Orden:
+        # Validate account has already been created
+        if not SKIP_VALIDATION_PRIOR_SEND_ORDER:
+            try:
+                account = Account.objects.get(cuenta=self.cuenta_ordenante)
+                assert account.stp_id and account.estado is Estado.succeeded
+            except (DoesNotExist, AssertionError):
+                self.estado = Estado.error
+                self.save()
+                raise MalformedOrderException(
+                    f'Account has not been registered: {self.cuenta_ordenante}'
+                    f', stp_id: {self.stp_id}'
+                )
+
+        # Don't send if stp_id already exists
+        if self.stp_id:
+            return Orden(
+                id=self.stp_id,
+                monto=self.monto / 100.0,
+                conceptoPago=self.concepto_pago,
+                nombreBeneficiario=self.nombre_beneficiario,
+                cuentaBeneficiario=self.cuenta_beneficiario,
+                institucionContraparte=self.institucion_beneficiaria,
+                cuentaOrdenante=self.cuenta_ordenante,
+            )
+
         optionals = dict(
             institucionOperante=self.institucion_ordenante,
             claveRastreo=self.clave_rastreo,
@@ -136,28 +142,39 @@ class Transaction(Document):
         for k in remove:
             optionals.pop(k)
 
-        order = Orden(
-            monto=self.monto / 100.0,
-            conceptoPago=self.concepto_pago,
-            nombreBeneficiario=self.nombre_beneficiario,
-            cuentaBeneficiario=self.cuenta_beneficiario,
-            institucionContraparte=self.institucion_beneficiaria,
-            tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
-            nombreOrdenante=self.nombre_ordenante,
-            cuentaOrdenante=self.cuenta_ordenante,
-            rfcCurpOrdenante=self.rfc_curp_ordenante,
-            tipoCuentaOrdenante=self.tipo_cuenta_ordenante,
-            iva=self.iva,
-            **optionals,
-        )
+        try:
+            order = stpmex_client.ordenes.registra(
+                monto=self.monto / 100.0,
+                conceptoPago=self.concepto_pago,
+                nombreBeneficiario=self.nombre_beneficiario,
+                cuentaBeneficiario=self.cuenta_beneficiario,
+                institucionContraparte=self.institucion_beneficiaria,
+                tipoCuentaBeneficiario=self.tipo_cuenta_beneficiario,
+                nombreOrdenante=self.nombre_ordenante,
+                cuentaOrdenante=self.cuenta_ordenante,
+                rfcCurpOrdenante=self.rfc_curp_ordenante,
+                iva=self.iva,
+                **optionals,
+            )
+        except (Exception, StpmexException) as e:  # Anything can happen here
+            self.events.append(Event(type=EventType.error, metadata=str(e)))
+            self.estado = Estado.error
+            self.save()
+            raise e
+        else:
+            self.clave_rastreo = self.clave_rastreo or order.claveRastreo
+            self.rfc_curp_beneficiario = (
+                self.rfc_curp_beneficiario or order.rfcCurpBeneficiario
+            )
+            self.referencia_numerica = (
+                self.referencia_numerica or order.referenciaNumerica
+            )
+            self.empresa = self.empresa or STP_EMPRESA
+            self.stp_id = order.id
 
-        self.clave_rastreo = self.clave_rastreo or order.claveRastreo
-        self.rfc_curp_beneficiario = (
-            self.rfc_curp_beneficiario or order.rfcCurpBeneficiario
-        )
-        self.referencia_numerica = (
-            self.referencia_numerica or order.referenciaNumerica
-        )
-        self.empresa = self.empresa or STP_EMPRESA
-
-        return order
+            self.events.append(
+                Event(type=EventType.completed, metadata=str(order))
+            )
+            self.estado = Estado.submitted
+            self.save()
+            return order

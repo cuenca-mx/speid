@@ -12,3 +12,4 @@ black
 isort[requirements]
 flake8
 mongomock
+coverage<5.0,>=3.6

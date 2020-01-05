@@ -4,10 +4,10 @@ import os
 from flask import abort, request
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception, capture_message
+from stpmex.exc import StpmexException
 
 from speid import app
 from speid.models import Event, Request, Transaction
-from speid.processors import stpmex_client
 from speid.types import Estado, EventType, HttpRequestMethod
 from speid.utils import get, patch, post
 from speid.validations import StpTransaction
@@ -65,11 +65,12 @@ def create_orden():
 
         r = request.json
         r['estado'] = Estado.convert_to_stp_state(transaction.estado)
-    except Exception as exc:
+    except Exception as e:
         r = dict(estado='LIQUIDACION')
         transaction.estado = Estado.error
+        transaction.events.append(Event(type=EventType.error, metadata=str(e)))
         transaction.save()
-        capture_exception(exc)
+        capture_exception(e)
     return 201, r
 
 
@@ -98,36 +99,24 @@ def get_orders():
 def process_transaction(transaction_id):
     try:
         transaction = Transaction.objects.get(
-            id=transaction_id, estado=Estado.submitted
+            id=transaction_id, estado=Estado.created
         )
     except DoesNotExist:
         abort(401)
 
-    order = transaction.get_order()
-    transaction.save()
-
-    res = stpmex_client.registrar_orden(order)
-
-    if res is not None and res.id > 0:
-        transaction.stp_id = res.id
-        transaction.events.append(
-            Event(type=EventType.completed, metadata=str(res))
-        )
-        transaction.save()
-        return 201, transaction
+    try:
+        transaction.create_order()
+    except StpmexException as e:
+        return 400, str(e)
     else:
-        transaction.events.append(
-            Event(type=EventType.error, metadata=str(res))
-        )
-        transaction.save()
-        return 400, res
+        return 201, transaction
 
 
 @patch('/transactions/<transaction_id>/reverse')
 def reverse_transaction(transaction_id):
     try:
         transaction = Transaction.objects.get(
-            id=transaction_id, estado=Estado.submitted
+            id=transaction_id, estado=Estado.created
         )
     except DoesNotExist:
         abort(401)

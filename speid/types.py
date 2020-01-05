@@ -11,10 +11,11 @@ class EventType(Enum):
     retry = 'RETRY'  # When the transaction has been retry
     completed = 'COMPLETE'  # The request was processed with no errors
     error = 'ERROR'  # Something happened when the response was obtained
-    received = 'RECEIVED'  # When we get the response from a transaction made
+    received = 'RECEIVED'  # When we get the response from a transaction
 
 
 class Estado(Enum):
+    created = 'created'
     submitted = 'submitted'  # Sent to STP
     succeeded = 'succeeded'  # LIQUIDACION from STP
     failed = 'failed'  # DEVOLUCION from STP

@@ -84,6 +84,18 @@ def updated_at(_, document):
     document.updated_at = datetime.utcnow()
 
 
+@handler(signals.pre_save)
+def save_events(_, document):
+    if len(document.events) > 0:
+        [event.save() for event in document.events]
+
+
+@handler(signals.pre_delete)
+def delete_events(_, document):
+    if len(document.events) > 0:
+        [event.delete() for event in document.events]
+
+
 class EnumField(BaseField):
     """
     https://github.com/MongoEngine/extras-mongoengine/blob/master/

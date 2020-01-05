@@ -6,7 +6,6 @@ import pandas
 from speid import app
 from speid.helpers import callback_helper
 from speid.models import Event, Request, Transaction
-from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
 
@@ -52,22 +51,7 @@ def re_execute_transactions(speid_id):
     if transaction is None:
         raise ValueError('Transaction not found')
 
-    order = transaction.get_order()
-    transaction.save()
-
-    res = stpmex_client.registrar_orden(order)
-
-    if res is not None and res.id > 0:
-        transaction.stp_id = res.id
-        transaction.events.append(
-            Event(type=EventType.completed, metadata=str(res))
-        )
-    else:
-        transaction.events.append(
-            Event(type=EventType.error, metadata=str(res))
-        )
-
-    transaction.save()
+    transaction.create_order()
 
 
 @speid_group.command()

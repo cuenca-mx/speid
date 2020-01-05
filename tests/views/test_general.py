@@ -76,7 +76,7 @@ def test_invalid_order_event(client, default_outcome_transaction):
     assert resp.data == "got it!".encode()
 
     trx = Transaction.objects.get(id=id_trx)
-    assert trx.estado is Estado.submitted
+    assert trx.estado is Estado.created
     trx.delete()
 
 
@@ -92,7 +92,7 @@ def test_invalid_id_order_event(client, default_outcome_transaction):
     assert resp.data == "got it!".encode()
 
     trx = Transaction.objects.get(id=id_trx)
-    assert trx.estado is Estado.submitted
+    assert trx.estado is Estado.created
     trx.delete()
 
 
@@ -237,12 +237,13 @@ def test_get_transactions(
 
 
 @pytest.mark.vcr
-def test_process_transaction(client, default_outcome_transaction):
+def test_process_transaction(
+    client, default_outcome_transaction, create_account
+):
     trx = Transaction(**default_outcome_transaction)
-    trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
 
-    assert trx.estado is Estado.submitted
+    assert trx.estado is Estado.created
 
     resp = client.get(
         '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
@@ -265,7 +266,7 @@ def test_reverse_transaction(
     trx.stp_id = DEFAULT_ORDEN_ID
     trx.save()
 
-    assert trx.estado is Estado.submitted
+    assert trx.estado is Estado.created
 
     resp = client.get(
         '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
