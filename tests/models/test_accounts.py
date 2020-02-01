@@ -1,5 +1,5 @@
 import pytest
-from stpmex.exc import StpmexException
+from pydantic import ValidationError
 
 from speid.models import Account
 from speid.types import Estado
@@ -49,7 +49,6 @@ def test_create_account():
 
     account.create_account()
 
-    assert account.stp_id is not None
     assert account.estado is Estado.succeeded
 
     account.delete()
@@ -70,11 +69,10 @@ def test_create_account_failed():
     account.save()
     account_id = account.id
 
-    with pytest.raises(StpmexException):
+    with pytest.raises(ValidationError):
         account.create_account()
 
     account = Account.objects.get(id=account_id)
-    assert account.stp_id is None
     assert account.estado is Estado.error
 
     account.delete()

@@ -9,7 +9,6 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
-from stpmex.exc import StpmexException
 from stpmex.resources import Orden
 
 from speid import STP_EMPRESA
@@ -103,7 +102,7 @@ class Transaction(Document, BaseModel):
         if not SKIP_VALIDATION_PRIOR_SEND_ORDER:
             try:
                 account = Account.objects.get(cuenta=self.cuenta_ordenante)
-                assert account.stp_id and account.estado is Estado.succeeded
+                assert account.estado is Estado.succeeded
             except (DoesNotExist, AssertionError):
                 self.estado = Estado.error
                 self.save()
@@ -156,7 +155,7 @@ class Transaction(Document, BaseModel):
                 iva=self.iva,
                 **optionals,
             )
-        except (Exception, StpmexException) as e:  # Anything can happen here
+        except (Exception) as e:  # Anything can happen here
             self.events.append(Event(type=EventType.error, metadata=str(e)))
             self.estado = Estado.error
             self.save()

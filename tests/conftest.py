@@ -34,7 +34,6 @@ def vcr_config():
 @pytest.fixture
 def create_account():
     account = Account(
-        stp_id=89,
         estado=Estado.succeeded,
         nombre='Ricardo',
         apellido_paterno='Sánchez',

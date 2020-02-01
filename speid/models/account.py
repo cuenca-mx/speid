@@ -6,8 +6,7 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
-from stpmex.exc import StpmexException
-from stpmex.resources import Cuenta
+from stpmex.resources import CuentaFisica
 from stpmex.types import Genero
 
 from speid.processors import stpmex_client
@@ -30,7 +29,6 @@ from .helpers import (
 class Account(Document, BaseModel):
     created_at = date_now()
     updated_at = DateTimeField()
-    stp_id = IntField()
     estado = EnumField(Estado, default=Estado.created)
 
     nombre = StringField()
@@ -56,7 +54,7 @@ class Account(Document, BaseModel):
 
     events = ListField(ReferenceField(Event))
 
-    def create_account(self) -> Cuenta:
+    def create_account(self) -> CuentaFisica:
         self.estado = Estado.submitted
         self.save()
 
@@ -94,13 +92,12 @@ class Account(Document, BaseModel):
                 telefono=self.telefono,
                 **optionals,
             )
-        except (Exception, StpmexException) as e:
+        except (Exception) as e:
             self.events.append(Event(type=EventType.error, metadata=str(e)))
             self.estado = Estado.error
             self.save()
             raise e
         else:
-            self.stp_id = cuenta.id
             self.estado = Estado.succeeded
             self.save()
             return cuenta
