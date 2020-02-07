@@ -19,7 +19,6 @@ def test_create_account():
 
     account = Account.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
-    assert account.stp_id is not None
 
     account.delete()
 
@@ -59,7 +58,6 @@ def test_create_account_existing_account():
 
     account = Account.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
-    assert account.stp_id is not None
 
     account.delete()
 
@@ -88,6 +86,5 @@ def test_create_account_existing_succeeded_account():
 
     account = Account.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
-    assert account.stp_id == 123
 
     account.delete()

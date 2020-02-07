@@ -1,6 +1,5 @@
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
-from stpmex.exc import StpmexException
 
 from speid.models import Account, Event
 from speid.tasks import celery
@@ -12,7 +11,7 @@ from speid.validations import Account as AccountValidation
 def create_account(self, account_dict: dict):
     try:
         execute(account_dict)
-    except (Exception, StpmexException) as e:
+    except (Exception) as e:
         capture_exception(e)
         self.retry(countdown=600, exc=e)  # Reintenta en 10 minutos
 
@@ -30,9 +29,6 @@ def execute(account_dict: dict):
     else:
         account = previous_account
         account.events.append(Event(type=EventType.retry))
-
-    if account.stp_id:
-        return
 
     if account.estado is Estado.succeeded:
         return
