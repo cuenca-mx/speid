@@ -1,0 +1,98 @@
+interactions:
+- request:
+    body: '{"nombre": "Ricardo", "apellidoPaterno": "Sanchez", "cuenta": "646180157069665325",
+      "rfcCurp": "SACR891125HDFGHI01", "telefono": "5567980796", "firma": "mD4Sh4bcILdhQ0h2LDrMI11nbkKHjSoLplQYw12QWXEQKDHwCfuRYA/O20DgGJ7uq2xTq3jr2cP0wDllw923YekI7yt1xBOwJMqCLv4kgNmREuq6EFZ+FZkNGyrC8RSZFUlv+DrmePazNbL4X7qLknMaj7grX3eCLd8wRe41XuA=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '348'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.0.1
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
+  response:
+    body:
+      string: '{"descripcion":"","id":0}'
+    headers:
+      Content-Length:
+      - '25'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 02 Jan 2020 19:58:01 GMT
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"nombre": "Ricardo", "apellidoPaterno": "Sanchez", "cuenta": "646180157069665325",
+      "rfcCurp": "SACR891125HDFGHI01", "telefono": "5567980796", "firma": "mD4Sh4bcILdhQ0h2LDrMI11nbkKHjSoLplQYw12QWXEQKDHwCfuRYA/O20DgGJ7uq2xTq3jr2cP0wDllw923YekI7yt1xBOwJMqCLv4kgNmREuq6EFZ+FZkNGyrC8RSZFUlv+DrmePazNbL4X7qLknMaj7grX3eCLd8wRe41XuA=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '348'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.0.1
+    method: DELETE
+    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
+  response:
+    body:
+      string: '{"descripcion":"","id":0}'
+    headers:
+      Content-Length:
+      - '25'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 02 Jan 2020 19:58:01 GMT
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"nombre": "Ricardo", "apellidoPaterno": "Sanchez", "cuenta": "646180157069665325",
+      "rfcCurp": "SACR891125HDFGHI02", "telefono": "5567980796", "firma": "mD4Sh4bcILdhQ0h2LDrMI11nbkKHjSoLplQYw12QWXEQKDHwCfuRYA/O20DgGJ7uq2xTq3jr2cP0wDllw923YekI7yt1xBOwJMqCLv4kgNmREuq6EFZ+FZkNGyrC8RSZFUlv+DrmePazNbL4X7qLknMaj7grX3eCLd8wRe41XuA=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '348'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.0.1
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
+  response:
+    body:
+      string: '{"descripcion":"","id":0}'
+    headers:
+      Content-Length:
+      - '25'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 02 Jan 2020 19:58:01 GMT
+    status:
+      code: 200
+      message: OK
+version: 1
