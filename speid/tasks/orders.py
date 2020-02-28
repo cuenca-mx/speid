@@ -3,6 +3,7 @@ import os
 
 import clabe
 import luhnmod10
+import newrelic.agent
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
@@ -25,6 +26,7 @@ def retry_timeout(attempts: int) -> int:
     return 1200
 
 
+@newrelic.agent.background_task()
 @celery.task(bind=True, max_retries=12, name=os.environ['CELERY_TASK_NAME'])
 def send_order(self, order_val: dict):
     try:
