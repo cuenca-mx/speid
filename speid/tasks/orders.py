@@ -5,6 +5,7 @@ import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
+from stpmex.exc import InvalidAccountType
 
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
@@ -29,10 +30,14 @@ def retry_timeout(attempts: int) -> int:
 def send_order(self, order_val: dict):
     try:
         execute(order_val)
+    except InvalidAccountType:
+        pass
     except MalformedOrderException as exc:
         capture_exception(exc)
-        pass
-    except (Exception) as exc:
+    except Exception as exc:
+        import pdb
+
+        pdb.set_trace()
         capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries))
 
@@ -44,6 +49,9 @@ def execute(order_val: dict):
         version = order_val['version']
 
     transaction = Transaction()
+    # import pdb
+    #
+    # pdb.set_trace()
     try:
         input = factory.create(version, **order_val)
         transaction = input.transform()
