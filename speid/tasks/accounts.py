@@ -15,9 +15,9 @@ def create_account(self, account_dict: dict) -> None:
         create_account_(account_dict)
     except (InvalidRfcOrCurp, ValidationError):
         pass
-    except Exception as e:
-        capture_exception(e)
-        self.retry(countdown=600, exc=e)  # Reintenta en 10 minutos
+    except Exception as exc:
+        capture_exception(exc)
+        self.retry(countdown=600, exc=exc)  # Reintenta en 10 minutos
 
 
 def create_account_(account_dict: dict):
@@ -61,11 +61,16 @@ def execute_update(account_dict: dict):
     except ValueError as e:
         capture_exception(e)
 
-# @celery.task(bind=True, max_retries=None)
-# def update_account(self, account_dict: dict) -> None:
-#     pass
-#
-#
-# def execute_update_account(account_dict: dict) -> None:
-#     pass
 
+@celery.task(bind=True, max_retries=None)
+@newrelic.agent.background_task()
+def update_account(self, account_dict: dict) -> None:
+    try:
+        validation_model = AccountValidation(**account_dict)
+        account = Account.objects.get(cuenta=validation_model.cuenta)
+        account.update_account(validation_model.transform())
+    except (ValidationError, DoesNotExist) as exc:
+        capture_exception(exc)
+    except Exception as exc:
+        capture_exception(exc)
+        self.retry(countdown=600, exc=exc)

@@ -7,6 +7,8 @@ from speid.models import Account
 from speid.tasks.accounts import create_account, create_account_, execute_update
 from speid.types import Estado
 
+# from stpmex.exc import InvalidRfcOrCurp
+
 
 @pytest.mark.vcr
 def test_create_account():
@@ -189,3 +191,30 @@ def test_raises_unexpected_exception(
         create_account(account_dict)
     mock_capture_exception.assert_called_once()
     mock_retry.assert_called_once()
+
+
+# @pytest.mark.vcr
+# @patch('speid.tasks.accounts.capture_exception')
+# @patch('speid.tasks.accounts.create_account.retry')
+# def test_update_account_successfully(
+#     mock_retry: MagicMock, mock_capture_exception: MagicMock
+# ) -> None:
+#     account_dict = dict(
+#         nombre='Ric',
+#         apellido_paterno='San',
+#         cuenta='646180157000000004',
+#         rfc_curp='SACR891125HDFABC01',
+#     )
+#     with pytest.raises(InvalidRfcOrCurp):
+#         create_account_(account_dict)
+#
+#     # datos corregidos y nuevo RFC
+#     account_dict['nombre'] = 'Ricardo'
+#     account_dict['apellido_paterno'] = 'Sánchez'
+#     account_dict['apellido_materno'] = 'Castillo'
+#     account_dict['rfc_curp'] = 'SACR891125HDFABC02'
+#
+#     update_account(account_dict)
+#
+#     mock_capture_exception.assert_not_called()
+#     mock_retry.assert_not_called()
