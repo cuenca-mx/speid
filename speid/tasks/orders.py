@@ -5,13 +5,13 @@ import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
-from stpmex.exc import InvalidAccountType
 
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import factory
+from stpmex.exc import InvalidAccountType
 
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 IGNORED_EXCEPTIONS = os.getenv('IGNORED_EXCEPTIONS', '').split(',')

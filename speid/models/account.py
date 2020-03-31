@@ -6,11 +6,11 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
-from stpmex.resources import CuentaFisica
-from stpmex.types import Genero
 
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
+from stpmex.resources import CuentaFisica
+from stpmex.types import Genero
 
 from .base import BaseModel
 from .events import Event

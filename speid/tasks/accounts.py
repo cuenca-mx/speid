@@ -1,12 +1,12 @@
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
-from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import Account, Event
 from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import Account as AccountValidation
+from stpmex.exc import InvalidRfcOrCurp
 
 
 @celery.task(bind=True, max_retries=60)
