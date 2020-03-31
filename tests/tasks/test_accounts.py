@@ -226,6 +226,11 @@ def test_update_account_successfully(
     mock_retry.assert_not_called()
 
     account = Account.objects.get(cuenta='646180157000000004')
+    assert account.nombre == 'Ricardo'
+    assert account.apellido_paterno == 'Sánchez'
+    assert account.apellido_materno == 'Castillo'
+    assert account.rfc_curp == 'SACR891125HDFABC02'
+    assert account.estado == Estado.succeeded
     account.delete()
 
 
@@ -289,7 +294,7 @@ def test_update_account_retries_on_unexpected_exception(
     account_dict['rfc_curp'] = 'SACR891125HDFABC02'
 
     with patch(
-        'speid.tasks.accounts.Account.update_account',
+        'speid.models.account.stpmex_client.cuentas.update',
         side_effect=Exception('something went wrong!'),
     ):
         update_account(account_dict)
@@ -298,4 +303,12 @@ def test_update_account_retries_on_unexpected_exception(
     mock_retry.assert_called_once()
 
     account = Account.objects.get(cuenta='646180157000000004')
+
+    # los datos no se modifican si falla el update en STP
+    assert account.nombre == 'Ric'
+    assert account.apellido_paterno == 'San'
+    assert not account.apellido_materno
+    assert account.rfc_curp == 'SACR891125HDFABC01'
+    assert account.estado == Estado.error
+
     account.delete()
