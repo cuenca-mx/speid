@@ -69,7 +69,9 @@ def update_account(self, account_dict: dict) -> None:
         validation_model = AccountValidation(**account_dict)
         account = Account.objects.get(cuenta=validation_model.cuenta)
         account.update_account(validation_model.transform())
-    except (ValidationError, DoesNotExist) as exc:
+    except ValidationError:
+        pass
+    except DoesNotExist as exc:
         capture_exception(exc)
     except Exception as exc:
         capture_exception(exc)
