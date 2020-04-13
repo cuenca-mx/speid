@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from mongoengine import DoesNotExist
 from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import Account
