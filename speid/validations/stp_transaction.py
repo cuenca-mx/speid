@@ -34,7 +34,7 @@ class StpTransaction:
             if not k.startswith('_')
         }
         trans_dict['stp_id'] = trans_dict.pop('clave')
-        trans_dict['monto'] = trans_dict['monto'] * 100
+        trans_dict['monto'] = round(trans_dict['monto'] * 100)
         transaction = Transaction(**trans_dict)
         transaction.speid_id = base62_uuid('SR')()
         transaction.fecha_operacion = datetime.strptime(
