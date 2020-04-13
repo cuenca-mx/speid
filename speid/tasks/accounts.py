@@ -39,29 +39,6 @@ def create_account_(account_dict: dict):
     account.create_account()
 
 
-@celery.task(bind=True, max_retries=3)
-def update_curp(self, account_dict: dict):
-    try:
-        execute_update(account_dict)
-    except Exception as e:
-        capture_exception(e)
-        self.retry(countdown=300, exc=e)
-
-
-def execute_update(account_dict: dict):
-    account_val = AccountValidation(**account_dict)
-    try:
-        account = Account.objects.get(cuenta=account_val.cuenta)
-    except DoesNotExist as e:
-        capture_exception(e)
-        return
-    new_curp = account_val.rfc_curp
-    try:
-        account.update_curp(new_curp)
-    except ValueError as e:
-        capture_exception(e)
-
-
 @celery.task(bind=True, max_retries=None)
 @newrelic.agent.background_task()
 def update_account(self, account_dict: dict) -> None:
