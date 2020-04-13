@@ -41,9 +41,7 @@ def callback_spei_transaction(transaction_id, transaction_status):
 
 
 @speid_group.command()
-@click.option(
-    '--speid_id', default=None, help='Specific speid id to create_account_',
-)
+@click.option('--speid_id', default=None, help='Specific speid id to execute')
 def re_execute_transactions(speid_id):
     """Retry send a transaction to STP, it takes the values
     of the event created before

@@ -49,9 +49,6 @@ def execute(order_val: dict):
         version = order_val['version']
 
     transaction = Transaction()
-    # import pdb
-    #
-    # pdb.set_trace()
     try:
         input = factory.create(version, **order_val)
         transaction = input.transform()
