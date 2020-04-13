@@ -97,19 +97,6 @@ class Account(Document, BaseModel):
             self.save()
             return cuenta
 
-    def update_curp(self, new_curp: str):
-        account_updated = dict(
-            nombre=self.nombre,
-            apellidoPaterno=self.apellido_paterno,
-            cuenta=self.cuenta,
-            rfcCurp=new_curp,
-        )
-        CuentaFisica.update(
-            self.rfc_curp, **account_updated,
-        )
-        self.rfc_curp = new_curp
-        self.save()
-
     def update_account(self, account: 'Account') -> CuentaFisica:
         optionals = dict(
             apellidoMaterno=account.apellido_materno,
