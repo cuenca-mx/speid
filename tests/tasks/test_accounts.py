@@ -6,8 +6,8 @@ from stpmex.exc import InvalidRfcOrCurp
 from speid.models import Account
 from speid.tasks.accounts import (
     create_account,
-    create_account_,
-    update_account,
+    create_account_task,
+    update_account_task,
 )
 from speid.types import Estado
 
@@ -22,7 +22,7 @@ def test_create_account():
         telefono='5567980796',
     )
 
-    create_account_(account_dict)
+    create_account(account_dict)
 
     account = Account.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
@@ -38,7 +38,7 @@ def test_create_account_no_name():
     )
 
     with pytest.raises(TypeError):
-        create_account_(account_dict)
+        create_account(account_dict)
 
 
 @pytest.mark.vcr
@@ -61,7 +61,7 @@ def test_create_account_existing_account():
         telefono='5567980796',
     )
 
-    create_account_(account_dict)
+    create_account(account_dict)
 
     account = Account.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
@@ -89,7 +89,7 @@ def test_create_account_existing_succeeded_account():
         telefono='5567980796',
     )
 
-    create_account_(account_dict)
+    create_account(account_dict)
 
     account = Account.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
@@ -98,9 +98,9 @@ def test_create_account_existing_succeeded_account():
 
 
 @patch('speid.tasks.accounts.capture_exception')
-@patch('speid.tasks.accounts.create_account.retry')
+@patch('speid.tasks.accounts.create_account_task.retry')
 def test_does_not_retry_when_validation_error_raised(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock,
+        mock_retry: MagicMock, mock_capture_exception: MagicMock,
 ) -> None:
     account_dict = dict(
         nombre='Ricardo',
@@ -109,16 +109,16 @@ def test_does_not_retry_when_validation_error_raised(
         rfc_curp=None,
         telefono='5567980796',
     )
-    create_account(account_dict)
-    mock_capture_exception.assert_not_called()
+    create_account_task(account_dict)
+    mock_capture_exception.assert_called_once()
     mock_retry.assert_not_called()
 
 
 @pytest.mark.vcr
 @patch('speid.tasks.accounts.capture_exception')
-@patch('speid.tasks.accounts.create_account.retry')
+@patch('speid.tasks.accounts.create_account_task.retry')
 def test_does_not_retry_when_invalid_rfc_raised(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock,
+        mock_retry: MagicMock, mock_capture_exception: MagicMock,
 ) -> None:
     account_dict = dict(
         nombre='24',
@@ -128,16 +128,16 @@ def test_does_not_retry_when_invalid_rfc_raised(
         rfc_curp='VIN2810417HNECPX01',
         telefono='5567980796',
     )
-    create_account(account_dict)
-    mock_capture_exception.assert_not_called()
+    create_account_task(account_dict)
+    mock_capture_exception.assert_called_once()
     mock_retry.assert_not_called()
 
 
 @pytest.mark.vcr
 @patch('speid.tasks.accounts.capture_exception')
-@patch('speid.tasks.accounts.create_account.retry')
+@patch('speid.tasks.accounts.create_account_task.retry')
 def test_raises_unexpected_exception(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock
+        mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
         nombre='24',
@@ -148,18 +148,19 @@ def test_raises_unexpected_exception(
         telefono='5567980796',
     )
     with patch(
-        'speid.tasks.accounts.create_account_', side_effect=Exception('error!')
+            'speid.tasks.accounts.create_account',
+            side_effect=Exception('error!')
     ):
-        create_account(account_dict)
+        create_account_task(account_dict)
     mock_capture_exception.assert_called_once()
     mock_retry.assert_called_once()
 
 
 @pytest.mark.vcr
 @patch('speid.tasks.accounts.capture_exception')
-@patch('speid.tasks.accounts.update_account.retry')
+@patch('speid.tasks.accounts.update_account_task.retry')
 def test_update_account_successfully(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock
+        mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
         nombre='Ric',
@@ -170,7 +171,7 @@ def test_update_account_successfully(
 
     # debe existir una cuenta guardada en los registros de Account
     with pytest.raises(InvalidRfcOrCurp):
-        create_account_(account_dict)
+        create_account(account_dict)
 
     # datos corregidos y nuevo RFC
     account_dict['nombre'] = 'Ricardo'
@@ -178,7 +179,7 @@ def test_update_account_successfully(
     account_dict['apellido_materno'] = 'Castillo'
     account_dict['rfc_curp'] = 'SACR891125HDFABC02'
 
-    update_account(account_dict)
+    update_account_task(account_dict)
 
     mock_capture_exception.assert_not_called()
     mock_retry.assert_not_called()
@@ -193,9 +194,9 @@ def test_update_account_successfully(
 
 
 @patch('speid.tasks.accounts.capture_exception')
-@patch('speid.tasks.accounts.update_account.retry')
+@patch('speid.tasks.accounts.update_account_task.retry')
 def test_update_account_failed_with_validation_error_raised(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock
+        mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
         nombre='Ric',
@@ -204,16 +205,18 @@ def test_update_account_failed_with_validation_error_raised(
         rfc_curp=None,
     )
 
-    update_account(account_dict)
+    update_account_task(account_dict)
 
-    mock_capture_exception.assert_not_called()
+    mock_capture_exception.assert_called_once()
     mock_retry.assert_not_called()
 
 
 @patch('speid.tasks.accounts.capture_exception')
-@patch('speid.tasks.accounts.update_account.retry')
-def test_update_account_failed_with_account_does_not_exists(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock
+@patch('speid.tasks.accounts.update_account_task.retry')
+@patch('speid.tasks.accounts.update_account_task.apply')
+def test_update_account_does_not_exists_then_create_account(
+        mock_apply: MagicMock, mock_retry: MagicMock,
+        mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
         nombre='Ricardo',
@@ -222,17 +225,18 @@ def test_update_account_failed_with_account_does_not_exists(
         rfc_curp='SACR891125HDFABC01',
     )
 
-    update_account(account_dict)
+    update_account_task(account_dict)
 
-    mock_capture_exception.assert_called_once()
+    mock_apply.assert_called_once()
+    mock_capture_exception.assert_not_called()
     mock_retry.assert_not_called()
 
 
 @pytest.mark.vcr
 @patch('speid.tasks.accounts.capture_exception')
-@patch('speid.tasks.accounts.update_account.retry')
+@patch('speid.tasks.accounts.update_account_task.retry')
 def test_update_account_retries_on_unexpected_exception(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock
+        mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
         nombre='Ric',
@@ -243,7 +247,7 @@ def test_update_account_retries_on_unexpected_exception(
 
     # debe existir una cuenta guardada en los registros de Account
     with pytest.raises(InvalidRfcOrCurp):
-        create_account_(account_dict)
+        create_account(account_dict)
 
     # datos corregidos y nuevo RFC
     account_dict['nombre'] = 'Ricardo'
@@ -252,10 +256,10 @@ def test_update_account_retries_on_unexpected_exception(
     account_dict['rfc_curp'] = 'SACR891125HDFABC02'
 
     with patch(
-        'speid.models.account.stpmex_client.cuentas.update',
-        side_effect=Exception('something went wrong!'),
+            'speid.models.account.stpmex_client.cuentas.update',
+            side_effect=Exception('something went wrong!'),
     ):
-        update_account(account_dict)
+        update_account_task(account_dict)
 
     mock_capture_exception.assert_called_once()
     mock_retry.assert_called_once()

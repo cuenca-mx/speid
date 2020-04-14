@@ -35,9 +35,6 @@ def send_order(self, order_val: dict):
     except MalformedOrderException as exc:
         capture_exception(exc)
     except Exception as exc:
-        import pdb
-
-        pdb.set_trace()
         capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries))
 

@@ -92,35 +92,4 @@ interactions:
     status:
       code: 200
       message: OK
-#- request:
-#    body: '{"cuenta": "646180157019846408", "empresa": "TAMIZI", "rfcCurp": "SAHE800416HDFABC02",
-#      "firma": "rsdUwLTzSAWnEL+gk8LnEMnmfECgNqPb0Ccdv3nqOmno2AGE7yxPfLSOzdn8KSx1k8DgF5mtCjfuiCCLvBJTrYJJfKLq5YD3fxkWqQaORpcPwRrSzXMvxXZgK6/XXDI2MIkG9y3yKCuxH6gl6qzDprIt0F09BQQr4iCs+wroqMI="}'
-#    headers:
-#      Accept:
-#      - '*/*'
-#      Accept-Encoding:
-#      - gzip, deflate
-#      Connection:
-#      - keep-alive
-#      Content-Length:
-#      - '271'
-#      Content-Type:
-#      - application/json
-#      User-Agent:
-#      - stpmex-python/3.1.0
-#    method: DELETE
-#    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
-#  response:
-#    body:
-#      string: '{"descripcion":"","id":0}'
-#    headers:
-#      Content-Length:
-#      - '25'
-#      Content-Type:
-#      - application/json
-#      Date:
-#      - Tue, 07 Jan 2020 13:02:19 GMT
-#    status:
-#      code: 200
-#      message: OK
 version: 1

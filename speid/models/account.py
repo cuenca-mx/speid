@@ -97,7 +97,7 @@ class Account(Document, BaseModel):
             self.save()
             return cuenta
 
-    def update_account(self, account: 'Account') -> CuentaFisica:
+    def update_account(self, account: 'Account') -> None:
         optionals = dict(
             apellidoMaterno=account.apellido_materno,
             genero=account.genero,
@@ -118,38 +118,39 @@ class Account(Document, BaseModel):
         # remove if value is None
         optionals = {key: val for key, val in optionals.items() if val}
 
-        try:
-            cuenta = stpmex_client.cuentas.update(
-                old_rfc_curp=self.rfc_curp,
-                nombre=account.nombre,
-                apellidoPaterno=account.apellido_paterno,
-                cuenta=account.cuenta,
-                rfcCurp=account.rfc_curp,
-                telefono=account.telefono,
-                **optionals,
-            )
-        except Exception as exc:
-            self.events.append(Event(type=EventType.error, metadata=str(exc)))
-            self.estado = Estado.error
-            self.save()
-            raise exc
-        else:
-            self.rfc_curp = account.rfc_curp
-            self.nombre = account.nombre
-            self.apellido_paterno = account.apellido_paterno
-            self.apellido_materno = account.apellido_materno
-            self.genero = account.genero
-            self.fecha_nacimiento = account.fecha_nacimiento
-            self.actividad_economica = account.actividad_economica
-            self.calle = account.calle
-            self.numero_exterior = account.numero_exterior
-            self.numero_interior = account.numero_interior
-            self.colonia = account.colonia
-            self.alcaldia_municipio = account.alcaldia_municipio
-            self.cp = account.cp
-            self.pais = account.pais
-            self.email = account.email
-            self.id_identificacion = account.id_identificacion
-            self.estado = Estado.succeeded
-            self.save()
-            return cuenta
+        if self.rfc_curp != account.rfc_curp:
+            try:
+                stpmex_client.cuentas.update(
+                    old_rfc_curp=self.rfc_curp,
+                    nombre=account.nombre,
+                    apellidoPaterno=account.apellido_paterno,
+                    cuenta=account.cuenta,
+                    rfcCurp=account.rfc_curp,
+                    telefono=account.telefono,
+                    **optionals,
+                )
+            except Exception as exc:
+                self.events.append(
+                    Event(type=EventType.error, metadata=str(exc))
+                )
+                self.estado = Estado.error
+                self.save()
+                raise exc
+        self.rfc_curp = account.rfc_curp
+        self.nombre = account.nombre
+        self.apellido_paterno = account.apellido_paterno
+        self.apellido_materno = account.apellido_materno
+        self.genero = account.genero
+        self.fecha_nacimiento = account.fecha_nacimiento
+        self.actividad_economica = account.actividad_economica
+        self.calle = account.calle
+        self.numero_exterior = account.numero_exterior
+        self.numero_interior = account.numero_interior
+        self.colonia = account.colonia
+        self.alcaldia_municipio = account.alcaldia_municipio
+        self.cp = account.cp
+        self.pais = account.pais
+        self.email = account.email
+        self.id_identificacion = account.id_identificacion
+        self.estado = Estado.succeeded
+        self.save()
