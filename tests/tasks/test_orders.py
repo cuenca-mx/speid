@@ -55,7 +55,7 @@ def test_malformed_order_worker():
 
 
 @pytest.mark.vcr
-@pytest.mark.usefixtures('create_account_task')
+@pytest.mark.usefixtures('create_account')
 def test_create_order_debit_card():
     order = dict(
         concepto_pago='DebitCardTest',
@@ -78,7 +78,7 @@ def test_create_order_debit_card():
 
 
 @pytest.mark.vcr
-@pytest.mark.usefixtures('create_account_task')
+@pytest.mark.usefixtures('create_account')
 def test_worker_with_version_2():
     order = dict(
         concepto_pago='PRUEBA Version 2',
@@ -101,7 +101,7 @@ def test_worker_with_version_2():
 
 
 @pytest.mark.vcr
-@pytest.mark.usefixtures('create_account_task')
+@pytest.mark.usefixtures('create_account')
 @patch('speid.tasks.orders.capture_exception')
 @patch('speid.tasks.orders.send_order.retry')
 def test_ignore_invalid_account_type(
