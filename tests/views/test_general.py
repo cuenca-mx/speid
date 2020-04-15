@@ -128,6 +128,29 @@ def test_create_orden(client, default_income_transaction, mock_callback_api):
     transaction.delete()
 
 
+def test_create_orden_duplicated(
+    client, default_income_transaction, mock_callback_api
+):
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.succeeded
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'LIQUIDACION'
+
+    default_income_transaction['Clave'] = 2456304
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transactions = Transaction.objects(
+        clave_rastreo=default_income_transaction['ClaveRastreo']
+    ).order_by('-created_at')
+    assert len(transactions) == 1
+    assert transactions[0].stp_id == 2456304
+    assert transactions[0].estado is Estado.succeeded
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'LIQUIDACION'
+    for t in transactions:
+        t.delete()
+
+
 def test_create_orden_blocked(
     client, default_blocked_transaction, mock_callback_api
 ):
