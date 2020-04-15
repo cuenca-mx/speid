@@ -143,7 +143,7 @@ def test_create_orden_duplicated(
         clave_rastreo=default_income_transaction['ClaveRastreo']
     ).order_by('-created_at')
     assert len(transactions) == 1
-    assert transactions[0].stp_id == 2456304
+    assert transactions[0].stp_id == 2456303
     assert transactions[0].estado is Estado.succeeded
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
