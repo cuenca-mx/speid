@@ -79,6 +79,11 @@ class Transaction(Document, BaseModel):
     iva = StringField()
 
     events = ListField(ReferenceField(Event))
+    meta = {
+        'indexes': [
+            {'fields': ('clave_rastreo', 'fecha_operacion'), 'unique': True}
+        ]
+    }
 
     def set_state(self, state: Estado):
         callback_helper.set_status_transaction(self.speid_id, state.value)
