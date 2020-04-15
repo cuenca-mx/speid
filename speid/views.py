@@ -51,18 +51,8 @@ def create_orden():
             if transaction.cuenta_beneficiario in clabes:
                 capture_message('Transacción retenida')
                 raise Exception
-
-        previous_trx = Transaction.objects(
-            clave_rastreo=transaction.clave_rastreo,
-            cuenta_ordenante=transaction.cuenta_ordenante,
-            cuenta_beneficiario=transaction.cuenta_beneficiario,
-            monto=transaction.monto,
-        )
-        assert len(previous_trx) == 0
-
-        transaction.confirm_callback_transaction()
         transaction.save()
-
+        transaction.confirm_callback_transaction()
         r = request.json
         r['estado'] = Estado.convert_to_stp_state(transaction.estado)
     except NotUniqueError as e:
