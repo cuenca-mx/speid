@@ -3,7 +3,6 @@ import os
 
 from flask import abort, request
 from mongoengine import DoesNotExist, NotUniqueError
-
 from sentry_sdk import capture_exception, capture_message
 from stpmex.exc import StpmexException
 
