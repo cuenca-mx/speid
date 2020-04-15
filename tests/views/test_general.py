@@ -142,11 +142,9 @@ def test_create_orden_duplicated(
     transactions = Transaction.objects(
         clave_rastreo=default_income_transaction['ClaveRastreo']
     ).order_by('-created_at')
-    assert len(transactions) == 2
-    assert transactions[0].stp_id == 2456304
-    assert transactions[0].estado is Estado.error
-    assert transactions[1].stp_id == 2456303
-    assert transactions[1].estado is Estado.succeeded
+    assert len(transactions) == 1
+    assert transactions[0].stp_id == 2456303
+    assert transactions[0].estado is Estado.succeeded
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
     for t in transactions:
@@ -234,6 +232,7 @@ def test_get_transactions(
     resp = client.get('/transactions')
     assert resp.status_code == 200
     assert len(resp.json) == 2
+    trx_out.delete()
 
 
 @pytest.mark.vcr

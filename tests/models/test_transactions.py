@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import pytest
+from mongoengine import NotUniqueError
 from pydantic import ValidationError
 from stpmex.types import TipoCuenta
 
@@ -45,6 +48,33 @@ def test_transaction():
     assert transaction.rfc_curp_ordenante == trx_saved.rfc_curp_ordenante
     assert transaction.speid_id == trx_saved.speid_id
     assert len(trx_saved.events) == 6
+    transaction.delete()
+
+
+def test_not_duplicate_transaction():
+    transaction_data = dict(
+        concepto_pago='PRUEBA',
+        institucion_ordenante='646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='072',
+        monto=1020,
+        nombre_beneficiario='Rogelio Lopez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='speid_id',
+        fecha_operacion=datetime.today(),
+        clave_rastreo='abc123',
+    )
+
+    transaction = Transaction(**transaction_data)
+    transaction.save()
+    assert transaction.id is not None
+
+    transaction_duplicated = Transaction(**transaction_data)
+    with pytest.raises(NotUniqueError):
+        transaction_duplicated.save()
+    assert transaction_duplicated.id is None
     transaction.delete()
 
 
