@@ -143,7 +143,7 @@ def test_create_mal_formed_orden(client, mock_callback_api):
     }
     resp = client.post('/ordenes', json=request)
     assert resp.status_code == 201
-    assert resp.json['estado'] == 'DEVOLUCION'
+    assert resp.json['estado'] == 'LIQUIDACION'
 
 
 def test_create_orden_duplicated(
