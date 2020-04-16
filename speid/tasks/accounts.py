@@ -1,4 +1,3 @@
-import re
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception, capture_message
 
@@ -8,7 +7,7 @@ from speid.types import Estado, EventType
 from speid.validations import Account as AccountValidation
 
 
-@celery.task(bind=True, max_retries=60)     # Creo que 60 es suficiente
+@celery.task(bind=True, max_retries=60)  # Creo que 60 es suficiente
 def create_account(self, account_dict: dict):
     try:
         execute(account_dict)

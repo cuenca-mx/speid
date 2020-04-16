@@ -1,6 +1,5 @@
-import re
-
 import datetime as dt
+import re
 from typing import Optional
 
 from pydantic.dataclasses import dataclass
@@ -46,8 +45,6 @@ class Account:
 
     def validate_curp_regex(self) -> bool:
         result = True
-        if len(self.rfc_curp) == 18 and (
-            not re.match(CURP_RE, self.rfc_curp)
-        ):
+        if len(self.rfc_curp) == 18 and (not re.match(CURP_RE, self.rfc_curp)):
             result = False
         return result
