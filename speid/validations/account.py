@@ -1,3 +1,5 @@
+import re
+
 import datetime as dt
 from typing import Optional
 
@@ -5,6 +7,8 @@ from pydantic.dataclasses import dataclass
 
 from speid.models import Account as Model
 from speid.types import Estado
+
+CURP_RE = re.compile(r'^[A-Z]{4}[0-9]{6}[A-Z]{6}[A-Z|0-9][0-9]$')
 
 
 @dataclass
@@ -39,3 +43,11 @@ class Account:
         account = Model(**self.to_dict())
         account.estado = Estado.created
         return account
+
+    def validate_curp_regex(self) -> bool:
+        result = True
+        if len(self.rfc_curp) == 18 and (
+            not re.match(CURP_RE, self.rfc_curp)
+        ):
+            result = False
+        return result
