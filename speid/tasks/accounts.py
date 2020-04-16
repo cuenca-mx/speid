@@ -8,7 +8,6 @@ from speid.types import Estado, EventType
 from speid.validations import Account as AccountValidation
 
 
-@newrelic.agent.background_task()
 @celery.task(bind=True, max_retries=None)
 def create_account(self, account_dict: dict):
     try:

@@ -26,7 +26,6 @@ def retry_timeout(attempts: int) -> int:
     return 1200
 
 
-@newrelic.agent.background_task()
 @celery.task(bind=True, max_retries=12, name=os.environ['CELERY_TASK_NAME'])
 def send_order(self, order_val: dict):
     try:
