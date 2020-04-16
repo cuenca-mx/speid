@@ -36,7 +36,7 @@ def test_new_request_stp() -> None:
         "Monto": 500,
         "NombreOrdenante": "SARAHI SANCHEZ HERNANDEZ",
         "RFCCurpOrdenante": "SAHS95022114A",
-        "TipoCuentaOrdenante": 40
+        "TipoCuentaOrdenante": 40,
     }
     external_transaction = StpTransaction(**request)
     assert external_transaction
