@@ -79,9 +79,15 @@ class Transaction(Document, BaseModel):
     iva = StringField()
 
     events = ListField(ReferenceField(Event))
+    # The Unique-Sparse index skips over any document that is missing
+    # the indexed field (null values)
     meta = {
         'indexes': [
-            {'fields': ('clave_rastreo', 'fecha_operacion'), 'unique': True}
+            {
+                'fields': ('clave_rastreo', 'fecha_operacion'),
+                'unique': True,
+                'sparse': True,
+            }
         ]
     }
 
