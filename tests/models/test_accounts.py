@@ -41,9 +41,7 @@ def test_account_bad_curp():
         rfc_curp='S1ACR891125M47',
         telefono='5567980796',
     )
-
-    account = account_validation.transform()
-    assert not account.validate_curp_regex()
+    assert not account_validation.validate_curp_regex()
 
 
 @pytest.mark.vcr
