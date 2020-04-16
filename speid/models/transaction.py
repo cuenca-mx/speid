@@ -79,16 +79,18 @@ class Transaction(Document, BaseModel):
     iva = StringField()
 
     events = ListField(ReferenceField(Event))
-    # The Unique-Sparse index skips over any document that is missing
-    # the indexed field (null values)
+
     meta = {
         'indexes': [
+            '+stp_id',
+            # The Unique-Sparse index skips over any document that is missing
+            # the indexed field (null values)
             {
                 'fields': ('clave_rastreo', 'fecha_operacion'),
                 'unique': True,
                 'sparse': True,
-            }
-        ]
+            },
+        ],
     }
 
     def set_state(self, state: Estado):

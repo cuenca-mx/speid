@@ -51,7 +51,7 @@ def test_transaction():
     transaction.delete()
 
 
-def test_not_duplicate_transaction():
+def test_transaction_constraints():
     transaction_data = dict(
         concepto_pago='PRUEBA',
         institucion_ordenante='646',
@@ -63,19 +63,30 @@ def test_not_duplicate_transaction():
         cuenta_ordenante='646180157000000004',
         rfc_curp_ordenante='ND',
         speid_id='speid_id',
-        fecha_operacion=datetime.today(),
-        clave_rastreo='abc123',
     )
 
     transaction = Transaction(**transaction_data)
     transaction.save()
     assert transaction.id is not None
 
-    transaction_duplicated = Transaction(**transaction_data)
+    # Unique Index skip documents that not contains
+    second_transaction = Transaction(**transaction_data)
+    second_transaction.save()
+    assert second_transaction.id is not None
+
+    # Add unique fields
+    transaction.fecha_operacion = datetime.today()
+    transaction.clave_rastreo = 'abc123'
+    transaction.save()
+
+    # Index not allow save duplicated values
+    second_transaction.fecha_operacion = transaction.fecha_operacion
+    second_transaction.clave_rastreo = transaction.clave_rastreo
     with pytest.raises(NotUniqueError):
-        transaction_duplicated.save()
-    assert transaction_duplicated.id is None
+        second_transaction.save()
+
     transaction.delete()
+    second_transaction.delete()
 
 
 def test_transaction_stp_input():
