@@ -66,14 +66,7 @@ def create_orden():
 
         r = request.json
         r['estado'] = Estado.convert_to_stp_state(transaction.estado)
-    except TypeError as e:
-        clave_rastreo = request.json.get('ClaveRastreo')
-        if clave_rastreo and Transaction.objects(clave_rastreo=clave_rastreo):
-            r = dict(estado='LIQUIDACION')
-        else:
-            r = dict(estado='DEVOLUCION')
-        capture_exception(e)
-    except (NotUniqueError, AssertionError, DuplicateKeyError) as e:
+    except (NotUniqueError, AssertionError, TypeError, DuplicateKeyError) as e:
         r = dict(estado='LIQUIDACION')
         capture_exception(e)
     except Exception as e:

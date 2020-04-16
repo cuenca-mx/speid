@@ -1,5 +1,6 @@
 from mongoengine import DoesNotExist
-from sentry_sdk import capture_exception, capture_message
+from pydantic import ValidationError
+from sentry_sdk import capture_exception
 
 from speid.models import Account, Event
 from speid.tasks import celery
@@ -7,10 +8,13 @@ from speid.types import Estado, EventType
 from speid.validations import Account as AccountValidation
 
 
-@celery.task(bind=True, max_retries=60)  # Creo que 60 es suficiente
+@celery.task(bind=True, max_retries=60)
 def create_account(self, account_dict: dict):
     try:
         execute(account_dict)
+    except ValidationError as e:
+        capture_exception(e)
+        return
     except Exception as e:
         capture_exception(e)
         self.retry(countdown=600, exc=e)  # Reintenta en 10 minutos
@@ -18,10 +22,6 @@ def create_account(self, account_dict: dict):
 
 def execute(account_dict: dict):
     account_val = AccountValidation(**account_dict)
-    # Para evitar curps que rechazan
-    if not account_val.validate_curp_regex():
-        capture_message('Invalid curp')
-        return
     # Look for previous accounts
     account = account_val.transform()
     try:

@@ -14,7 +14,6 @@ def test_account():
         rfc_curp='SACR891125M47',
         telefono='5567980796',
     )
-    assert account_validation.validate_curp_regex()
     account = account_validation.transform()
 
     account.save()
@@ -34,14 +33,14 @@ def test_account():
 
 
 def test_account_bad_curp():
-    account_validation = AccountValidation(
-        nombre='Ricardo',
-        apellido_paterno='Sánchez',
-        cuenta='646180157063641989',
-        rfc_curp='S1ACR891125M47',
-        telefono='5567980796',
-    )
-    assert not account_validation.validate_curp_regex()
+    with pytest.raises(ValidationError):
+        AccountValidation(
+            nombre='Ricardo',
+            apellido_paterno='Sánchez',
+            cuenta='646180157063641989',
+            rfc_curp='S1CR891125HDFGHI01',
+            telefono='5567980796',
+        )
 
 
 @pytest.mark.vcr

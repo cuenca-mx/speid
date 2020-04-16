@@ -2,6 +2,7 @@ import datetime as dt
 import re
 from typing import Optional
 
+from pydantic import ValidationError, validator
 from pydantic.dataclasses import dataclass
 
 from speid.models import Account as Model
@@ -33,6 +34,12 @@ class Account:
     email: Optional[str] = None
     id_identificacion: Optional[str] = None
 
+    @validator('rfc_curp')
+    def validate_curp_regex(cls, v) -> str:
+        if len(v) == 18 and (not re.match(CURP_RE, v)):
+            raise ValidationError('Invalid curp format')
+        return v
+
     def to_dict(self) -> dict:
         return {
             k: v for k, v in self.__dict__.items() if not k.startswith('_')
@@ -42,9 +49,3 @@ class Account:
         account = Model(**self.to_dict())
         account.estado = Estado.created
         return account
-
-    def validate_curp_regex(self) -> bool:
-        result = True
-        if len(self.rfc_curp) == 18 and (not re.match(CURP_RE, self.rfc_curp)):
-            result = False
-        return result
