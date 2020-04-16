@@ -1,4 +1,3 @@
-import newrelic.agent
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 

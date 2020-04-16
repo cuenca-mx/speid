@@ -3,7 +3,6 @@ import os
 
 import clabe
 import luhnmod10
-import newrelic.agent
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
