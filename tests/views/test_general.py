@@ -128,6 +128,24 @@ def test_create_orden(client, default_income_transaction, mock_callback_api):
     transaction.delete()
 
 
+def test_create_mal_formed_orden(client, mock_callback_api):
+    request = {
+        "Clave": 17658976,
+        "ClaveRastreo": "clave-restreo",
+        "CuentaOrdenante": "014180567802222244",
+        "FechaOperacion": 20200416,
+        "InstitucionBeneficiaria": 90646,
+        "InstitucionOrdenante": 40014,
+        "Monto": 500,
+        "NombreOrdenante": "Pepito",
+        "RFCCurpOrdenante": "XXXX950221141",
+        "TipoCuentaOrdenante": 40,
+    }
+    resp = client.post('/ordenes', json=request)
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'DEVOLUCION'
+
+
 def test_create_orden_duplicated(
     client, default_income_transaction, mock_callback_api
 ):

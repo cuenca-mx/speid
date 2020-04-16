@@ -65,6 +65,9 @@ def create_orden():
 
         r = request.json
         r['estado'] = Estado.convert_to_stp_state(transaction.estado)
+    except TypeError as e:
+        r = dict(estado='DEVOLUCION')
+        capture_exception(e)
     except (NotUniqueError, AssertionError) as e:
         r = dict(estado='LIQUIDACION')
         capture_exception(e)
