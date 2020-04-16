@@ -23,3 +23,20 @@ def test_converts_float_amount_to_int_correctly() -> None:
     )
     transaction = stp_transaction.transform()
     assert transaction.monto == 26565
+
+
+def test_new_request_stp() -> None:
+    request = {
+        "Clave": 17658976,
+        "ClaveRastreo": "2020041640014BMOV0000494354990",
+        "CuentaOrdenante": "014180567802222244",
+        "FechaOperacion": 20200416,
+        "InstitucionBeneficiaria": 90646,
+        "InstitucionOrdenante": 40014,
+        "Monto": 500,
+        "NombreOrdenante": "SARAHI SANCHEZ HERNANDEZ",
+        "RFCCurpOrdenante": "SAHS95022114A",
+        "TipoCuentaOrdenante": 40
+    }
+    external_transaction = StpTransaction(**request)
+    assert external_transaction

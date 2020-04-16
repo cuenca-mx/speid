@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import StrictStr
 from pydantic.dataclasses import dataclass
@@ -19,13 +20,13 @@ class StpTransaction:
     TipoCuentaOrdenante: int
     CuentaOrdenante: StrictStr
     RFCCurpOrdenante: StrictStr
-    NombreBeneficiario: StrictStr
-    TipoCuentaBeneficiario: int
-    CuentaBeneficiario: StrictStr
-    RFCCurpBeneficiario: StrictStr
-    ConceptoPago: StrictStr
-    ReferenciaNumerica: int
-    Empresa: StrictStr
+    NombreBeneficiario: Optional[str] = ''
+    TipoCuentaBeneficiario: Optional[int] = None
+    CuentaBeneficiario: Optional[str] = ''
+    RFCCurpBeneficiario: Optional[str] = ''
+    ConceptoPago: Optional[str] = ''
+    ReferenciaNumerica: Optional[int] = None
+    Empresa: Optional[str] = ''
 
     def transform(self) -> Transaction:
         trans_dict = {
