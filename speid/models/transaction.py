@@ -37,13 +37,12 @@ SKIP_VALIDATION_PRIOR_SEND_ORDER = (
 
 @handler(signals.pre_save)
 def pre_save_transaction(sender, document):
-    if document.estado == Estado.submitted:
-        date = (
-            document.fecha_operacion.strftime("%Y%m%d")
-            if document.fecha_operacion
-            else None
-        )
-        document.compound_key = f'{document.clave_rastreo}:{date}'
+    date = (
+        document.fecha_operacion.strftime("%Y%m%d")
+        if document.fecha_operacion
+        else None
+    )
+    document.compound_key = f'{document.clave_rastreo}:{date}'
 
 
 @updated_at.apply

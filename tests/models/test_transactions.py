@@ -70,27 +70,17 @@ def test_transaction_constraints():
     transaction = Transaction(**transaction_data)
     transaction.save()
     assert transaction.id is not None
-    assert transaction.compound_key is None
-
-    # Unique-Spare Index skip documents that not contains compound_key
-    second_transaction = Transaction(**transaction_data)
-    second_transaction.save()
-    assert second_transaction.id is not None
-    assert second_transaction.compound_key is None
-
-    # Add unique condition
-    transaction.estado = Estado.submitted
-    transaction.save()
     assert transaction.compound_key is not None
 
-    # Index not allow save duplicated values
-    second_transaction.estado = Estado.submitted
+    # Unique-Spare Index skip documents that not contains compound_key
+    # and not allow saving duplicated values
+    second_transaction = Transaction(**transaction_data)
     with pytest.raises(NotUniqueError):
         second_transaction.save()
     assert second_transaction.compound_key == transaction.compound_key
+    assert second_transaction.id is None
 
     transaction.delete()
-    second_transaction.delete()
 
 
 def test_transaction_stp_input():
