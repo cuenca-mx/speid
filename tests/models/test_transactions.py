@@ -63,27 +63,31 @@ def test_transaction_constraints():
         cuenta_ordenante='646180157000000004',
         rfc_curp_ordenante='ND',
         speid_id='speid_id',
+        fecha_operacion=datetime.today(),
+        clave_rastreo='abc123',
     )
 
     transaction = Transaction(**transaction_data)
     transaction.save()
     assert transaction.id is not None
+    assert transaction.compound_key is None
 
-    # Unique Index skip documents that not contains
+    # Unique-Spare Index skip documents that not contains compound_key
     second_transaction = Transaction(**transaction_data)
     second_transaction.save()
     assert second_transaction.id is not None
+    assert second_transaction.compound_key is None
 
-    # Add unique fields
-    transaction.fecha_operacion = datetime.today()
-    transaction.clave_rastreo = 'abc123'
+    # Add unique condition
+    transaction.estado = Estado.submitted
     transaction.save()
+    assert transaction.compound_key is not None
 
     # Index not allow save duplicated values
-    second_transaction.fecha_operacion = transaction.fecha_operacion
-    second_transaction.clave_rastreo = transaction.clave_rastreo
+    second_transaction.estado = Estado.submitted
     with pytest.raises(NotUniqueError):
         second_transaction.save()
+    assert second_transaction.compound_key == transaction.compound_key
 
     transaction.delete()
     second_transaction.delete()
