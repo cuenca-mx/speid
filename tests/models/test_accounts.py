@@ -70,7 +70,7 @@ def test_create_account_failed():
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157063641989',
-        rfc_curp='SACR891125',
+        rfc_curp='SACR89112501',
         telefono='5567980796',
     )
 

@@ -36,9 +36,11 @@ class Account:
 
     @validator('rfc_curp')
     def validate_curp_regex(cls, v) -> str:
-        if len(v) == 18 and (not re.match(CURP_RE, v)):
-            raise ValidationError('Invalid curp format')
-        return v
+        if (len(v) == 18 and re.match(CURP_RE, v)) or (  # CURP
+            len(v) == 12 or len(v) == 13  # RFC
+        ):
+            return v
+        raise ValidationError('Invalid curp format')
 
     def to_dict(self) -> dict:
         return {

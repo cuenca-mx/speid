@@ -3,7 +3,6 @@ import os
 
 from flask import abort, request
 from mongoengine import DoesNotExist, NotUniqueError
-from pymongo.errors import DuplicateKeyError
 from sentry_sdk import capture_exception, capture_message
 from stpmex.exc import StpmexException
 
@@ -66,7 +65,7 @@ def create_orden():
 
         r = request.json
         r['estado'] = Estado.convert_to_stp_state(transaction.estado)
-    except (NotUniqueError, AssertionError, TypeError, DuplicateKeyError) as e:
+    except (NotUniqueError, AssertionError, TypeError) as e:
         r = dict(estado='LIQUIDACION')
         capture_exception(e)
     except Exception as e:

@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from mongoengine import (
     DateTimeField,
@@ -37,12 +38,10 @@ SKIP_VALIDATION_PRIOR_SEND_ORDER = (
 
 @handler(signals.pre_save)
 def pre_save_transaction(sender, document):
-    date = (
-        document.fecha_operacion.strftime("%Y%m%d")
-        if document.fecha_operacion
-        else None
+    date = document.fecha_operacion or datetime.today()
+    document.compound_key = (
+        f'{document.clave_rastreo}:{date.strftime("%Y%m%d")}'
     )
-    document.compound_key = f'{document.clave_rastreo}:{date}'
 
 
 @updated_at.apply
