@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from mongoengine import (
     DateTimeField,
@@ -8,6 +9,7 @@ from mongoengine import (
     ListField,
     ReferenceField,
     StringField,
+    signals,
 )
 from stpmex.resources import Orden
 
@@ -24,6 +26,7 @@ from .helpers import (
     EnumField,
     date_now,
     delete_events,
+    handler,
     save_events,
     updated_at,
 )
@@ -33,8 +36,17 @@ SKIP_VALIDATION_PRIOR_SEND_ORDER = (
 )
 
 
+@handler(signals.pre_save)
+def pre_save_transaction(sender, document):
+    date = document.fecha_operacion or datetime.today()
+    document.compound_key = (
+        f'{document.clave_rastreo}:{date.strftime("%Y%m%d")}'
+    )
+
+
 @updated_at.apply
 @save_events.apply
+@pre_save_transaction.apply
 @delete_events.apply
 class Transaction(Document, BaseModel):
     created_at = date_now()
@@ -77,12 +89,17 @@ class Transaction(Document, BaseModel):
     medio_entrega = IntField()
     prioridad = IntField()
     iva = StringField()
+    compound_key = StringField()
 
     events = ListField(ReferenceField(Event))
+
     meta = {
         'indexes': [
-            {'fields': ('clave_rastreo', 'fecha_operacion'), 'unique': True}
-        ]
+            '+stp_id',
+            # The Unique-Sparse index skips over any document that is missing
+            # the indexed field (null values)
+            {'fields': ['+compound_key'], 'unique': True, 'sparse': True},
+        ],
     }
 
     def set_state(self, state: Estado):

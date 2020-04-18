@@ -1,10 +1,14 @@
 import datetime as dt
+import re
 from typing import Optional
 
+from pydantic import ValidationError, validator
 from pydantic.dataclasses import dataclass
 
 from speid.models import Account as Model
 from speid.types import Estado
+
+CURP_RE = re.compile(r'^[A-Z]{4}[0-9]{6}[A-Z]{6}[A-Z|0-9][0-9]$')
 
 
 @dataclass
@@ -29,6 +33,14 @@ class Account:
     pais: Optional[str] = None
     email: Optional[str] = None
     id_identificacion: Optional[str] = None
+
+    @validator('rfc_curp')
+    def validate_curp_regex(cls, v) -> str:
+        if (len(v) == 18 and re.match(CURP_RE, v)) or (  # CURP
+            len(v) == 12 or len(v) == 13  # RFC
+        ):
+            return v
+        raise ValidationError('Invalid curp format')
 
     def to_dict(self) -> dict:
         return {

@@ -14,7 +14,6 @@ def test_account():
         rfc_curp='SACR891125M47',
         telefono='5567980796',
     )
-
     account = account_validation.transform()
 
     account.save()
@@ -31,6 +30,17 @@ def test_account():
     assert account_saved.telefono == account.telefono
 
     account.delete()
+
+
+def test_account_bad_curp():
+    with pytest.raises(ValidationError):
+        AccountValidation(
+            nombre='Ricardo',
+            apellido_paterno='Sánchez',
+            cuenta='646180157063641989',
+            rfc_curp='S1CR891125HDFGHI01',
+            telefono='5567980796',
+        )
 
 
 @pytest.mark.vcr
@@ -60,7 +70,7 @@ def test_create_account_failed():
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157063641989',
-        rfc_curp='SACR891125',
+        rfc_curp='SACR89112501',
         telefono='5567980796',
     )
 

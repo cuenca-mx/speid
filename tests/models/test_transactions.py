@@ -51,7 +51,7 @@ def test_transaction():
     transaction.delete()
 
 
-def test_not_duplicate_transaction():
+def test_transaction_constraints():
     transaction_data = dict(
         concepto_pago='PRUEBA',
         institucion_ordenante='646',
@@ -70,11 +70,16 @@ def test_not_duplicate_transaction():
     transaction = Transaction(**transaction_data)
     transaction.save()
     assert transaction.id is not None
+    assert transaction.compound_key is not None
 
-    transaction_duplicated = Transaction(**transaction_data)
+    # Unique-Spare Index skip documents that not contains compound_key
+    # and not allow saving duplicated values
+    second_transaction = Transaction(**transaction_data)
     with pytest.raises(NotUniqueError):
-        transaction_duplicated.save()
-    assert transaction_duplicated.id is None
+        second_transaction.save()
+    assert second_transaction.compound_key == transaction.compound_key
+    assert second_transaction.id is None
+
     transaction.delete()
 
 
