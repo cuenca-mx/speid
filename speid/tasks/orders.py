@@ -1,5 +1,5 @@
-import datetime as dt
 import os
+from datetime import datetime, timedelta
 
 import clabe
 import luhnmod10
@@ -30,8 +30,6 @@ def retry_timeout(attempts: int) -> int:
 def send_order(self, order_val: dict):
     try:
         execute(order_val)
-    except InvalidAccountType:
-        pass
     except MalformedOrderException as exc:
         capture_exception(exc)
     except Exception as exc:
@@ -73,9 +71,11 @@ def execute(order_val: dict):
         transaction.save()
         raise MalformedOrderException()
 
-    if transaction.created_at > (dt.datetime.utcnow() - dt.timedelta(hours=2)):
-        transaction.create_order()
-    else:
+    now = datetime.utcnow()
+    try:
         # Return transaction after 2 hours of creation
+        assert (now - transaction.created_at) < timedelta(hours=2)
+        transaction.create_order()
+    except (AssertionError, InvalidAccountType):
         transaction.set_state(Estado.failed)
         transaction.save()

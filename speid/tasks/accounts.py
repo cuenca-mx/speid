@@ -12,7 +12,7 @@ from speid.validations import Account as AccountValidation
 @celery.task(bind=True, max_retries=60)
 def create_account(self, account_dict: dict) -> None:
     try:
-        create_account(account_dict)
+        execute_create_account(account_dict)
     except (InvalidRfcOrCurp, ValidationError) as exc:
         capture_exception(exc)
     except Exception as exc:
@@ -20,7 +20,7 @@ def create_account(self, account_dict: dict) -> None:
         self.retry(countdown=600, exc=exc)  # Reintenta en 10 minutos
 
 
-def create_account(account_dict: dict):
+def execute_create_account(account_dict: dict):
     account_val = AccountValidation(**account_dict)
     # Look for previous accounts
     account = account_val.transform()
@@ -40,8 +40,7 @@ def create_account(account_dict: dict):
 
 
 @celery.task(bind=True, max_retries=None)
-@newrelic.agent.background_task()
-def update_account_task(self, account_dict: dict) -> None:
+def update_account(self, account_dict: dict) -> None:
     try:
         validation_model = AccountValidation(**account_dict)
         account = Account.objects.get(cuenta=validation_model.cuenta)
@@ -49,7 +48,7 @@ def update_account_task(self, account_dict: dict) -> None:
     except ValidationError as exc:
         capture_exception(exc)
     except DoesNotExist:
-        create_account_task.apply((account_dict,))
+        create_account.apply((account_dict,))
     except Exception as exc:
         capture_exception(exc)
         self.retry(countdown=600, exc=exc)

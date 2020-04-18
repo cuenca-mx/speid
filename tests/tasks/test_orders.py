@@ -102,6 +102,7 @@ def test_worker_with_version_2():
 
 @pytest.mark.vcr
 @pytest.mark.usefixtures('create_account')
+@pytest.mark.usefixtures('mock_callback_api')
 @patch('speid.tasks.orders.capture_exception')
 @patch('speid.tasks.orders.send_order.retry')
 def test_ignore_invalid_account_type(
