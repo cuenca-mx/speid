@@ -1,10 +1,11 @@
-import datetime as dt
 import os
+from datetime import datetime, timedelta
 
 import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
+from stpmex.exc import InvalidAccountType
 
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
@@ -31,8 +32,7 @@ def send_order(self, order_val: dict):
         execute(order_val)
     except MalformedOrderException as exc:
         capture_exception(exc)
-        pass
-    except (Exception) as exc:
+    except Exception as exc:
         capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries))
 
@@ -71,9 +71,11 @@ def execute(order_val: dict):
         transaction.save()
         raise MalformedOrderException()
 
-    if transaction.created_at > (dt.datetime.utcnow() - dt.timedelta(hours=2)):
-        transaction.create_order()
-    else:
+    now = datetime.utcnow()
+    try:
         # Return transaction after 2 hours of creation
+        assert (now - transaction.created_at) < timedelta(hours=2)
+        transaction.create_order()
+    except (AssertionError, InvalidAccountType):
         transaction.set_state(Estado.failed)
         transaction.save()

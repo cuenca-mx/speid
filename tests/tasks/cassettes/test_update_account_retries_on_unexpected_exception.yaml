@@ -1,0 +1,33 @@
+interactions:
+- request:
+    body: '{"cuenta": "646180157000000004", "rfcCurp": "SACR891125HDFABC01", "nombre":
+      "Ric", "apellidoPaterno": "San"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '668'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.1.0
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
+  response:
+    body:
+      string: '{"descripcion":"rfc/curp invalido","id":1}'
+    headers:
+      Content-Length:
+      - '25'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 07 Jan 2020 13:02:15 GMT
+    status:
+      code: 200
+      message: OK
+version: 1

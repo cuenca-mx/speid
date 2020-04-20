@@ -1,6 +1,7 @@
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
+from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import Account, Event
 from speid.tasks import celery
@@ -9,18 +10,17 @@ from speid.validations import Account as AccountValidation
 
 
 @celery.task(bind=True, max_retries=60)
-def create_account(self, account_dict: dict):
+def create_account(self, account_dict: dict) -> None:
     try:
-        execute(account_dict)
-    except ValidationError as e:
-        capture_exception(e)
-        return
-    except Exception as e:
-        capture_exception(e)
-        self.retry(countdown=600, exc=e)  # Reintenta en 10 minutos
+        execute_create_account(account_dict)
+    except (InvalidRfcOrCurp, ValidationError) as exc:
+        capture_exception(exc)
+    except Exception as exc:
+        capture_exception(exc)
+        self.retry(countdown=600, exc=exc)  # Reintenta en 10 minutos
 
 
-def execute(account_dict: dict):
+def execute_create_account(account_dict: dict):
     account_val = AccountValidation(**account_dict)
     # Look for previous accounts
     account = account_val.transform()
@@ -39,24 +39,16 @@ def execute(account_dict: dict):
     account.create_account()
 
 
-@celery.task(bind=True, max_retries=3)
-def update_curp(self, account_dict: dict):
+@celery.task(bind=True, max_retries=None)
+def update_account(self, account_dict: dict) -> None:
     try:
-        execute_update(account_dict)
-    except Exception as e:
-        capture_exception(e)
-        self.retry(countdown=300, exc=e)
-
-
-def execute_update(account_dict: dict):
-    account_val = AccountValidation(**account_dict)
-    try:
-        account = Account.objects.get(cuenta=account_val.cuenta)
-    except DoesNotExist as e:
-        capture_exception(e)
-        return
-    new_curp = account_val.rfc_curp
-    try:
-        account.update_curp(new_curp)
-    except ValueError as e:
-        capture_exception(e)
+        validation_model = AccountValidation(**account_dict)
+        account = Account.objects.get(cuenta=validation_model.cuenta)
+        account.update_account(validation_model.transform())
+    except ValidationError as exc:
+        capture_exception(exc)
+    except DoesNotExist:
+        create_account.apply((account_dict,))
+    except Exception as exc:
+        capture_exception(exc)
+        self.retry(countdown=600, exc=exc)
