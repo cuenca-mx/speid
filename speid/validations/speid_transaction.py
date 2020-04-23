@@ -41,7 +41,6 @@ class SpeidTransaction:
     usuario: str = None
     medio_entrega: int = 3
     prioridad: int = 1
-    iva: str = None
 
     def to_dict(self) -> dict:
         return {

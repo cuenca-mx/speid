@@ -88,7 +88,6 @@ class Transaction(Document, BaseModel):
     usuario = StringField()
     medio_entrega = IntField()
     prioridad = IntField()
-    iva = StringField()
     compound_key = StringField()
 
     events = ListField(ReferenceField(Event))
@@ -174,7 +173,6 @@ class Transaction(Document, BaseModel):
                 nombreOrdenante=self.nombre_ordenante,
                 cuentaOrdenante=self.cuenta_ordenante,
                 rfcCurpOrdenante=self.rfc_curp_ordenante,
-                iva=self.iva,
                 **optionals,
             )
         except (Exception) as e:  # Anything can happen here
