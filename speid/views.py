@@ -1,5 +1,4 @@
 import json
-import os
 
 from flask import abort, request
 from mongoengine import DoesNotExist
@@ -8,11 +7,9 @@ from stpmex.exc import StpmexException
 
 from speid import app
 from speid.models import Request, Transaction
-from speid.models.transaction import process_incoming_transaction
+from speid.tasks.transactions import process_incoming_transaction
 from speid.types import Estado, HttpRequestMethod
 from speid.utils import get, patch, post
-
-CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
 
 
 @app.route('/')
