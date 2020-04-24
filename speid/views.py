@@ -2,16 +2,15 @@ import json
 import os
 
 from flask import abort, request
-from mongoengine import DoesNotExist, NotUniqueError
-from sentry_sdk import capture_exception, capture_message
+from mongoengine import DoesNotExist
+from sentry_sdk import capture_exception
 from stpmex.exc import StpmexException
 
 from speid import app
-from speid.models import Event, Request, Transaction
+from speid.models import Request, Transaction
 from speid.models.transaction import process_incoming_transaction
-from speid.types import Estado, EventType, HttpRequestMethod
+from speid.types import Estado, HttpRequestMethod
 from speid.utils import get, patch, post
-from speid.validations import StpTransaction
 
 CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
 

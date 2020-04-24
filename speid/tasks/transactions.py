@@ -19,7 +19,9 @@ def create_transactions(self, transactions: list):
 def execute(transactions: list):
     for transaction in transactions:
         try:
-            previous_transaction = Transaction.objects.get(clave_rastreo=transaction['clave_rastreo'])
+            previous_transaction = Transaction.objects.get(
+                clave_rastreo=transaction['clave_rastreo']
+            )
             if previous_transaction['estado'] == Estado.error:
                 previous_transaction.confirm_callback_transaction()
                 previous_transaction.save()

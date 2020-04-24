@@ -7,11 +7,12 @@ from mongoengine import (
     DoesNotExist,
     IntField,
     ListField,
+    NotUniqueError,
     ReferenceField,
     StringField,
     signals,
-    NotUniqueError)
-from sentry_sdk import capture_message, capture_exception
+)
+from sentry_sdk import capture_exception, capture_message
 from stpmex.resources import Orden
 
 from speid import STP_EMPRESA
@@ -19,6 +20,8 @@ from speid.exc import MalformedOrderException
 from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
+from speid.validations import StpTransaction
+from speid.views import CLABES_BLOCKED
 
 from .account import Account
 from .base import BaseModel
@@ -31,11 +34,9 @@ from .helpers import (
     save_events,
     updated_at,
 )
-from speid.validations import StpTransaction
-from speid.views import CLABES_BLOCKED
 
 SKIP_VALIDATION_PRIOR_SEND_ORDER = (
-        os.getenv('SKIP_VALIDATION_PRIOR_SEND_ORDER', 'false').lower() == 'true'
+    os.getenv('SKIP_VALIDATION_PRIOR_SEND_ORDER', 'false').lower() == 'true'
 )
 
 
@@ -214,10 +215,10 @@ class Transaction(Document, BaseModel):
         else:
             self.clave_rastreo = self.clave_rastreo or order.claveRastreo
             self.rfc_curp_beneficiario = (
-                    self.rfc_curp_beneficiario or order.rfcCurpBeneficiario
+                self.rfc_curp_beneficiario or order.rfcCurpBeneficiario
             )
             self.referencia_numerica = (
-                    self.referencia_numerica or order.referenciaNumerica
+                self.referencia_numerica or order.referenciaNumerica
             )
             self.empresa = self.empresa or STP_EMPRESA
             self.stp_id = order.id
