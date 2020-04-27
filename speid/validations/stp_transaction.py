@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import StrictStr
 from pydantic.dataclasses import dataclass
@@ -9,7 +10,7 @@ from speid.models.helpers import base62_uuid, camel_to_snake
 
 @dataclass
 class StpTransaction:
-    Clave: int
+    Clave: Optional[int]
     FechaOperacion: int
     InstitucionOrdenante: str
     InstitucionBeneficiaria: str
@@ -33,7 +34,7 @@ class StpTransaction:
             for k, v in self.__dict__.items()
             if not k.startswith('_')
         }
-        trans_dict['stp_id'] = trans_dict.pop('clave')
+        trans_dict['stp_id'] = trans_dict.pop('clave', None)
         trans_dict['monto'] = round(trans_dict['monto'] * 100)
         transaction = Transaction(**trans_dict)
         transaction.speid_id = base62_uuid('SR')()

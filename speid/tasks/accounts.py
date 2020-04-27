@@ -12,7 +12,6 @@ from speid.validations import Account as AccountValidation
 @celery.task(bind=True, max_retries=60)
 def create_account(self, account_dict: dict) -> None:
     try:
-        print(account_dict)
         execute_create_account(account_dict)
     except (InvalidRfcOrCurp, ValidationError) as exc:
         capture_exception(exc)

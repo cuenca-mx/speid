@@ -15,7 +15,6 @@ CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
 @celery.task(bind=True, max_retries=5)
 def create_transactions(self, transactions: list):
     try:
-        print(transactions)
         execute(transactions)
     except Exception as e:
         capture_exception(e)
