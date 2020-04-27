@@ -7,7 +7,9 @@ from speid.types import Estado
 
 @pytest.fixture
 def incoming_transactions():
-    yield [{'InstitucionBeneficiaria': '90646',
+    yield [
+        {
+            'InstitucionBeneficiaria': '90646',
             'InstitucionOrdenante': '40021',
             'FechaOperacion': '20200424',
             'ClaveRastreo': 'HSBC000081',
@@ -22,8 +24,10 @@ def incoming_transactions():
             'RFCCurpBeneficiario': '',
             'ConceptoPago': 'Andy',
             'ReferenciaNumerica': 230420,
-            'Empresa': 'TAMIZI'},
-           {'InstitucionBeneficiaria': '90646',
+            'Empresa': 'TAMIZI',
+        },
+        {
+            'InstitucionBeneficiaria': '90646',
             'InstitucionOrdenante': '90646',
             'FechaOperacion': '20200424',
             'ClaveRastreo': 'MIBO587683053420',
@@ -38,9 +42,12 @@ def incoming_transactions():
             'RFCCurpBeneficiario': 'ND',
             'ConceptoPago': 'omar prro',
             'ReferenciaNumerica': 3053420,
-            'Empresa': 'TAMIZI'}]
+            'Empresa': 'TAMIZI',
+        },
+    ]
 
     Transaction.objects.delete()
+
 
 @pytest.mark.vcr
 def test_transaction_not_in_cuenca(incoming_transactions):
@@ -52,6 +59,8 @@ def test_transaction_not_in_cuenca(incoming_transactions):
     previous_transaction.estado = Estado.error
     previous_transaction.save()
 
-    transactions = [incoming_transactions[0],]
+    transactions = [
+        incoming_transactions[0],
+    ]
 
     execute(transactions)
