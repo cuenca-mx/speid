@@ -10,7 +10,6 @@ from speid.models.helpers import base62_uuid, camel_to_snake
 
 @dataclass
 class StpTransaction:
-    Clave: Optional[int]
     FechaOperacion: int
     InstitucionOrdenante: str
     InstitucionBeneficiaria: str
@@ -27,6 +26,7 @@ class StpTransaction:
     ConceptoPago: StrictStr
     ReferenciaNumerica: int
     Empresa: StrictStr
+    Clave: Optional[int] = None
 
     def transform(self) -> Transaction:
         trans_dict = {

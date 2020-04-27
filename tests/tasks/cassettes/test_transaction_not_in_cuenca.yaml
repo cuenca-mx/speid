@@ -1,0 +1,174 @@
+interactions:
+- request:
+    body: '{"id": "5ea709e72465c3978629618e", "created_at": "2020-04-27T16:35:51.332667",
+      "updated_at": "2020-04-27T16:35:51.334089", "stp_id": null, "fecha_operacion":
+      "2020-04-24", "institucion_ordenante": "40021", "institucion_beneficiaria":
+      "90646", "clave_rastreo": "HSBC000089", "monto": 100000, "nombre_ordenante":
+      "CARLOS JAIR  AGUILAR PEREZ", "tipo_cuenta_ordenante": 40, "cuenta_ordenante":
+      "021650040600992156", "rfc_curp_ordenante": "AUPC890116DU0", "nombre_beneficiario":
+      "CARLOS JAIR CTA CUENCA", "tipo_cuenta_beneficiario": 40, "cuenta_beneficiario":
+      "646180157026913146", "rfc_curp_beneficiario": "", "concepto_pago": "Andy",
+      "referencia_numerica": 230420, "empresa": "TAMIZI", "estado": "Estado.created",
+      "version": null, "speid_id": "SR1dOSXPfozmqpLbleWPmHcM", "folio_origen": null,
+      "tipo_pago": null, "email_beneficiario": null, "tipo_cuenta_beneficiario2":
+      null, "nombre_beneficiario2": null, "cuenta_beneficiario2": null, "rfc_curpBeneficiario2":
+      null, "concepto_pago2": null, "clave_cat_usuario1": null, "clave_cat_usuario2":
+      null, "clave_pago": null, "referencia_cobranza": null, "tipo_operacion": null,
+      "topologia": null, "usuario": null, "medio_entrega": null, "prioridad": null,
+      "iva": null, "compound_key": "HSBC000089:20200424", "events": ["Event object"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic QUszNkVBUVhJbHVyZzUzcFJqY3Z0eDMwOkVhLTZKbXBuUlgzWktpNG9HSHBzbXJvR0VFUFUxdmd1MkVxMzYyQjI3S2lKRzJhTEdrdUdoM3BZZkc3MjV5RFNOeFFuMEw5MnpDb0Z2RWRucnIxWWJ3
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1273'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.23.0
+    method: POST
+    uri: https://testapi/set
+  response:
+    body:
+      string: '{"error":"No user found for this CLABE","status":"failed"}
+
+'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '59'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 27 Apr 2020 16:35:51 GMT
+      Server:
+      - nginx
+      X-Cuenca-Version:
+      - '2019-03-10'
+      X-Last-Cuenca-Version-Supported:
+      - '2019-03-10'
+    status:
+      code: 400
+      message: BAD REQUEST
+- request:
+    body: '{"id": "5ea709e72465c39786296191", "created_at": "2020-04-27T16:35:51.721269",
+      "updated_at": "2020-04-27T16:35:51.721889", "stp_id": null, "fecha_operacion":
+      "2020-04-24", "institucion_ordenante": "90646", "institucion_beneficiaria":
+      "90646", "clave_rastreo": "MIBO587683053420", "monto": 85000, "nombre_ordenante":
+      "OMAR FLORES CASTRO", "tipo_cuenta_ordenante": 40, "cuenta_ordenante": "646180142500081321",
+      "rfc_curp_ordenante": "FOCO9810191K9", "nombre_beneficiario": "Omar Flores Castro",
+      "tipo_cuenta_beneficiario": 40, "cuenta_beneficiario": "646180157031498782",
+      "rfc_curp_beneficiario": "ND", "concepto_pago": "omar prro", "referencia_numerica":
+      3053420, "empresa": "TAMIZI", "estado": "Estado.created", "version": null, "speid_id":
+      "SR1efYF8SuZZL7jxPAJm5FKA", "folio_origen": null, "tipo_pago": null, "email_beneficiario":
+      null, "tipo_cuenta_beneficiario2": null, "nombre_beneficiario2": null, "cuenta_beneficiario2":
+      null, "rfc_curpBeneficiario2": null, "concepto_pago2": null, "clave_cat_usuario1":
+      null, "clave_cat_usuario2": null, "clave_pago": null, "referencia_cobranza":
+      null, "tipo_operacion": null, "topologia": null, "usuario": null, "medio_entrega":
+      null, "prioridad": null, "iva": null, "compound_key": "MIBO587683053420:20200424",
+      "events": ["Event object"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic QUszNkVBUVhJbHVyZzUzcFJqY3Z0eDMwOkVhLTZKbXBuUlgzWktpNG9HSHBzbXJvR0VFUFUxdmd1MkVxMzYyQjI3S2lKRzJhTEdrdUdoM3BZZkc3MjV5RFNOeFFuMEw5MnpDb0Z2RWRucnIxWWJ3
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1280'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.23.0
+    method: POST
+    uri: https://testapi/set
+  response:
+    body:
+      string: '{"error":"No user found for this CLABE","status":"failed"}
+
+'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '59'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 27 Apr 2020 16:35:52 GMT
+      Server:
+      - nginx
+      X-Cuenca-Version:
+      - '2019-03-10'
+      X-Last-Cuenca-Version-Supported:
+      - '2019-03-10'
+    status:
+      code: 400
+      message: BAD REQUEST
+- request:
+    body: '{"id": "5ea709e72465c3978629618e", "created_at": "2020-04-27T16:35:51.332000",
+      "updated_at": "2020-04-27T16:35:52.133148", "stp_id": null, "fecha_operacion":
+      "2020-04-24T00:00:00", "institucion_ordenante": "40021", "institucion_beneficiaria":
+      "90646", "clave_rastreo": "HSBC000089", "monto": 100000, "nombre_ordenante":
+      "CARLOS JAIR  AGUILAR PEREZ", "tipo_cuenta_ordenante": 40, "cuenta_ordenante":
+      "021650040600992156", "rfc_curp_ordenante": "AUPC890116DU0", "nombre_beneficiario":
+      "CARLOS JAIR CTA CUENCA", "tipo_cuenta_beneficiario": 40, "cuenta_beneficiario":
+      "646180157026913146", "rfc_curp_beneficiario": "", "concepto_pago": "Andy",
+      "referencia_numerica": 230420, "empresa": "TAMIZI", "estado": "Estado.error",
+      "version": null, "speid_id": "SR1dOSXPfozmqpLbleWPmHcM", "folio_origen": null,
+      "tipo_pago": null, "email_beneficiario": null, "tipo_cuenta_beneficiario2":
+      null, "nombre_beneficiario2": null, "cuenta_beneficiario2": null, "rfc_curpBeneficiario2":
+      null, "concepto_pago2": null, "clave_cat_usuario1": null, "clave_cat_usuario2":
+      null, "clave_pago": null, "referencia_cobranza": null, "tipo_operacion": null,
+      "topologia": null, "usuario": null, "medio_entrega": null, "prioridad": null,
+      "iva": null, "compound_key": "HSBC000089:20200424", "events": ["Event object",
+      "Event object", "Event object"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic QUszNkVBUVhJbHVyZzUzcFJqY3Z0eDMwOkVhLTZKbXBuUlgzWktpNG9HSHBzbXJvR0VFUFUxdmd1MkVxMzYyQjI3S2lKRzJhTEdrdUdoM3BZZkc3MjV5RFNOeFFuMEw5MnpDb0Z2RWRucnIxWWJ3
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1312'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.23.0
+    method: POST
+    uri: https://testapi/set
+  response:
+    body:
+      string: '{"error":"No user found for this CLABE","status":"failed"}
+
+'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '59'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 27 Apr 2020 16:35:52 GMT
+      Server:
+      - nginx
+      X-Cuenca-Version:
+      - '2019-03-10'
+      X-Last-Cuenca-Version-Supported:
+      - '2019-03-10'
+    status:
+      code: 400
+      message: BAD REQUEST
+version: 1
