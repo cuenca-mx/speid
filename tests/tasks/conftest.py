@@ -15,3 +15,13 @@ def default_internal_request():
         rfc_curp_ordenante='ND',
         version=2,
     )
+
+
+@pytest.fixture(scope='module')
+def vcr_config():
+    config = dict()
+    config['filter_headers'] = [
+        ('Authorization', 'DUMMY'),
+        ('access-token', 'DUMMY'),
+    ]
+    return config
