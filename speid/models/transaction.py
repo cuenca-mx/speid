@@ -98,7 +98,7 @@ class Transaction(Document, BaseModel):
             # The Unique-Sparse index skips over any document that is missing
             # the indexed field (null values)
             {'fields': ['+compound_key'], 'unique': True, 'sparse': True},
-        ],
+        ]
     }
 
     def set_state(self, state: Estado):
