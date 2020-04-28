@@ -22,7 +22,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Basic QUszNkVBUVhJbHVyZzUzcFJqY3Z0eDMwOkVhLTZKbXBuUlgzWktpNG9HSHBzbXJvR0VFUFUxdmd1MkVxMzYyQjI3S2lKRzJhTEdrdUdoM3BZZkc3MjV5RFNOeFFuMEw5MnpDb0Z2RWRucnIxWWJ3
+      - DUMMY
       Connection:
       - keep-alive
       Content-Length:
@@ -79,7 +79,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Basic QUszNkVBUVhJbHVyZzUzcFJqY3Z0eDMwOkVhLTZKbXBuUlgzWktpNG9HSHBzbXJvR0VFUFUxdmd1MkVxMzYyQjI3S2lKRzJhTEdrdUdoM3BZZkc3MjV5RFNOeFFuMEw5MnpDb0Z2RWRucnIxWWJ3
+      - DUMMY
       Connection:
       - keep-alive
       Content-Length:
@@ -137,7 +137,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       Authorization:
-      - Basic QUszNkVBUVhJbHVyZzUzcFJqY3Z0eDMwOkVhLTZKbXBuUlgzWktpNG9HSHBzbXJvR0VFUFUxdmd1MkVxMzYyQjI3S2lKRzJhTEdrdUdoM3BZZkc3MjV5RFNOeFFuMEw5MnpDb0Z2RWRucnIxWWJ3
+      - DUMMY
       Connection:
       - keep-alive
       Content-Length:
