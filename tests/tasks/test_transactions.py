@@ -1,8 +1,12 @@
-import pytest
 import datetime as dt
 
+import pytest
+
 from speid.models import Transaction
-from speid.tasks.transactions import execute_create_transactions, process_outgoing_transactions
+from speid.tasks.transactions import (
+    execute_create_transactions,
+    process_outgoing_transactions,
+)
 from speid.types import Estado
 from speid.validations import SpeidTransaction
 
@@ -107,43 +111,30 @@ def test_transaction_not_in_backend_but_in_speid(incoming_transactions):
     assert sent_transaction.estado == Estado.succeeded
 
 
-def test_outgoing_transaction_succeeded(outgoing_transaction, mock_callback_api):
+def test_outgoing_transaction_succeeded(
+    outgoing_transaction, mock_callback_api
+):
     speid_id = outgoing_transaction.speid_id
-    to_process = [
-        dict(
-            speid_id=speid_id,
-            action='succeeded'
-        )
-    ]
+    to_process = [dict(speid_id=speid_id, action='succeeded')]
     process_outgoing_transactions(to_process)
 
-    transaction = Transaction.objects.get(speid_id)
+    transaction = Transaction.objects.get(speid_id=speid_id)
     assert transaction.estado is Estado.succeeded
 
 
 def test_outgoing_transaction_failed(outgoing_transaction, mock_callback_api):
     speid_id = outgoing_transaction.speid_id
-    to_process = [
-        dict(
-            speid_id=speid_id,
-            action='failed'
-        )
-    ]
+    to_process = [dict(speid_id=speid_id, action='failed')]
     process_outgoing_transactions(to_process)
 
-    transaction = Transaction.objects.get(speid_id)
+    transaction = Transaction.objects.get(speid_id=speid_id)
     assert transaction.estado is Estado.failed
 
 
-def test_outgoing_transaction_doesnotexist():
+def test_outgoing_transaction_doesnotexist(outgoing_transaction):
     speid_id = outgoing_transaction.speid_id
-    to_process = [
-        dict(
-            speid_id='RANDOM',
-            action='succeeded'
-        )
-    ]
+    to_process = [dict(speid_id='RANDOM', action='succeeded')]
     process_outgoing_transactions(to_process)
 
-    transaction = Transaction.objects.get(speid_id)
+    transaction = Transaction.objects.get(speid_id=speid_id)
     assert transaction.estado is Estado.created
