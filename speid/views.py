@@ -6,8 +6,8 @@ from sentry_sdk import capture_exception
 from stpmex.exc import StpmexException
 
 from speid import app
+from speid.helpers.transaction_helper import process_incoming_transaction
 from speid.models import Request, Transaction
-from speid.tasks.transactions import process_incoming_transaction
 from speid.types import Estado, HttpRequestMethod
 from speid.utils import get, patch, post
 
