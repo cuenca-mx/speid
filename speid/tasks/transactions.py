@@ -8,15 +8,15 @@ from speid.types import Estado, EventType
 
 
 @celery.task(bind=True, max_retries=5)
-def create_transactions(self, transactions: list):
+def create_incoming_transactions(self, transactions: list):
     try:
-        execute_create_transactions(transactions)
+        execute_create_incoming_transactions(transactions)
     except Exception as e:
         capture_exception(e)
         self.retry(countdown=600, exc=e)
 
 
-def execute_create_transactions(transactions: list):
+def execute_create_incoming_transactions(transactions: list):
     for transaction in transactions:
         try:
             previous_transaction = Transaction.objects.get(

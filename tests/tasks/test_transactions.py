@@ -4,7 +4,7 @@ import pytest
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
-    execute_create_transactions,
+    execute_create_incoming_transactions,
     process_outgoing_transactions,
 )
 from speid.types import Estado
@@ -82,7 +82,7 @@ def outgoing_transaction():
 
 @pytest.mark.vcr
 def test_transaction_not_in_speid(incoming_transactions):
-    execute_create_transactions(incoming_transactions)
+    execute_create_incoming_transactions(incoming_transactions)
 
     saved_transaction = Transaction.objects.get(
         clave_rastreo=incoming_transactions[0]['ClaveRastreo']
@@ -92,7 +92,7 @@ def test_transaction_not_in_speid(incoming_transactions):
 
 @pytest.mark.vcr
 def test_transaction_not_in_backend_but_in_speid(incoming_transactions):
-    execute_create_transactions(incoming_transactions)
+    execute_create_incoming_transactions(incoming_transactions)
 
     saved_transaction = Transaction.objects.get(
         clave_rastreo=incoming_transactions[0]['ClaveRastreo']
@@ -102,7 +102,7 @@ def test_transaction_not_in_backend_but_in_speid(incoming_transactions):
     saved_transaction.estado = Estado.error
     saved_transaction.save()
 
-    execute_create_transactions([incoming_transactions[0]])
+    execute_create_incoming_transactions([incoming_transactions[0]])
 
     sent_transaction = Transaction.objects.get(
         clave_rastreo=saved_transaction.clave_rastreo
