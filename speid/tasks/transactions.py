@@ -1,22 +1,22 @@
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
-from speid.helpers.transaction_helper import process_incoming_transaction
-from speid.models import Transaction
+from speid.helpers import callback_helper, transaction_helper
+from speid.models import Transaction, Event
 from speid.tasks import celery
-from speid.types import Estado
+from speid.types import Estado, EventType
 
 
 @celery.task(bind=True, max_retries=5)
 def create_transactions(self, transactions: list):
     try:
-        execute(transactions)
+        execute_create_transactions(transactions)
     except Exception as e:
         capture_exception(e)
         self.retry(countdown=600, exc=e)
 
 
-def execute(transactions: list):
+def execute_create_transactions(transactions: list):
     for transaction in transactions:
         try:
             previous_transaction = Transaction.objects.get(
@@ -24,9 +24,38 @@ def execute(transactions: list):
                 fecha_operacion=transaction['FechaOperacion'],
             )
             if previous_transaction.estado == Estado.error:
-                # Not in cuenca
+                # Not in backend
                 previous_transaction.confirm_callback_transaction()
                 previous_transaction.save()
         except DoesNotExist:
             # Not in speid
-            process_incoming_transaction(transaction)
+            transaction_helper.process_incoming_transaction(transaction)
+
+
+@celery.task(bind=True)
+def process_outgoing_transactions(self, transactions: list):
+    for request_dic in transactions:
+        try:
+            transaction = Transaction.objects.get(
+                speid_id=request_dic['speid_id']
+            )
+        except DoesNotExist:
+            continue
+
+        action = request_dic['action']
+        if action == Estado.succeeded.name:
+            transaction.estado = Estado.succeeded
+            event_type = EventType.completed
+        elif action == Estado.failed.name:
+            transaction.estado = Estado.failed
+            event_type = EventType.error
+        else:
+            raise ValueError('Invalid event type')
+
+        callback_helper.set_status_transaction(
+            transaction.speid_id, transaction.estado.name
+        )
+        transaction.events.append(
+            Event(type=event_type, metadata=str('Reversed by recon task'))
+        )
+        transaction.save()
