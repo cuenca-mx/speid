@@ -26,7 +26,7 @@ def execute(transactions: list):
         try:
             previous_transaction = Transaction.objects.get(
                 clave_rastreo=transaction['ClaveRastreo'],
-                fecha_operacion=transaction['FechaOperacion']
+                fecha_operacion=transaction['FechaOperacion'],
             )
             if previous_transaction.estado == Estado.error:
                 # Not in cuenca

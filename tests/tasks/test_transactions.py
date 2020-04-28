@@ -20,7 +20,7 @@ def incoming_transactions():
             'RFCCurpOrdenante': 'AUPC890116DU0',
             'NombreBeneficiario': 'CARLOS JAIR CTA CUENCA',
             'TipoCuentaBeneficiario': 40,
-            'CuentaBeneficiario': '646180157026913146',
+            'CuentaBeneficiario': '646180157000000004',
             'RFCCurpBeneficiario': '',
             'ConceptoPago': 'Andy',
             'ReferenciaNumerica': 230420,
@@ -38,7 +38,7 @@ def incoming_transactions():
             'RFCCurpOrdenante': 'FOCO9810191K9',
             'NombreBeneficiario': 'Omar Flores Castro',
             'TipoCuentaBeneficiario': 40,
-            'CuentaBeneficiario': '646180157031498782',
+            'CuentaBeneficiario': '646180157055148681',
             'RFCCurpBeneficiario': 'ND',
             'ConceptoPago': 'omar prro',
             'ReferenciaNumerica': 3053420,
@@ -50,17 +50,32 @@ def incoming_transactions():
 
 
 @pytest.mark.vcr
-def test_transaction_not_in_cuenca(incoming_transactions):
+def test_transaction_not_in_speid(incoming_transactions):
     execute(incoming_transactions)
 
-    previous_transaction = Transaction.objects.get(
+    saved_transaction = Transaction.objects.get(
         clave_rastreo=incoming_transactions[0]['ClaveRastreo']
     )
-    previous_transaction.estado = Estado.error
-    previous_transaction.save()
+    assert saved_transaction.estado == Estado.succeeded
 
-    transactions = [
-        incoming_transactions[0],
-    ]
 
-    execute(transactions)
+@pytest.mark.vcr
+def test_transaction_not_in_backend_but_in_speid(incoming_transactions):
+
+    execute(incoming_transactions)
+
+    saved_transaction = Transaction.objects.get(
+        clave_rastreo=incoming_transactions[0]['ClaveRastreo']
+    )
+
+    assert saved_transaction.estado == Estado.succeeded
+    saved_transaction.estado = Estado.error
+    saved_transaction.save()
+
+    execute([incoming_transactions[0]])
+
+    sent_transaction = Transaction.objects.get(
+        clave_rastreo=saved_transaction.clave_rastreo
+    )
+
+    assert sent_transaction.estado == Estado.succeeded
