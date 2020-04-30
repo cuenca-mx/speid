@@ -100,7 +100,7 @@ def test_create_account_existing_succeeded_account():
 @patch('speid.tasks.accounts.capture_exception')
 @patch('speid.tasks.accounts.create_account.retry')
 def test_does_not_retry_when_validation_error_raised(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock,
+    mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
         nombre='Ricardo',
@@ -118,7 +118,7 @@ def test_does_not_retry_when_validation_error_raised(
 @patch('speid.tasks.accounts.capture_exception')
 @patch('speid.tasks.accounts.create_account.retry')
 def test_does_not_retry_when_invalid_rfc_raised(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock,
+    mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
         nombre='24',

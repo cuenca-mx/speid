@@ -32,7 +32,7 @@ clean-pyc:
 		find . -name '*~' -delete
 
 test: clean-pyc lint
-		pytest -vv
+		pytest --cov-report term-missing tests/ --cov=speid
 		coveralls
 
 travis-test:
