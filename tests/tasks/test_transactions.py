@@ -7,7 +7,7 @@ from speid.tasks.transactions import (
     execute_create_incoming_transactions,
     process_outgoing_transactions,
 )
-from speid.types import Estado
+from speid.types import Estado, EventType
 from speid.validations import SpeidTransaction
 
 
@@ -129,6 +129,30 @@ def test_outgoing_transaction_failed(outgoing_transaction, mock_callback_api):
 
     transaction = Transaction.objects.get(speid_id=speid_id)
     assert transaction.estado is Estado.failed
+    assert (
+        len(
+            [
+                event
+                for event in transaction.events
+                if event.type is EventType.error
+            ]
+        )
+        == 1
+    )
+
+    process_outgoing_transactions(to_process)
+    transaction = Transaction.objects.get(speid_id=speid_id)
+    assert transaction.estado is Estado.failed
+    assert (
+        len(
+            [
+                event
+                for event in transaction.events
+                if event.type is EventType.error
+            ]
+        )
+        == 1
+    )
 
 
 def test_outgoing_transaction_doesnotexist(outgoing_transaction):

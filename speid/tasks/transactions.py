@@ -44,13 +44,18 @@ def process_outgoing_transactions(self, transactions: list):
 
         action = request_dic['action']
         if action == Estado.succeeded.name:
-            transaction.estado = Estado.succeeded
+            new_estado = Estado.succeeded
             event_type = EventType.completed
         elif action == Estado.failed.name:
-            transaction.estado = Estado.failed
+            new_estado = Estado.failed
             event_type = EventType.error
         else:
             raise ValueError('Invalid event type')
+
+        if transaction.estado == new_estado:
+            continue
+        else:
+            transaction.estado = new_estado
 
         callback_helper.set_status_transaction(
             transaction.speid_id, transaction.estado.name
