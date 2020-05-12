@@ -1,8 +1,8 @@
 from datetime import datetime
 
 import click
-import pandas
 
+import pandas
 from speid import app
 from speid.helpers import callback_helper
 from speid.models import Event, Request, Transaction

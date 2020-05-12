@@ -3,12 +3,12 @@ from datetime import datetime
 import pytest
 from mongoengine import NotUniqueError
 from pydantic import ValidationError
-from stpmex.types import TipoCuenta
 
 from speid.exc import MalformedOrderException
 from speid.models import Event, Transaction
 from speid.types import Estado, EventType
 from speid.validations import SpeidTransaction, StpTransaction
+from stpmex.types import TipoCuenta
 
 
 def test_transaction():

@@ -36,4 +36,4 @@ class Estado(Enum, EnumField):
             cls.succeeded: 'LIQUIDACION',
             cls.failed: 'DEVOLUCION',
         }
-        return status_to_stp.get(status, 'DEVOLUCION')
+        return status_to_stp.get(status, 'DEVOLUCION')  # type: ignore
