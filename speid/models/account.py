@@ -29,7 +29,7 @@ from .helpers import (
 class Account(Document, BaseModel):
     created_at = date_now()
     updated_at = DateTimeField()
-    estado = EnumField(Estado, default=Estado.created)
+    estado = EnumField(Estado, default=Estado.created)  # type: ignore
 
     nombre = StringField()
     apellido_paterno = StringField()
@@ -55,7 +55,7 @@ class Account(Document, BaseModel):
     events = ListField(ReferenceField(Event))
 
     def create_account(self) -> CuentaFisica:
-        self.estado = Estado.submitted
+        self.estado = Estado.submitted  # type: ignore
         self.save()
 
         optionals = dict(
@@ -89,11 +89,11 @@ class Account(Document, BaseModel):
             )
         except Exception as e:
             self.events.append(Event(type=EventType.error, metadata=str(e)))
-            self.estado = Estado.error
+            self.estado = Estado.error  # type: ignore
             self.save()
             raise e
         else:
-            self.estado = Estado.succeeded
+            self.estado = Estado.succeeded  # type: ignore
             self.save()
             return cuenta
 
@@ -134,5 +134,5 @@ class Account(Document, BaseModel):
         self.pais = account.pais
         self.email = account.email
         self.id_identificacion = account.id_identificacion
-        self.estado = Estado.succeeded
+        self.estado = Estado.succeeded  # type: ignore
         self.save()

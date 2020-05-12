@@ -1,6 +1,9 @@
 ipython
 ipdb
 pytest
+black
+isort[pipfile]
+mypy
 pytest-cov
 flask-shell-ipython
 werkzeug
@@ -10,6 +13,6 @@ moto
 pytest-mock
 black
 isort[requirements]
-flake8<3.8.0
+flake8
 mongomock
 coverage<5.0,>=3.6

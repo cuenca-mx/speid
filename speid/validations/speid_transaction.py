@@ -18,27 +18,27 @@ class SpeidTransaction:
     rfc_curp_ordenante: StrictStr
     speid_id: StrictStr
     version: str
-    empresa: str = None
-    folio_origen: str = None
-    clave_rastreo: str = None
+    empresa: str = ''
+    folio_origen: str = ''
+    clave_rastreo: str = ''
     tipo_pago: int = 1
-    tipo_cuenta_ordenante: str = None
+    tipo_cuenta_ordenante: str = ''
     tipo_cuenta_beneficiario: int = 40
     rfc_curp_beneficiario: str = "ND"
-    email_beneficiario: str = None
-    tipo_cuenta_beneficiario2: str = None
-    nombre_beneficiario2: str = None
-    cuenta_beneficiario2: str = None
-    rfc_curpBeneficiario2: str = None
-    concepto_pago2: str = None
-    clave_cat_usuario1: str = None
-    clave_cat_usuario2: str = None
-    clave_pago: str = None
-    referencia_cobranza: str = None
-    referencia_numerica: int = None
-    tipo_operacion: str = None
+    email_beneficiario: str = ''
+    tipo_cuenta_beneficiario2: str = ''
+    nombre_beneficiario2: str = ''
+    cuenta_beneficiario2: str = ''
+    rfc_curpBeneficiario2: str = ''
+    concepto_pago2: str = ''
+    clave_cat_usuario1: str = ''
+    clave_cat_usuario2: str = ''
+    clave_pago: str = ''
+    referencia_cobranza: str = ''
+    referencia_numerica: int = 0
+    tipo_operacion: str = ''
     topologia: str = "T"
-    usuario: str = None
+    usuario: str = ''
     medio_entrega: int = 3
     prioridad: int = 1
 

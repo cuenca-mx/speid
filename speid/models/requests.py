@@ -7,7 +7,7 @@ from .helpers import EnumField, date_now
 
 class Request(Document):
     created_at = date_now()
-    method = EnumField(HttpRequestMethod)
+    method = EnumField(HttpRequestMethod)  # type: ignore
     path = StringField()
     query_string = StringField()
     ip_address = StringField()

@@ -1,8 +1,9 @@
+# mypy: ignore-errors
 import re
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Union
+from typing import Callable, Union
 
 from blinker.base import NamedSignal
 from mongoengine import (
@@ -64,7 +65,7 @@ def handler(event: NamedSignal):
     decorators
     """
 
-    def decorator(fn: ()):
+    def decorator(fn: Callable):
         def apply(cls):
             event.connect(fn, sender=cls)
             return cls

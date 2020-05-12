@@ -9,5 +9,5 @@ from .helpers import EnumField, date_now
 
 class Event(Document):
     created_at: datetime.datetime = date_now()
-    type = EnumField(EventType)
+    type = EnumField(EventType)  # type: ignore
     metadata = StringField()
