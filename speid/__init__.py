@@ -8,11 +8,10 @@ from enum import Enum
 import boto3
 import sentry_sdk
 from flask import Flask
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk.integrations.flask import FlaskIntegration
-
 from flask_mongoengine import MongoEngine
 from python_hosts import Hosts, HostsEntry
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 
 class CJSONEncoder(json.JSONEncoder):

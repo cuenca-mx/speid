@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import Account
 from speid.tasks.accounts import (
@@ -9,7 +10,6 @@ from speid.tasks.accounts import (
     update_account,
 )
 from speid.types import Estado
-from stpmex.exc import InvalidRfcOrCurp
 
 
 @pytest.mark.vcr

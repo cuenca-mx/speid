@@ -1,8 +1,8 @@
 from pydantic import StrictStr
 from pydantic.dataclasses import dataclass
+from stpmex.types import TipoCuenta
 
 from speid.models import Transaction
-from stpmex.types import TipoCuenta
 
 
 @dataclass

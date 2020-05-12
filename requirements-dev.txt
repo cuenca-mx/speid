@@ -2,7 +2,7 @@ ipython
 ipdb
 pytest
 black
-isort[pipfile]
+isort>=4.3.21,<4.4
 mypy
 pytest-cov
 flask-shell-ipython
