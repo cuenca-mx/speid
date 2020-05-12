@@ -23,7 +23,7 @@ format:
 		$(black)
 
 lint:
-		flake8 $(PROJECT) tests setup.py
+		flake8 $(PROJECT) tests
 		$(isort) --check-only
 		$(black) --check
 		mypy $(PROJECT) tests
