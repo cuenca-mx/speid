@@ -1,7 +1,5 @@
 from enum import Enum
 
-from speid.models.helpers import EnumField
-
 
 class HttpRequestMethod(Enum):
     get = 'GET'
@@ -16,7 +14,7 @@ class EventType(Enum):
     received = 'RECEIVED'  # When we get the response from a transaction
 
 
-class Estado(Enum, EnumField):
+class Estado(Enum):
     created = 'created'
     submitted = 'submitted'  # Sent to STP
     succeeded = 'succeeded'  # LIQUIDACION from STP
