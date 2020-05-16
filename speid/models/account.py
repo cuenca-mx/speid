@@ -38,7 +38,7 @@ class Account(Document, BaseModel):
     rfc_curp = StringField()
     telefono = StringField()
 
-    genero = EnumField(Genero, required=False)
+    genero = EnumField(Genero, required=False)  # type: ignore
     fecha_nacimiento = DateTimeField(required=False)
     entidad_federativa = IntField(required=False)
     actividad_economica = IntField(required=False)
