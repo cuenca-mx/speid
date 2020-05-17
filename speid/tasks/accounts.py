@@ -39,7 +39,7 @@ def execute_create_account(account_dict: dict):
     account.create_account()
 
 
-@celery.task(bind=True, max_retries=None)
+@celery.task(bind=True, max_retries=0)
 def update_account(self, account_dict: dict) -> None:
     try:
         validation_model = AccountValidation(**account_dict)
