@@ -118,24 +118,6 @@ class Account(Document, BaseModel):
         # remove if value is None
         optionals = {key: val for key, val in optionals.items() if val}
 
-        if self.rfc_curp != account.rfc_curp:
-            try:
-                stpmex_client.cuentas.update(
-                    old_rfc_curp=self.rfc_curp,
-                    nombre=account.nombre,
-                    apellidoPaterno=account.apellido_paterno,
-                    cuenta=account.cuenta,
-                    rfcCurp=account.rfc_curp,
-                    telefono=account.telefono,
-                    **optionals,
-                )
-            except Exception as exc:
-                self.events.append(
-                    Event(type=EventType.error, metadata=str(exc))
-                )
-                self.estado = Estado.error
-                self.save()
-                raise exc
         self.rfc_curp = account.rfc_curp
         self.nombre = account.nombre
         self.apellido_paterno = account.apellido_paterno
