@@ -233,6 +233,7 @@ def test_update_account_does_not_exists_then_create_account(
     mock_retry.assert_not_called()
 
 
+@pytest.mark.skip('se deshabilita temporalmente el request a stp')
 @pytest.mark.vcr
 @patch('speid.tasks.accounts.capture_exception')
 @patch('speid.tasks.accounts.update_account.retry')
