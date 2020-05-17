@@ -36,7 +36,7 @@ test: clean-pyc lint
 		coveralls
 
 travis-test:
-		pip install -q isort black flake8
+		$(MAKE) install-dev
 		$(MAKE) lint
 		$(MAKE) docker-build
 		$(DOCKER) scripts/test.sh
