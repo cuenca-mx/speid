@@ -60,6 +60,8 @@ def execute(order_val: dict):
     try:
         prev_trx = Transaction.objects.get(speid_id=transaction.speid_id)
         # Si la transacción ya esta como succeeded termina
+        # Puede suceder cuando se corre la misma tarea tiempo después
+        # Y la transacción ya fue confirmada por stp
         assert prev_trx.estado != Estado.succeeded
         transaction = prev_trx
         transaction.events.append(Event(type=EventType.retry))
@@ -68,6 +70,7 @@ def execute(order_val: dict):
         transaction.save()
         pass
     except AssertionError:
+        # Para evitar que se vuelva a mandar o regresar se manda la excepción
         raise ResendSuccessOrderException()
 
     if transaction.monto > MAX_AMOUNT:
