@@ -4,3 +4,7 @@ class OrderNotFoundException(ReferenceError):
 
 class MalformedOrderException(ValueError):
     pass
+
+
+class ResendSuccessOrderException(ValueError):
+    pass

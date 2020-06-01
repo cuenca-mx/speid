@@ -7,7 +7,7 @@ from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 from stpmex.exc import InvalidAccountType
 
-from speid.exc import MalformedOrderException
+from speid.exc import MalformedOrderException, ResendSuccessOrderException
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
@@ -59,12 +59,16 @@ def execute(order_val: dict):
 
     try:
         prev_trx = Transaction.objects.get(speid_id=transaction.speid_id)
+        # Si la transacción ya esta como succeeded termina
+        assert prev_trx.estado != Estado.succeeded
         transaction = prev_trx
         transaction.events.append(Event(type=EventType.retry))
     except DoesNotExist:
         transaction.events.append(Event(type=EventType.created))
         transaction.save()
         pass
+    except AssertionError:
+        raise ResendSuccessOrderException()
 
     if transaction.monto > MAX_AMOUNT:
         transaction.events.append(Event(type=EventType.error))

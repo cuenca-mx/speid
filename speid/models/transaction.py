@@ -95,6 +95,7 @@ class Transaction(Document, BaseModel):
     meta = {
         'indexes': [
             '+stp_id',
+            '+speid_id',
             # The Unique-Sparse index skips over any document that is missing
             # the indexed field (null values)
             {'fields': ['+compound_key'], 'unique': True, 'sparse': True},
