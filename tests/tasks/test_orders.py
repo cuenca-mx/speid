@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from speid.exc import MalformedOrderException
+from speid.exc import MalformedOrderException, ResendSuccessOrderException
 from speid.models import Transaction
 from speid.tasks.orders import execute, send_order
 from speid.types import Estado, EventType
@@ -125,4 +125,31 @@ def test_ignore_invalid_account_type(
     mock_retry.assert_not_called()
     mock_capture_exception.assert_not_called()
     transaction = Transaction.objects.order_by('-created_at').first()
+    transaction.delete()
+
+
+@pytest.mark.vcr
+@pytest.mark.usefixtures('create_account')
+def test_resend_success_order():
+    order = dict(
+        concepto_pago='PRUEBA Version 2',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='40072',
+        monto=1020,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='stp_id_again',
+        version=2,
+    )
+    execute(order)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+    transaction.estado = Estado.succeeded
+    transaction.save()
+    # Ejecuta nuevamente la misma orden
+    with pytest.raises(ResendSuccessOrderException):
+        execute(order)
     transaction.delete()

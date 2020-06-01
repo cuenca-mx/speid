@@ -7,7 +7,7 @@ from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 from stpmex.exc import InvalidAccountType
 
-from speid.exc import MalformedOrderException
+from speid.exc import MalformedOrderException, ResendSuccessOrderException
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
@@ -30,7 +30,7 @@ def retry_timeout(attempts: int) -> int:
 def send_order(self, order_val: dict):
     try:
         execute(order_val)
-    except MalformedOrderException as exc:
+    except (MalformedOrderException, ResendSuccessOrderException) as exc:
         capture_exception(exc)
     except Exception as exc:
         capture_exception(exc)
@@ -59,12 +59,19 @@ def execute(order_val: dict):
 
     try:
         prev_trx = Transaction.objects.get(speid_id=transaction.speid_id)
+        # Si la transacción ya esta como succeeded termina
+        # Puede suceder cuando se corre la misma tarea tiempo después
+        # Y la transacción ya fue confirmada por stp
+        assert prev_trx.estado != Estado.succeeded
         transaction = prev_trx
         transaction.events.append(Event(type=EventType.retry))
     except DoesNotExist:
         transaction.events.append(Event(type=EventType.created))
         transaction.save()
         pass
+    except AssertionError:
+        # Para evitar que se vuelva a mandar o regresar se manda la excepción
+        raise ResendSuccessOrderException()
 
     if transaction.monto > MAX_AMOUNT:
         transaction.events.append(Event(type=EventType.error))
