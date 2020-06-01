@@ -30,7 +30,7 @@ def retry_timeout(attempts: int) -> int:
 def send_order(self, order_val: dict):
     try:
         execute(order_val)
-    except MalformedOrderException as exc:
+    except (MalformedOrderException, ResendSuccessOrderException) as exc:
         capture_exception(exc)
     except Exception as exc:
         capture_exception(exc)
