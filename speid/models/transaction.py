@@ -96,6 +96,7 @@ class Transaction(Document, BaseModel):
         'indexes': [
             '+stp_id',
             '+speid_id',
+            '+clave_rastreo',
             # The Unique-Sparse index skips over any document that is missing
             # the indexed field (null values)
             {'fields': ['+compound_key'], 'unique': True, 'sparse': True},
