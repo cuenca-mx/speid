@@ -55,7 +55,7 @@ class Account(Document, BaseModel):
     events = ListField(ReferenceField(Event))
 
     def create_account(self) -> CuentaFisica:
-        self.estado = Estado.submitted  # type: ignore
+        self.estado = Estado.submitted
         self.save()
 
         optionals = dict(
@@ -89,11 +89,11 @@ class Account(Document, BaseModel):
             )
         except Exception as e:
             self.events.append(Event(type=EventType.error, metadata=str(e)))
-            self.estado = Estado.error  # type: ignore
+            self.estado = Estado.error
             self.save()
             raise e
         else:
-            self.estado = Estado.succeeded  # type: ignore
+            self.estado = Estado.succeeded
             self.save()
             return cuenta
 
@@ -134,5 +134,5 @@ class Account(Document, BaseModel):
         self.pais = account.pais
         self.email = account.email
         self.id_identificacion = account.id_identificacion
-        self.estado = Estado.succeeded  # type: ignore
+        self.estado = Estado.succeeded
         self.save()

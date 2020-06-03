@@ -24,6 +24,18 @@ def mock_callback_api(monkeypatch):
     monkeypatch.setattr(requests, 'post', substitute_patch_status)
 
 
+def substitute_patch_status_fail(*_, **__):
+    return Response(status_code=403, text='{"status": "failed"}')
+
+
+@pytest.fixture
+def mock_callback_api_fail(monkeypatch):
+    import requests
+
+    monkeypatch.setattr(requests, 'patch', substitute_patch_status_fail)
+    monkeypatch.setattr(requests, 'post', substitute_patch_status_fail)
+
+
 @pytest.fixture(scope='module')
 def vcr_config():
     config = dict()

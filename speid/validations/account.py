@@ -49,5 +49,5 @@ class Account:
 
     def transform(self) -> Model:
         account = Model(**self.to_dict())
-        account.estado = Estado.created  # type: ignore
+        account.estado = Estado.created
         return account

@@ -43,10 +43,10 @@ def process_outgoing_transactions(self, transactions: list):
             continue
 
         action = request_dic['action']
-        if action == Estado.succeeded.name:
+        if action == Estado.succeeded.value:
             new_estado = Estado.succeeded
             event_type = EventType.completed
-        elif action == Estado.failed.name:
+        elif action == Estado.failed.value:
             new_estado = Estado.failed
             event_type = EventType.error
         else:

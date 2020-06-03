@@ -265,6 +265,9 @@ def test_send_order(create_account):
     assert len(order.nombreBeneficiario) == 39
     assert len(order.nombreOrdenante) == 39
 
+    order = transaction.create_order()
+    assert transaction.stp_id == order.id
+
     transaction.delete()
 
 

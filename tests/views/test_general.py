@@ -253,6 +253,36 @@ def test_get_transactions(
     trx_out.delete()
 
 
+def test_get_transactions_with_status(
+    client,
+    default_income_transaction,
+    default_outcome_transaction,
+    mock_callback_api,
+):
+    resp = client.post('/ordenes', json=default_income_transaction)
+    assert resp.status_code == 201
+
+    trx_out = Transaction(**default_outcome_transaction)
+    trx_out.stp_id = DEFAULT_ORDEN_ID
+    trx_out.save()
+
+    resp = client.get(
+        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
+    )
+    assert resp.status_code == 200
+    assert str(trx_out.id) == resp.json[0]['_id']['$oid']
+
+    resp = client.get(
+        '/transactions?' 'estado=submitted&prefix_beneficiario=6461801570'
+    )
+    assert resp.status_code == 200
+
+    resp = client.get('/transactions')
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
+    trx_out.delete()
+
+
 @pytest.mark.vcr
 def test_process_transaction(
     client, default_outcome_transaction, create_account
@@ -270,6 +300,9 @@ def test_process_transaction(
     resp = client.patch(f'/transactions/{resp.json[0]["_id"]["$oid"]}/process')
     assert resp.status_code == 201
     trx = Transaction.objects.get(id=resp.json["_id"]["$oid"])
+
+    resp = client.patch('/transactions/1234ff550ade83aadce648cb/process')
+    assert resp.status_code == 401
 
     assert trx.estado is Estado.submitted
     assert trx.stp_id is not None
@@ -293,6 +326,9 @@ def test_reverse_transaction(
     resp = client.patch(f'/transactions/{resp.json[0]["_id"]["$oid"]}/reverse')
     assert resp.status_code == 201
     trx = Transaction.objects.get(id=resp.json["_id"]["$oid"])
+
+    resp = client.patch('/transactions/1234ff550ade83aadce648cb/reverse')
+    assert resp.status_code == 401
 
     assert trx.estado is Estado.failed
     trx.delete()

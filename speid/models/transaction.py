@@ -106,7 +106,7 @@ class Transaction(Document, BaseModel):
 
     def set_state(self, state: Estado):
         callback_helper.set_status_transaction(self.speid_id, state.value)
-        self.estado = state  # type: ignore
+        self.estado = state
 
         self.events.append(Event(type=EventType.completed))
 
@@ -128,7 +128,7 @@ class Transaction(Document, BaseModel):
                 account = Account.objects.get(cuenta=self.cuenta_ordenante)
                 assert account.estado is Estado.succeeded
             except (DoesNotExist, AssertionError):
-                self.estado = Estado.error  # type: ignore
+                self.estado = Estado.error
                 self.save()
                 raise MalformedOrderException(
                     f'Account has not been registered: {self.cuenta_ordenante}'
@@ -180,7 +180,7 @@ class Transaction(Document, BaseModel):
             )
         except (Exception) as e:  # Anything can happen here
             self.events.append(Event(type=EventType.error, metadata=str(e)))
-            self.estado = Estado.error  # type: ignore
+            self.estado = Estado.error
             self.save()
             raise e
         else:
@@ -197,6 +197,6 @@ class Transaction(Document, BaseModel):
             self.events.append(
                 Event(type=EventType.completed, metadata=str(order))
             )
-            self.estado = Estado.submitted  # type: ignore
+            self.estado = Estado.submitted
             self.save()
             return order
