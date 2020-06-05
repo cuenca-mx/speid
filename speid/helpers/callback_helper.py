@@ -3,13 +3,24 @@ import json
 import os
 
 import requests
+from celery import Celery
+from celery.result import AsyncResult
 from requests.auth import HTTPBasicAuth
 from requests.models import Response
 from sentry_sdk import capture_message
 
+from speid.types import Estado
+
 CALLBACK_URL = os.environ['CALLBACK_URL']
 CALLBACK_API_KEY = os.environ['CALLBACK_API_KEY']
 CALLBACK_API_SECRET = os.environ['CALLBACK_API_SECRET']
+# Se establece getenv por si están usando el sistema de
+# callback por api no requieran configurar esto
+SEND_TRANSACTION_TASK = os.getenv('SEND_TRANSACTION_TASK', '')
+SEND_STATUS_TRANSACTION_TASK = os.getenv('SEND_STATUS_TRANSACTION_TASK', '')
+
+queue = Celery('back_end_client')
+queue.config_from_object('speid.helpers.celery_transaction_config')
 
 
 def auth_header(username: str, password: str) -> dict:
@@ -26,6 +37,21 @@ def send_transaction(transaction: dict) -> dict:
         auth=HTTPBasicAuth(CALLBACK_API_KEY, CALLBACK_API_SECRET),
     )
     return json.loads(response.text)
+
+
+def send_queue_transaction(transaction: dict) -> AsyncResult:
+    resp = queue.send_task(
+        SEND_TRANSACTION_TASK, kwargs=dict(transaction=transaction)
+    )
+    return resp
+
+
+def send_queue_state(speid_id: str, state: Estado) -> AsyncResult:
+    resp = queue.send_task(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(speid_id=speid_id, state=state.value),
+    )
+    return resp
 
 
 def set_status_transaction(request_id: int, status: str) -> Response:

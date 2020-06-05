@@ -11,7 +11,7 @@ from speid.validations import StpTransaction
 CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
 
 
-def process_incoming_transaction(incoming_transaction):
+def process_incoming_transaction(incoming_transaction) -> dict:
     transaction = Transaction()
     try:
         external_transaction = StpTransaction(**incoming_transaction)
@@ -39,4 +39,4 @@ def process_incoming_transaction(incoming_transaction):
         transaction.events.append(Event(type=EventType.error, metadata=str(e)))
         transaction.save()
         capture_exception(e)
-    return 201, r
+    return r

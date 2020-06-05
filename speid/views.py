@@ -39,7 +39,8 @@ def create_orden_events():
 
 @post('/ordenes')
 def create_orden():
-    return process_incoming_transaction(request.json)
+    response = process_incoming_transaction(request.json)
+    return 201, response
 
 
 @get('/transactions')
