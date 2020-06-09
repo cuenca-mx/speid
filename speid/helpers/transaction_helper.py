@@ -18,8 +18,13 @@ def process_incoming_transaction(incoming_transaction):
         transaction = external_transaction.transform()
         if CLABES_BLOCKED:
             clabes = CLABES_BLOCKED.split(',')
-            if transaction.cuenta_beneficiario in clabes:
+            if transaction.cuenta_beneficiario in clabes or (
+                transaction.cuenta_ordenante in clabes
+            ):
                 capture_message('Transacción retenida')
+                raise Exception
+            if transaction.cuenta_ordenante in clabes:
+                capture_message('Transacción retenida por cuenta ordenante')
                 raise Exception
         transaction.confirm_callback_transaction()
         transaction.save()
