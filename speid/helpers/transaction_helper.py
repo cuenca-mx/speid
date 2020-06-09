@@ -23,7 +23,7 @@ def process_incoming_transaction(incoming_transaction):
                 capture_message('Transacción retenida')
                 raise Exception
         if INCOMING_CLABES_BLOCKED:
-            clabes = CLABES_BLOCKED.split(',')
+            clabes = INCOMING_CLABES_BLOCKED.split(',')
             if transaction.cuenta_ordenante in clabes:
                 capture_message('Transacción retenida por cuenta ordenante')
                 raise Exception
