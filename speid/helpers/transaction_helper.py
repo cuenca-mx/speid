@@ -9,7 +9,6 @@ from speid.types import Estado, EventType
 from speid.validations import StpTransaction
 
 CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
-INCOMING_CLABES_BLOCKED = os.getenv('INCOMING_CLABES_BLOCKED', '')
 
 
 def process_incoming_transaction(incoming_transaction):
@@ -19,11 +18,11 @@ def process_incoming_transaction(incoming_transaction):
         transaction = external_transaction.transform()
         if CLABES_BLOCKED:
             clabes = CLABES_BLOCKED.split(',')
-            if transaction.cuenta_beneficiario in clabes:
+            if transaction.cuenta_beneficiario in clabes or (
+                transaction.cuenta_ordenante in clabes
+            ):
                 capture_message('Transacción retenida')
                 raise Exception
-        if INCOMING_CLABES_BLOCKED:
-            clabes = INCOMING_CLABES_BLOCKED.split(',')
             if transaction.cuenta_ordenante in clabes:
                 capture_message('Transacción retenida por cuenta ordenante')
                 raise Exception
