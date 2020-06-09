@@ -182,7 +182,7 @@ def test_create_orden_blocked(
     transaction.delete()
 
 
-def test_create_orden_blocked(
+def test_create_incoming_orden_blocked(
     client, default_blocked_incoming_transaction, mock_callback_api
 ):
     resp = client.post(
