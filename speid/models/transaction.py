@@ -1,4 +1,3 @@
-# mypy: ignore-errors
 import os
 from datetime import datetime
 
@@ -137,7 +136,7 @@ class Transaction(Document, BaseModel):
 
         # Don't send if stp_id already exists
         if self.stp_id:
-            return Orden(
+            return Orden(  # type: ignore
                 id=self.stp_id,
                 monto=self.monto / 100.0,
                 conceptoPago=self.concepto_pago,
