@@ -11,7 +11,6 @@ from sentry_sdk import capture_message
 
 from speid.types import Estado
 
-
 BROKER = os.environ['AMPQ_ADDRESS']
 CALLBACK_URL = os.environ['CALLBACK_URL']
 CALLBACK_API_KEY = os.environ['CALLBACK_API_KEY']
