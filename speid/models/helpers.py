@@ -2,7 +2,7 @@ import re
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Union
+from typing import Any, Callable, List, Union
 
 from blinker.base import NamedSignal
 from mongoengine import (
@@ -64,12 +64,12 @@ def handler(event: NamedSignal):
     decorators
     """
 
-    def decorator(fn: ()):
+    def decorator(fn: Callable):
         def apply(cls):
             event.connect(fn, sender=cls)
             return cls
 
-        fn.apply = apply
+        fn.apply = apply  # type: ignore
         return fn
 
     return decorator
@@ -107,14 +107,16 @@ class EnumField(BaseField):
 
     def __init__(self, enum: Enum, *args, **kwargs):
         self.enum = enum
-        kwargs['choices'] = [choice for choice in enum]
+        kwargs['choices'] = [choice for choice in enum]  # type: ignore
         super(EnumField, self).__init__(*args, **kwargs)
 
     def __get_value(self, enum: Enum) -> str:
         return enum.value if hasattr(enum, 'value') else enum
 
     def to_python(self, value: Enum) -> Enum:
-        return self.enum(super(EnumField, self).to_python(value))
+        return self.enum(  # type: ignore
+            super(EnumField, self).to_python(value)
+        )
 
     def to_mongo(self, value: Enum) -> str:
         return self.__get_value(value)
@@ -129,11 +131,11 @@ class EnumField(BaseField):
 
     def _validate(self, value: Enum, **kwargs) -> Enum:
         return super(EnumField, self)._validate(
-            self.enum(self.__get_value(value)), **kwargs
+            self.enum(self.__get_value(value)), **kwargs  # type: ignore
         )
 
 
-def mongo_to_dict(obj, exclude_fields: list = None) -> Union[dict, None]:
+def mongo_to_dict(obj, exclude_fields: list = []) -> Union[dict, None]:
     """
     from: https://gist.github.com/jason-w/4969476
     """
@@ -156,9 +158,9 @@ def mongo_to_dict(obj, exclude_fields: list = None) -> Union[dict, None]:
         data = obj._data[field_name]
 
         if isinstance(obj._fields[field_name], ListField):
-            return_data[field_name] = list_field_to_dict(data)
+            return_data[field_name] = list_field_to_dict(data)  # type: ignore
         elif isinstance(obj._fields[field_name], EmbeddedDocumentField):
-            return_data[field_name] = mongo_to_dict(data, [])
+            return_data[field_name] = mongo_to_dict(data, [])  # type: ignore
         elif isinstance(obj._fields[field_name], DictField):
             return_data[field_name] = data
         else:
@@ -169,7 +171,7 @@ def mongo_to_dict(obj, exclude_fields: list = None) -> Union[dict, None]:
     return return_data
 
 
-def list_field_to_dict(list_field: list) -> list:
+def list_field_to_dict(list_field: List[Any]) -> list:
     return_data = []
 
     for item in list_field:

@@ -68,7 +68,7 @@ class Transaction(Document, BaseModel):
     concepto_pago = StringField()
     referencia_numerica = IntField()
     empresa = StringField()
-    estado = EnumField(Estado, default=Estado.created)
+    estado = EnumField(Estado, default=Estado.created)  # type: ignore
     version = IntField()
     speid_id = StringField()
     folio_origen = StringField()
@@ -136,7 +136,7 @@ class Transaction(Document, BaseModel):
 
         # Don't send if stp_id already exists
         if self.stp_id:
-            return Orden(
+            return Orden(  # type: ignore
                 id=self.stp_id,
                 monto=self.monto / 100.0,
                 conceptoPago=self.concepto_pago,

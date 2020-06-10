@@ -29,7 +29,7 @@ from .helpers import (
 class Account(Document, BaseModel):
     created_at = date_now()
     updated_at = DateTimeField()
-    estado = EnumField(Estado, default=Estado.created)
+    estado = EnumField(Estado, default=Estado.created)  # type: ignore
 
     nombre = StringField()
     apellido_paterno = StringField()
@@ -38,7 +38,7 @@ class Account(Document, BaseModel):
     rfc_curp = StringField()
     telefono = StringField()
 
-    genero = EnumField(Genero, required=False)
+    genero = EnumField(Genero, required=False)  # type: ignore
     fecha_nacimiento = DateTimeField(required=False)
     entidad_federativa = IntField(required=False)
     actividad_economica = IntField(required=False)

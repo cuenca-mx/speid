@@ -2,10 +2,10 @@ SHELL := bash
 PROJECT = speid
 PYTHON = python3.7
 DOCKER = docker-compose run --rm $(PROJECT)
-ISORT = isort -rc -ac $(PROJECT) tests
-BLACK = black -S -l 79 --target-version py37 $(PROJECT) tests
+isort = isort -rc -ac $(PROJECT) tests
+black = black -S -l 79 --target-version py37 $(PROJECT) tests
 
-
+default: install
 
 install:
 		pip install -q -r requirements.txt
@@ -14,17 +14,19 @@ install-dev: install
 		pip install -q -r requirements-dev.txt
 
 venv:
-		$(PYTHON) -m venv --prompt speid venv
-		venv/bin/pip install -qU pip
+		$(PYTHON) -m venv --prompt $(PROJECT) venv
+		source venv/bin/activate; \
+		pip install -qU pip;
 
 format:
-		$(ISORT)
-		$(BLACK)
+		$(isort)
+		$(black)
 
 lint:
-		flake8 $(PROJECT) tests setup.py
-		$(ISORT) --check-only
-		$(BLACK) --check
+		flake8 $(PROJECT) tests
+		$(isort) --check-only
+		$(black) --check
+		mypy $(PROJECT)
 
 clean-pyc:
 		find . -name '__pycache__' -exec rm -r "{}" +

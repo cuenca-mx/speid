@@ -23,7 +23,7 @@ def make_celery(app: Flask) -> Celery:
         'speid.tasks.transactions.*': {'queue': 'recon.stp.transaction'},
     }
 
-    class ContextTask(celery_app.Task):
+    class ContextTask(celery_app.Task):  # type: ignore
         def __call__(self, *args, **kwargs):
             with app.app_context():
                 return self.run(*args, **kwargs)

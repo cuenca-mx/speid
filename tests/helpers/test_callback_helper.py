@@ -45,3 +45,9 @@ def test_set_status_transaction(mock_callback_api):
     res = set_status_transaction(123, 'success')
     assert res.status_code == 201
     assert json.loads(res.text)['status'] == 'succeeded'
+
+
+def test_set_status_transaction_fail(mock_callback_api_fail):
+    res = set_status_transaction(000, 'fail')
+    assert res.status_code == 403
+    assert json.loads(res.text)['status'] == 'failed'

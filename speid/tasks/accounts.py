@@ -21,7 +21,7 @@ def create_account(self, account_dict: dict) -> None:
 
 
 def execute_create_account(account_dict: dict):
-    account_val = AccountValidation(**account_dict)
+    account_val = AccountValidation(**account_dict)  # type: ignore
     # Look for previous accounts
     account = account_val.transform()
     try:
@@ -42,7 +42,7 @@ def execute_create_account(account_dict: dict):
 @celery.task(bind=True, max_retries=0)
 def update_account(self, account_dict: dict) -> None:
     try:
-        validation_model = AccountValidation(**account_dict)
+        validation_model = AccountValidation(**account_dict)  # type: ignore
         account = Account.objects.get(cuenta=validation_model.cuenta)
         account.update_account(validation_model.transform())
     except ValidationError as exc:

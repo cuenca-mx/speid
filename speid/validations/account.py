@@ -40,7 +40,7 @@ class Account:
             len(v) == 12 or len(v) == 13  # RFC
         ):
             return v
-        raise ValidationError('Invalid curp format')
+        raise ValidationError(errors=['Invalid curp format'], model=Model)
 
     def to_dict(self) -> dict:
         return {
