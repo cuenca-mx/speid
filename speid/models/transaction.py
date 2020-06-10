@@ -108,7 +108,7 @@ class Transaction(Document, BaseModel):
 
     def set_state(self, state: Estado):
         if CALLBACK_QUEUE_ACTIVE:
-            callback_helper.set_status_transaction(
+            callback_helper.send_queue_state(
                 dict(speid_id=self.speid_id, state=state.value)
             )
         else:
@@ -118,6 +118,7 @@ class Transaction(Document, BaseModel):
         self.events.append(Event(type=EventType.completed))
 
     def confirm_callback_transaction(self):
+        response = ''
         self.events.append(Event(type=EventType.created))
         self.save()
         if CALLBACK_QUEUE_ACTIVE:
