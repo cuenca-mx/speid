@@ -4,7 +4,7 @@ import click
 import pandas
 
 from speid import app
-from speid.helpers import callback_helper
+from speid.helpers.callback_helper import set_status_transaction
 from speid.models import Event, Request, Transaction
 from speid.types import Estado, EventType
 
@@ -30,9 +30,7 @@ def callback_spei_transaction(transaction_id, transaction_status):
         event_type = EventType.error
     else:
         raise ValueError('Invalid event type')
-    callback_helper.set_status_transaction(
-        transaction.speid_id, transaction.estado.name
-    )
+    set_status_transaction(transaction.speid_id, transaction.estado.name)
     transaction.events.append(
         Event(type=event_type, metadata=str('Reversed by SPEID command'))
     )

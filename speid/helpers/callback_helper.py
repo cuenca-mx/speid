@@ -9,8 +9,6 @@ from requests.auth import HTTPBasicAuth
 from requests.models import Response
 from sentry_sdk import capture_message
 
-from speid.types import Estado
-
 BROKER = os.environ['AMPQ_ADDRESS']
 CALLBACK_URL = os.environ['CALLBACK_URL']
 CALLBACK_API_KEY = os.environ['CALLBACK_API_KEY']
@@ -45,11 +43,11 @@ def send_queue_transaction(transaction: dict) -> AsyncResult:
     return resp
 
 
-def send_queue_state(speid_id: str, state: Estado) -> AsyncResult:
+def send_queue_state(speid_id: str, state: str) -> AsyncResult:
     queue = Celery('back_end_client', broker=BROKER)
     resp = queue.send_task(
         SEND_STATUS_TRANSACTION_TASK,
-        kwargs=dict(speid_id=speid_id, state=state.value),
+        kwargs=dict(speid_id=speid_id, state=state),
     )
     return resp
 

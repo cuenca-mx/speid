@@ -11,11 +11,11 @@ from speid.validations import StpTransaction
 CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
 
 
-def process_incoming_transaction(incoming_transaction) -> dict:
+def process_incoming_transaction(incoming_transaction: dict) -> dict:
     transaction = Transaction()
     try:
-        external_transaction = StpTransaction(**incoming_transaction)
-        transaction = external_transaction.transform()
+        external_tx = StpTransaction(**incoming_transaction)  # type: ignore
+        transaction = external_tx.transform()
         if CLABES_BLOCKED:
             clabes = CLABES_BLOCKED.split(',')
             if transaction.cuenta_beneficiario in clabes or (

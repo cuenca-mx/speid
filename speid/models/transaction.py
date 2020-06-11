@@ -109,7 +109,7 @@ class Transaction(Document, BaseModel):
     def set_state(self, state: Estado):
         if CALLBACK_QUEUE_ACTIVE:
             callback_helper.send_queue_state(
-                dict(speid_id=self.speid_id, state=state.value)
+                speid_id=self.speid_id, state=state.value
             )
         else:
             callback_helper.set_status_transaction(self.speid_id, state.value)
