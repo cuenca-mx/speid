@@ -217,6 +217,15 @@ Este es el cuerpo del mensaje en RabbitMQ:
 'speid_id': 'SOME_ID'
 }
 ````
+En caso de querer realizar el callback al backend mediante queue se debe 
+establecer las siguientes variables de entorno
+```
+SEND_TRANSACTION_TASK=ruta_de_la_tarea_transacciones de entrada``
 
+SEND_STATUS_TRANSACTION_TASK=ruta_de_la_tarea_para_el_status``
+
+CALLBACK_QUEUE_ACTIVE=true
+
+```
 ___
 Hecho con ❤️ en [Cuenca](https://cuenca.com/)
