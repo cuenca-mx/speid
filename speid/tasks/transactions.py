@@ -1,7 +1,7 @@
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
-from speid.helpers import callback_helper, transaction_helper
+from speid.helpers import transaction_helper
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
