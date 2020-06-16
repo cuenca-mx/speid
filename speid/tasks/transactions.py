@@ -56,10 +56,7 @@ def process_outgoing_transactions(self, transactions: list):
             continue
         else:
             transaction.estado = new_estado
-
-        callback_helper.set_status_transaction(
-            transaction.speid_id, transaction.estado.name
-        )
+        transaction.set_state(transaction.estado)
         transaction.events.append(
             Event(type=event_type, metadata=str('Reversed by recon task'))
         )
