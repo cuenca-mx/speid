@@ -1,7 +1,7 @@
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
-from speid.helpers import callback_helper, transaction_helper
+from speid.helpers import transaction_helper
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
@@ -56,10 +56,7 @@ def process_outgoing_transactions(self, transactions: list):
             continue
         else:
             transaction.estado = new_estado
-
-        callback_helper.set_status_transaction(
-            transaction.speid_id, transaction.estado.name
-        )
+        transaction.set_state(transaction.estado)
         transaction.events.append(
             Event(type=event_type, metadata=str('Reversed by recon task'))
         )
