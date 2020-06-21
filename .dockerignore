@@ -4,3 +4,8 @@ venv
 pk.pem
 .pytest_cache
 .idea
+
+tests/
+requirements-dev.txt
+requirements-test.txt
+
