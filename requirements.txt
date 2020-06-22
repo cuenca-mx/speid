@@ -2,7 +2,7 @@ Flask>=1.0,<1.1
 blinker>=1.4
 boto3>=1.9,<2.0
 celery>=4.3,<4.5
-clabe>=0.2.1,<0.3
+clabe<1.1.0,>=1.0.0
 docker>=4.0.1
 flask-mongoengine>=0.9.5
 luhnmod10>=1.0.2
@@ -11,5 +11,5 @@ pandas>=0.24.2
 pydantic>=1.2,<1.6
 python-hosts>=0.4,<1.1
 sentry-sdk>=0.11.1
-stpmex>=3.1.0,<3.2.0
-vcrpy>=2.0.1
+stpmex>=3.1.0,<3.5.0
+

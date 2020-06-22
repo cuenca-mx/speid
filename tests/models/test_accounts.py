@@ -1,5 +1,6 @@
 import pytest
 from pydantic import ValidationError
+from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import Account
 from speid.types import Estado
@@ -79,7 +80,7 @@ def test_create_account_failed():
     account.save()
     account_id = account.id
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(InvalidRfcOrCurp):
         account.create_account()
 
     account = Account.objects.get(id=account_id)
