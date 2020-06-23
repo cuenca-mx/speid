@@ -5,6 +5,7 @@ pk.pem
 .pytest_cache
 .idea
 
+scripts/
 tests/
 requirements-dev.txt
 requirements-test.txt
