@@ -48,7 +48,9 @@ def create_orden():
 def log_responses(response):
     data = None
     if response.data:
-        data = json.loads(response.data.decode())
+        data = response.data.decode()
+        if response.json:
+            data = json.loads(data)
 
     headers = [str(header) for header in response.headers]
 
@@ -60,12 +62,15 @@ def log_responses(response):
 def log_posts():
     if 'healthcheck' in request.path:
         return
-
-    body = json.loads(request.get_json())
+    data = None
+    if request.data:
+        data = request.data.decode()
+        if request.is_json:
+            data = json.loads(data)
     headers = [
         str(header)
         for header in request.headers
         if 'Authorization' not in header
     ]
 
-    logging.info(f'{str(request)} {"".join(headers)} {str(body)}')
+    logging.info(f'{str(request)} {"".join(headers)} {str(data)}')
