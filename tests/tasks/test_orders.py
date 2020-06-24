@@ -130,7 +130,7 @@ def test_ignore_invalid_account_type(
 
 @pytest.mark.vcr
 @pytest.mark.usefixtures('create_account')
-def test_resend_success_order(create_account):
+def test_resend_success_order():
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',
