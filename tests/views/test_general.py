@@ -306,7 +306,7 @@ def test_process_transaction(
     assert trx.estado is Estado.created
 
     resp = client.get(
-        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
+        '/transactions?status=submitted&prefix_ordenante=6461801570'
     )
     assert resp.status_code == 200
 

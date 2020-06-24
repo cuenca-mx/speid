@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from enum import Enum
 
 from mongoengine import (
     DateTimeField,
@@ -71,7 +72,7 @@ class Transaction(Document, BaseModel):
     concepto_pago = StringField()
     referencia_numerica = IntField()
     empresa = StringField()
-    estado = EnumField(Estado, default=Estado.created)  # type: ignore
+    estado: Enum = EnumField(Estado, default=Estado.created)
     version = IntField()
     speid_id = StringField()
     folio_origen = StringField()

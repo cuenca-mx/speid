@@ -2,7 +2,7 @@ import re
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, Type, Union
 
 from blinker.base import NamedSignal
 from mongoengine import (
@@ -105,7 +105,7 @@ class EnumField(BaseField):
         and will be used as possible choices
     """
 
-    def __init__(self, enum: Enum, *args, **kwargs):
+    def __init__(self, enum: Type[Enum], *args, **kwargs):
         self.enum = enum
         kwargs['choices'] = [choice for choice in enum]  # type: ignore
         super(EnumField, self).__init__(*args, **kwargs)
