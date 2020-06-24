@@ -29,7 +29,9 @@ jobs:
         with:
           python-version: 3.8
       - name: Install dependencies
-        run: make install-dev
+        run: |
+          cp env.template .env
+          make install-dev
       - name: Generate coverage report
         run: |
           export $(<.env)
