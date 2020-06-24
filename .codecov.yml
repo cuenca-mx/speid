@@ -7,4 +7,3 @@ coverage:
 
 comment:
   layout: 'header, diff, flags, files, footer'
-  

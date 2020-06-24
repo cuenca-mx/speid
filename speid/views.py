@@ -1,15 +1,16 @@
 import json
+import logging
 
-from flask import abort, request
-from mongoengine import DoesNotExist
+from flask import request
 from sentry_sdk import capture_exception
-from stpmex.exc import StpmexException
 
 from speid import app
 from speid.helpers.transaction_helper import process_incoming_transaction
-from speid.models import Request, Transaction
-from speid.types import Estado, HttpRequestMethod
-from speid.utils import get, patch, post
+from speid.models import Transaction
+from speid.types import Estado
+from speid.utils import post
+
+logging.basicConfig(level=logging.INFO, format='SPEID: %(message)s')
 
 
 @app.route('/')
@@ -43,73 +44,28 @@ def create_orden():
     return 201, response
 
 
-@get('/transactions')
-def get_orders():
-    estado = request.args.get('estado', default=None, type=str)
-    prefix_ordenante = request.args.get(
-        'prefix_ordenante', default=None, type=str
-    )
-    prefix_beneficiario = request.args.get(
-        'prefix_beneficiario', default=None, type=str
-    )
-    query = dict()
-    if estado:
-        query['estado'] = estado
-    if prefix_ordenante:
-        query['cuenta_ordenante__startswith'] = prefix_ordenante
-    if prefix_beneficiario:
-        query['cuenta_beneficiario__startswith'] = prefix_beneficiario
+@app.after_request
+def log_responses(response):
+    data = None
+    if response.data:
+        data = json.loads(response.data.decode())
 
-    transactions = Transaction.objects(**query).order_by('-created_at')
-    return 200, transactions
+    headers = [str(header) for header in response.headers]
 
-
-@patch('/transactions/<transaction_id>/process')
-def process_transaction(transaction_id):
-    try:
-        transaction = Transaction.objects.get(
-            id=transaction_id, estado=Estado.created
-        )
-    except DoesNotExist:
-        abort(401)
-
-    try:
-        transaction.create_order()
-    except StpmexException as e:
-        return 400, str(e)
-    else:
-        return 201, transaction
-
-
-@patch('/transactions/<transaction_id>/reverse')
-def reverse_transaction(transaction_id):
-    try:
-        transaction = Transaction.objects.get(
-            id=transaction_id, estado=Estado.created
-        )
-    except DoesNotExist:
-        abort(401)
-
-    transaction.set_state(Estado.failed)
-    transaction.save()
-
-    return 201, transaction
+    logging.info(f'{str(response)} {"".join(headers)} {str(data)}')
+    return response
 
 
 @app.before_request
 def log_posts():
-    if request.method != 'POST':
+    if 'healthcheck' in request.path:
         return
-    if request.is_json:
-        body = json.dumps(request.json)
-    else:
-        body = request.data.decode('utf-8') or json.dumps(request.form)
-    req = Request(
-        method=HttpRequestMethod(request.method),
-        path=request.path,
-        query_string=request.query_string.decode(),
-        ip_address=request.remote_addr,
-        headers=dict(request.headers),
-        body=body,
-    )
-    req.save()
+
+    body = json.loads(request.get_json())
+    headers = [
+        str(header)
+        for header in request.headers
+        if 'Authorization' not in header
+    ]
+
+    logging.info(f'{str(request)} {"".join(headers)} {str(body)}')
