@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 
 import pytest
 
@@ -27,6 +27,7 @@ def default_outcome_transaction():
         rfc_curp_ordenante='ND',
         speid_id='go' + datetime.now().strftime('%m%d%H%M%S'),
         version=1,
+        clave_rastreo=f'PRUEBA{str(time.time()).replace(".", "")[5:]}',
     )
 
 
@@ -37,7 +38,7 @@ def default_blocked_transaction():
         FechaOperacion=20180618,
         InstitucionOrdenante=40012,
         InstitucionBeneficiaria=90646,
-        ClaveRastreo="PRUEBABloqueo",
+        ClaveRastreo=f'PRUEBABloqueo{str(time.time()).replace(".", "")[5:]}',
         Monto=100.0,
         NombreOrdenante="BANCO",
         TipoCuentaOrdenante=40,
@@ -60,7 +61,7 @@ def default_blocked_incoming_transaction():
         FechaOperacion=20180618,
         InstitucionOrdenante=40012,
         InstitucionBeneficiaria=90646,
-        ClaveRastreo="PRUEBABloqueo",
+        ClaveRastreo=f'PRUEBABloqueo{str(time.time()).replace(".", "")[5:]}',
         Monto=100.0,
         NombreOrdenante="BANCO",
         TipoCuentaOrdenante=40,
@@ -83,7 +84,7 @@ def default_income_transaction():
         FechaOperacion=20180618,
         InstitucionOrdenante=40012,
         InstitucionBeneficiaria=90646,
-        ClaveRastreo="PRUEBATAMIZI1",
+        ClaveRastreo=f'PRUEBATAMIZI1{str(time.time()).replace(".", "")[5:]}',
         Monto=100.0,
         NombreOrdenante="BANCO",
         TipoCuentaOrdenante=40,
