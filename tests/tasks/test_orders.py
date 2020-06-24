@@ -8,8 +8,9 @@ from speid.tasks.orders import execute, send_order
 from speid.types import Estado, EventType
 
 
-@pytest.mark.usefixtures('mock_callback_api')
-def test_worker_with_incorrect_version(default_internal_request):
+def test_worker_with_incorrect_version(
+    default_internal_request, mock_callback_api
+):
     default_internal_request['version'] = 0
 
     with pytest.raises(MalformedOrderException):
@@ -20,8 +21,7 @@ def test_worker_with_incorrect_version(default_internal_request):
     transaction.delete()
 
 
-@pytest.mark.usefixtures('mock_callback_api')
-def test_worker_without_version(default_internal_request):
+def test_worker_without_version(default_internal_request, mock_callback_api):
     default_internal_request['version'] = None
 
     with pytest.raises(MalformedOrderException):
@@ -32,8 +32,7 @@ def test_worker_without_version(default_internal_request):
     transaction.delete()
 
 
-@pytest.mark.usefixtures('mock_callback_api')
-def test_malformed_order_worker():
+def test_malformed_order_worker(mock_callback_api):
     order = dict(
         concepto_pago='PRUEBA',
         institucion_ordenante='646',
@@ -55,8 +54,7 @@ def test_malformed_order_worker():
 
 
 @pytest.mark.vcr
-@pytest.mark.usefixtures('create_account')
-def test_create_order_debit_card():
+def test_create_order_debit_card(create_account):
     order = dict(
         concepto_pago='DebitCardTest',
         institucion_ordenante='90646',
@@ -78,8 +76,7 @@ def test_create_order_debit_card():
 
 
 @pytest.mark.vcr
-@pytest.mark.usefixtures('create_account')
-def test_worker_with_version_2():
+def test_worker_with_version_2(create_account):
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',
@@ -101,12 +98,13 @@ def test_worker_with_version_2():
 
 
 @pytest.mark.vcr
-@pytest.mark.usefixtures('create_account')
-@pytest.mark.usefixtures('mock_callback_api')
 @patch('speid.tasks.orders.capture_exception')
 @patch('speid.tasks.orders.send_order.retry')
 def test_ignore_invalid_account_type(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock
+    mock_retry: MagicMock,
+    mock_capture_exception: MagicMock,
+    create_account,
+    mock_callback_api,
 ) -> None:
     order = dict(
         concepto_pago='PRUEBA Version 2',
@@ -129,8 +127,7 @@ def test_ignore_invalid_account_type(
 
 
 @pytest.mark.vcr
-@pytest.mark.usefixtures('create_account')
-def test_resend_success_order():
+def test_resend_success_order(create_account):
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',
