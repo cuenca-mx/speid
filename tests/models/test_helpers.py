@@ -20,10 +20,10 @@ from speid.models.base import BaseModel
 
 def test_doc_to_dict():
     """
-    Este test es temporal lo copié del PR original, cuando se haya mezclado:
+    Este test es temporal lo copié del PR original:
       - https://github.com/MongoEngine/mongoengine/pull/2349
       - https://github.com/MongoEngine/mongoengine/pull/2348
-    Estos helpers ya no serán necesarios
+    Cuando se haya mezclado, estos helpers ya no serán necesarios
     """
 
     class Character(EmbeddedDocument):
