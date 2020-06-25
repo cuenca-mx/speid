@@ -25,6 +25,7 @@ def test_doc_to_dict():
       - https://github.com/MongoEngine/mongoengine/pull/2348
     Estos helpers ya no serán necesarios
     """
+
     class Character(EmbeddedDocument):
         name = StringField()
         age = IntField()
