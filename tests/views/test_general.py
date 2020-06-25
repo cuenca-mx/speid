@@ -1,16 +1,37 @@
+import os
 from unittest.mock import patch
 
+import boto3
 from celery import Celery
+from moto import mock_s3
 
 from speid.models import Transaction
 from speid.types import Estado
 
 DEFAULT_ORDEN_ID = '2456305'
+DOWNLOAD_PATH = os.environ['STP_PRIVATE_LOCATION']
+KEY_NAME = os.environ['STP_PRIVATE_KEY']
+STP_BUCKET_S3 = os.environ['STP_BUCKET_S3']
 
 
 def test_ping(client):
     res = client.get('/')
     assert res.status_code == 200
+
+
+@mock_s3
+def test_download_key_from_s3():
+    client = boto3.client('s3', region_name='us-east-1')
+    client.create_bucket(Bucket=STP_BUCKET_S3)
+    client.upload_file(DOWNLOAD_PATH, STP_BUCKET_S3, KEY_NAME)
+
+    with open(DOWNLOAD_PATH) as file:
+        file_content = file.read()
+
+    with patch.dict(os.environ, {'AWS_ACCESS_KEY_ID': 'testing'}):
+        from speid import private_key
+
+        assert private_key == file_content
 
 
 def test_health_check(client):
