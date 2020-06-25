@@ -42,6 +42,35 @@ def test_callback_spei_transaction(mock_callback_queue, transaction):
     assert transaction.events[-1].metadata == 'Reversed by SPEID command'
 
 
+def test_callback_spei_failed_transaction(mock_callback_queue, transaction):
+    id_trx = transaction.id
+    assert transaction.estado is Estado.created
+
+    runner = CliRunner()
+    runner.invoke(
+        speid_group, ['callback-spei-transaction', str(id_trx), 'failed']
+    )
+
+    transaction = Transaction.objects.get(id=id_trx)
+    assert transaction.estado is Estado.failed
+    assert transaction.events[-1].type is EventType.error
+    assert transaction.events[-1].metadata == 'Reversed by SPEID command'
+
+
+def test_callback_spei_invalid_transaction(mock_callback_queue, transaction):
+    id_trx = transaction.id
+    assert transaction.estado is Estado.created
+
+    runner = CliRunner()
+    result = runner.invoke(
+        speid_group, ['callback-spei-transaction', str(id_trx), 'invalid']
+    )
+
+    transaction = Transaction.objects.get(id=id_trx)
+    assert transaction.estado is Estado.created
+    assert type(result.exception) is ValueError
+
+
 @pytest.mark.vcr
 def test_re_execute_transactions(runner, transaction, create_account):
     id_trx = transaction.id
@@ -56,3 +85,19 @@ def test_re_execute_transactions(runner, transaction, create_account):
 
     assert transaction.estado is Estado.submitted
     assert transaction.events[-1].type is EventType.completed
+
+
+@pytest.mark.vcr
+def test_re_execute_transaction_not_found(runner, transaction, create_account):
+    id_trx = transaction.id
+    assert transaction.estado is Estado.created
+
+    runner = CliRunner()
+    result = runner.invoke(
+        speid_group, ['re-execute-transactions', 'invalid_speid_id']
+    )
+
+    transaction = Transaction.objects.get(id=id_trx)
+
+    assert transaction.estado is Estado.created
+    assert type(result.exception) is ValueError

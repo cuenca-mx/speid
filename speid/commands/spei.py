@@ -1,4 +1,5 @@
 import click
+from mongoengine import DoesNotExist
 
 from speid import app
 from speid.helpers.callback_helper import set_status_transaction
@@ -40,13 +41,13 @@ def re_execute_transactions(speid_id):
     """Retry send a transaction to STP, it takes the values
     of the event created before
     """
-    transaction = Transaction.objects.get(speid_id=speid_id)
-
-    if transaction is None:
+    try:
+        transaction = Transaction.objects.get(speid_id=speid_id)
+    except DoesNotExist:
         raise ValueError('Transaction not found')
 
     transaction.create_order()
 
 
 if __name__ == "__main__":
-    re_execute_transactions()
+    re_execute_transactions()  # pragma: nocover
