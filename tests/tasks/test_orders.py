@@ -126,6 +126,111 @@ def test_ignore_invalid_account_type(
     transaction.delete()
 
 
+@patch('speid.tasks.orders.capture_exception')
+def test_malformed_order_exception(
+    mock_capture_exception: MagicMock, mock_callback_queue
+):
+    order = dict(
+        concepto_pago='PRUEBA Version 2',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='123456789012345678',
+        institucion_beneficiaria='40072',
+        monto=1020,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='ANOTHER_RANDOM_ID',
+        version=2,
+    )
+    send_order(order)
+
+    mock_capture_exception.assert_called_once()
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    transaction.delete()
+
+
+@patch('speid.tasks.orders.execute', side_effect=Exception())
+@patch('speid.tasks.orders.capture_exception')
+@patch('speid.tasks.orders.send_order.retry')
+def test_retry_on_unexpected_exception(
+    mock_retry: MagicMock, mock_capture_exception: MagicMock, _
+):
+    order = dict(
+        concepto_pago='PRUEBA Version 2',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='40072',
+        monto=1020,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='ANOTHER_RANDOM_ID',
+        version=2,
+    )
+    send_order(order)
+    mock_retry.assert_called_once()
+    mock_capture_exception.assert_called_once()
+
+
+def test_hold_max_amount():
+    order = dict(
+        concepto_pago='PRUEBA Version 2',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='40072',
+        monto=102000000,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='stp_id_again',
+        version=2,
+    )
+    with pytest.raises(MalformedOrderException):
+        execute(order)
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    transaction.delete()
+
+
+@pytest.mark.vcr
+def test_resend_not_success_order(create_account, mock_callback_queue):
+    order = dict(
+        concepto_pago='PRUEBA Version 2',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='40072',
+        monto=1020,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='stp_id_again',
+        version=2,
+    )
+
+    with patch(
+        'speid.tasks.orders.Transaction.create_order',
+        side_effect=AssertionError(),
+    ):
+        execute(order)
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.failed
+
+    # Ejecuta nuevamente la misma orden
+    execute(order)
+
+    transaction.reload()
+    assert transaction.events[-2].type is EventType.retry
+    assert transaction.estado is Estado.submitted
+
+    transaction.delete()
+
+
 @pytest.mark.vcr
 def test_resend_success_order(create_account):
     order = dict(
