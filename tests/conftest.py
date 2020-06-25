@@ -1,21 +1,11 @@
 import os
-from dataclasses import dataclass
 from unittest.mock import patch
 
 import pytest
 from celery import Celery
 
-from speid.models import Account
-from speid.types import Estado
-
 SEND_TRANSACTION_TASK = os.environ['SEND_TRANSACTION_TASK']
 SEND_STATUS_TRANSACTION_TASK = os.environ['SEND_STATUS_TRANSACTION_TASK']
-
-
-@dataclass
-class Response:
-    status_code: int
-    text: str
 
 
 @pytest.fixture
@@ -33,6 +23,12 @@ def vcr_config():
 
 @pytest.fixture
 def create_account():
+    # Pongo los import aquí porque de otra forma no puedo hacer tests del
+    # __init__ sin que se haya importado ya. Y así no repito el mismo fixture
+    # en todos los lugares donde se usa
+    from speid.models import Account
+    from speid.types import Estado
+
     account = Account(
         estado=Estado.succeeded,
         nombre='Ricardo',

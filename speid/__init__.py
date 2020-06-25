@@ -28,6 +28,24 @@ class CJSONEncoder(json.JSONEncoder):
         return encoded
 
 
+def configure_environment():
+    # Descarga la private key de S3
+    if 'AWS_ACCESS_KEY_ID' in os.environ:
+        s3 = boto3.client('s3')
+        s3.download_file(STP_BUCKET_S3, STP_PRIVATE_KEY, STP_PRIVATE_LOCATION)
+
+    # Edita archivo hosts si es necesario
+    if os.environ['EDIT_HOSTS'] == 'true':
+        host_ip = os.environ['HOST_IP']
+        host_ad = os.environ['HOST_AD']
+        hosts = Hosts()
+        new_entry = HostsEntry(
+            entry_type='ipv4', address=host_ip, names=[host_ad]
+        )
+        hosts.add([new_entry])
+        hosts.write()
+
+
 # Configura sentry
 sentry_sdk.init(
     dsn=os.environ['SENTRY_DSN'],
@@ -41,7 +59,6 @@ STP_PRIVATE_KEY = os.environ['STP_PRIVATE_KEY']
 STP_WSDL = os.environ['STP_WSDL']
 STP_EMPRESA = os.environ['STP_EMPRESA']
 STP_PREFIJO = os.environ['STP_PREFIJO']
-EDIT_HOSTS = os.environ['EDIT_HOSTS']
 DATABASE_URI = os.environ['DATABASE_URI']
 
 app = Flask('speid')
@@ -52,19 +69,7 @@ app.json_encoder = CJSONEncoder
 
 db = MongoEngine(app)
 
-# Descarga la private key de S3
-if 'AWS_ACCESS_KEY_ID' in os.environ:
-    s3 = boto3.client('s3')
-    s3.download_file(STP_BUCKET_S3, STP_PRIVATE_KEY, STP_PRIVATE_LOCATION)
-
-# Edita archivo hosts si es necesario
-if EDIT_HOSTS == 'true':
-    host_ip = os.environ['HOST_IP']
-    host_ad = os.environ['HOST_AD']
-    hosts = Hosts()
-    new_entry = HostsEntry(entry_type='ipv4', address=host_ip, names=[host_ad])
-    hosts.add([new_entry])
-    hosts.write()
+configure_environment()
 
 # Configura el cliente STP
 with open(STP_PRIVATE_LOCATION) as fp:
