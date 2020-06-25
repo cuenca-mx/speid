@@ -9,7 +9,7 @@ from speid.types import Estado, EventType
 
 
 @pytest.mark.skip(reason="Commands test")
-def test_callback_spei_transaction(runner, mock_callback_api):
+def test_callback_spei_transaction(runner, mock_callback_queue):
     transaction = Transaction(
         concepto_pago='PRUEBA',
         institucion_ordenante='646',
