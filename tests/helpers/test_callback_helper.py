@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
@@ -58,16 +57,13 @@ def test_send_transaction(mock_send_transaction: MagicMock):
 
 @patch('speid.helpers.callback_helper.Celery.send_task')
 @pytest.mark.parametrize(
-    "speid_id, state", [
-        pytest.param('UN_ID', 'success'),
-        pytest.param('DOS_ID', 'fail')
-    ]
+    "speid_id, state",
+    [pytest.param('UN_ID', 'success'), pytest.param('DOS_ID', 'fail')],
 )
-def test_set_status_transaction(mock_set_status_transaction: MagicMock, speid_id: str, state: str):
-    params = dict(
-        speid_id=speid_id,
-        state=state
-    )
+def test_set_status_transaction(
+    mock_set_status_transaction: MagicMock, speid_id: str, state: str
+):
+    params = dict(speid_id=speid_id, state=state)
     set_status_transaction(**params)
 
     task_params = mock_set_status_transaction.call_args[1]['kwargs']

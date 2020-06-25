@@ -9,7 +9,7 @@ from speid.types import Estado, EventType
 
 
 def test_worker_with_incorrect_version(
-    default_internal_request, mock_callback_api
+    default_internal_request, mock_callback_queue
 ):
     default_internal_request['version'] = 0
 
@@ -21,7 +21,7 @@ def test_worker_with_incorrect_version(
     transaction.delete()
 
 
-def test_worker_without_version(default_internal_request, mock_callback_api):
+def test_worker_without_version(default_internal_request, mock_callback_queue):
     default_internal_request['version'] = None
 
     with pytest.raises(MalformedOrderException):
@@ -32,7 +32,7 @@ def test_worker_without_version(default_internal_request, mock_callback_api):
     transaction.delete()
 
 
-def test_malformed_order_worker(mock_callback_api):
+def test_malformed_order_worker(mock_callback_queue):
     order = dict(
         concepto_pago='PRUEBA',
         institucion_ordenante='646',
@@ -104,7 +104,7 @@ def test_ignore_invalid_account_type(
     mock_retry: MagicMock,
     mock_capture_exception: MagicMock,
     create_account,
-    mock_callback_api,
+    mock_callback_queue,
 ) -> None:
     order = dict(
         concepto_pago='PRUEBA Version 2',

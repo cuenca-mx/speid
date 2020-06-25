@@ -1,7 +1,9 @@
 import os
 from dataclasses import dataclass
+from unittest.mock import patch
 
 import pytest
+from celery import Celery
 
 from speid.models import Account
 from speid.types import Estado
@@ -14,6 +16,12 @@ SEND_STATUS_TRANSACTION_TASK = os.environ['SEND_STATUS_TRANSACTION_TASK']
 class Response:
     status_code: int
     text: str
+
+
+@pytest.fixture
+def mock_callback_queue():
+    with patch.object(Celery, 'send_task', return_value=None):
+        yield
 
 
 @pytest.fixture(scope='module')
