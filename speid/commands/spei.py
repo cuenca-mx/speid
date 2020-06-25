@@ -32,11 +32,10 @@ def callback_spei_transaction(transaction_id, transaction_status):
         Event(type=event_type, metadata=str('Reversed by SPEID command'))
     )
     transaction.save()
-    return transaction
 
 
 @speid_group.command()
-@click.option('--speid_id', default=None, help='Specific speid id to execute')
+@click.argument('speid_id', type=str)
 def re_execute_transactions(speid_id):
     """Retry send a transaction to STP, it takes the values
     of the event created before
