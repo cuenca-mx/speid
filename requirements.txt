@@ -1,5 +1,5 @@
 blinker==1.4
-boto3==1.14.9
+boto3==1.14.10
 celery==4.4.6
 clabe==1.2.0
 docker==4.2.1
