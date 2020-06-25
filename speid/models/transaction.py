@@ -35,9 +35,6 @@ from .helpers import (
 SKIP_VALIDATION_PRIOR_SEND_ORDER = (
     os.getenv('SKIP_VALIDATION_PRIOR_SEND_ORDER', 'false').lower() == 'true'
 )
-CALLBACK_QUEUE_ACTIVE = (
-    os.getenv('CALLBACK_QUEUE_ACTIVE', 'false').lower() == 'true'
-)
 
 
 @handler(signals.pre_save)
@@ -108,12 +105,7 @@ class Transaction(Document, BaseModel):
     }
 
     def set_state(self, state: Estado):
-        if CALLBACK_QUEUE_ACTIVE:
-            callback_helper.send_queue_state(
-                speid_id=self.speid_id, state=state.value
-            )
-        else:
-            callback_helper.set_status_transaction(self.speid_id, state.value)
+        callback_helper.set_status_transaction(self.speid_id, state.value)
         self.estado = state
 
         self.events.append(Event(type=EventType.completed))
@@ -122,12 +114,8 @@ class Transaction(Document, BaseModel):
         response = ''
         self.events.append(Event(type=EventType.created))
         self.save()
-        if CALLBACK_QUEUE_ACTIVE:
-            self.estado = Estado.succeeded
-            callback_helper.send_queue_transaction(self.to_dict())
-        else:
-            response = callback_helper.send_transaction(self.to_dict())
-            self.estado = Estado(response['status'])
+        self.estado = Estado.succeeded
+        callback_helper.send_transaction(self.to_dict())
 
         self.events.append(
             Event(type=EventType.completed, metadata=str(response))
