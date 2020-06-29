@@ -233,46 +233,21 @@ def test_update_account_does_not_exists_then_create_account(
     mock_retry.assert_not_called()
 
 
-@pytest.mark.skip('se deshabilita temporalmente el request a stp')
 @pytest.mark.vcr
+@patch('speid.tasks.accounts.AccountValidation', side_effect=Exception())
 @patch('speid.tasks.accounts.capture_exception')
-@patch('speid.tasks.accounts.update_account.retry')
+@patch('speid.tasks.accounts.update_account.retry', return_value=None)
 def test_update_account_retries_on_unexpected_exception(
-    mock_retry: MagicMock, mock_capture_exception: MagicMock
+    mock_retry: MagicMock, mock_capture_exception: MagicMock, _
 ) -> None:
     account_dict = dict(
-        nombre='Ric',
-        apellido_paterno='San',
+        nombre='Ricardo',
+        apellido_paterno='Sánchez',
         cuenta='646180157000000004',
         rfc_curp='SACR891125HDFABC01',
     )
 
-    # debe existir una cuenta guardada en los registros de Account
-    with pytest.raises(InvalidRfcOrCurp):
-        execute_create_account(account_dict)
-
-    # datos corregidos y nuevo RFC
-    account_dict['nombre'] = 'Ricardo'
-    account_dict['apellido_paterno'] = 'Sánchez'
-    account_dict['apellido_materno'] = 'Castillo'
-    account_dict['rfc_curp'] = 'SACR891125HDFABC02'
-
-    with patch(
-        'speid.models.account.stpmex_client.cuentas.update',
-        side_effect=Exception('something went wrong!'),
-    ):
-        update_account(account_dict)
+    update_account(account_dict)
 
     mock_capture_exception.assert_called_once()
     mock_retry.assert_called_once()
-
-    account = Account.objects.get(cuenta='646180157000000004')
-
-    # los datos no se modifican si falla el update en STP
-    assert account.nombre == 'Ric'
-    assert account.apellido_paterno == 'San'
-    assert not account.apellido_materno
-    assert account.rfc_curp == 'SACR891125HDFABC01'
-    assert account.estado == Estado.error
-
-    account.delete()

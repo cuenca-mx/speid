@@ -1,9 +1,11 @@
 import datetime as dt
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
+    create_incoming_transactions,
     execute_create_incoming_transactions,
     process_outgoing_transactions,
 )
@@ -81,8 +83,8 @@ def outgoing_transaction():
 
 
 @pytest.mark.vcr
-def test_transaction_not_in_speid(incoming_transactions):
-    execute_create_incoming_transactions(incoming_transactions)
+def test_transaction_not_in_speid(incoming_transactions, mock_callback_queue):
+    create_incoming_transactions(incoming_transactions)
 
     saved_transaction = Transaction.objects.get(
         clave_rastreo=incoming_transactions[0]['ClaveRastreo']
@@ -90,8 +92,27 @@ def test_transaction_not_in_speid(incoming_transactions):
     assert saved_transaction.estado == Estado.succeeded
 
 
+@patch('speid.tasks.transactions.capture_exception')
+@patch('speid.tasks.transactions.create_incoming_transactions.retry')
+def test_retry_on_exception(
+    mock_retry: MagicMock,
+    mock_capture_exception: MagicMock,
+    incoming_transactions,
+):
+    with patch(
+        'speid.tasks.transactions.execute_create_incoming_transactions',
+        side_effect=Exception(),
+    ):
+        create_incoming_transactions(incoming_transactions)
+
+    mock_capture_exception.assert_called_once()
+    mock_retry.assert_called_once()
+
+
 @pytest.mark.vcr
-def test_transaction_not_in_backend_but_in_speid(incoming_transactions):
+def test_transaction_not_in_backend_but_in_speid(
+    incoming_transactions, mock_callback_queue
+):
     execute_create_incoming_transactions(incoming_transactions)
 
     saved_transaction = Transaction.objects.get(
@@ -112,7 +133,7 @@ def test_transaction_not_in_backend_but_in_speid(incoming_transactions):
 
 
 def test_outgoing_transaction_succeeded(
-    outgoing_transaction, mock_callback_api
+    outgoing_transaction, mock_callback_queue
 ):
     speid_id = outgoing_transaction.speid_id
     to_process = [dict(speid_id=speid_id, action='succeeded')]
@@ -122,7 +143,9 @@ def test_outgoing_transaction_succeeded(
     assert transaction.estado is Estado.succeeded
 
 
-def test_outgoing_transaction_failed(outgoing_transaction, mock_callback_api):
+def test_outgoing_transaction_failed(
+    outgoing_transaction, mock_callback_queue
+):
     speid_id = outgoing_transaction.speid_id
     to_process = [dict(speid_id=speid_id, action='failed')]
     process_outgoing_transactions(to_process)
@@ -153,6 +176,16 @@ def test_outgoing_transaction_failed(outgoing_transaction, mock_callback_api):
         )
         == 1
     )
+
+
+def test_outgoing_transaction_invalid(
+    outgoing_transaction, mock_callback_queue
+):
+    speid_id = outgoing_transaction.speid_id
+    to_process = [dict(speid_id=speid_id, action='invalid')]
+
+    with pytest.raises(ValueError):
+        process_outgoing_transactions(to_process)
 
 
 def test_outgoing_transaction_doesnotexist(outgoing_transaction):

@@ -23,9 +23,6 @@ def process_incoming_transaction(incoming_transaction: dict) -> dict:
             ):
                 capture_message('Transacción retenida')
                 raise Exception
-            if transaction.cuenta_ordenante in clabes:
-                capture_message('Transacción retenida por cuenta ordenante')
-                raise Exception
         transaction.confirm_callback_transaction()
         transaction.save()
         r = incoming_transaction

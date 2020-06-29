@@ -1,4 +1,6 @@
-import pytest
+from unittest.mock import patch
+
+from celery import Celery
 
 from speid.models import Transaction
 from speid.types import Estado
@@ -17,7 +19,7 @@ def test_health_check(client):
 
 
 def test_create_order_event(
-    mock_callback_api, client, default_outcome_transaction
+    mock_callback_queue, client, default_outcome_transaction
 ):
     trx = Transaction(**default_outcome_transaction)
     trx.stp_id = DEFAULT_ORDEN_ID
@@ -35,7 +37,7 @@ def test_create_order_event(
 
 
 def test_create_order_event_failed_twice(
-    mock_callback_api, client, default_outcome_transaction
+    mock_callback_queue, client, default_outcome_transaction
 ):
     trx = Transaction(**default_outcome_transaction)
     trx.stp_id = DEFAULT_ORDEN_ID
@@ -97,7 +99,7 @@ def test_invalid_id_order_event(client, default_outcome_transaction):
 
 
 def test_order_event_duplicated(
-    client, default_outcome_transaction, mock_callback_api
+    client, default_outcome_transaction, mock_callback_queue
 ):
     trx = Transaction(**default_outcome_transaction)
     trx.stp_id = DEFAULT_ORDEN_ID
@@ -119,7 +121,7 @@ def test_order_event_duplicated(
     trx.delete()
 
 
-def test_create_orden(client, default_income_transaction, mock_callback_api):
+def test_create_orden(client, default_income_transaction, mock_callback_queue):
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.succeeded
@@ -128,7 +130,7 @@ def test_create_orden(client, default_income_transaction, mock_callback_api):
     transaction.delete()
 
 
-def test_create_mal_formed_orden(client, mock_callback_api):
+def test_create_mal_formed_orden(client, mock_callback_queue):
     request = {
         "Clave": 17658976,
         "ClaveRastreo": "clave-restreo",
@@ -147,7 +149,7 @@ def test_create_mal_formed_orden(client, mock_callback_api):
 
 
 def test_create_orden_duplicated(
-    client, default_income_transaction, mock_callback_api
+    client, default_income_transaction, mock_callback_queue
 ):
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
@@ -170,7 +172,7 @@ def test_create_orden_duplicated(
 
 
 def test_create_orden_blocked(
-    client, default_blocked_transaction, mock_callback_api
+    client, default_blocked_transaction, mock_callback_queue
 ):
     resp = client.post('/ordenes', json=default_blocked_transaction)
     transaction = Transaction.objects.get(
@@ -183,7 +185,7 @@ def test_create_orden_blocked(
 
 
 def test_create_incoming_orden_blocked(
-    client, default_blocked_incoming_transaction, mock_callback_api
+    client, default_blocked_incoming_transaction, mock_callback_queue
 ):
     resp = client.post('/ordenes', json=default_blocked_incoming_transaction)
     transaction = Transaction.objects.get(
@@ -196,17 +198,18 @@ def test_create_incoming_orden_blocked(
 
 
 def test_create_orden_exception(client, default_income_transaction):
-    # Este test no tiene el mock, aún si hay una excepción debería devolver
-    # Liquidación para ser validado posteriormente
-    resp = client.post('/ordenes', json=default_income_transaction)
-    transaction = Transaction.objects.order_by('-created_at').first()
-    assert transaction.estado is Estado.error
-    assert resp.status_code == 201
-    assert resp.json['estado'] == 'LIQUIDACION'
-    transaction.delete()
+    with patch.object(
+        Celery, 'send_task', side_effect=Exception('Algo muy malo')
+    ):
+        resp = client.post('/ordenes', json=default_income_transaction)
+        transaction = Transaction.objects.order_by('-created_at').first()
+        assert transaction.estado is Estado.error
+        assert resp.status_code == 201
+        assert resp.json['estado'] == 'LIQUIDACION'
+        transaction.delete()
 
 
-def test_create_orden_without_ordenante(client, mock_callback_api):
+def test_create_orden_without_ordenante(client, mock_callback_queue):
     data = dict(
         Clave=123123233,
         FechaOperacion=20190129,
@@ -232,116 +235,3 @@ def test_create_orden_without_ordenante(client, mock_callback_api):
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
     transaction.delete()
-
-
-def test_get_transactions(
-    client,
-    default_income_transaction,
-    default_outcome_transaction,
-    mock_callback_api,
-):
-    resp = client.post('/ordenes', json=default_income_transaction)
-    assert resp.status_code == 201
-    trx_in = Transaction.objects.order_by('-created_at').first()
-
-    trx_out = Transaction(**default_outcome_transaction)
-    trx_out.stp_id = DEFAULT_ORDEN_ID
-    trx_out.save()
-
-    resp = client.get(
-        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
-    )
-    assert resp.status_code == 200
-    assert str(trx_out.id) == resp.json[0]['_id']['$oid']
-
-    resp = client.get(
-        '/transactions?' 'status=submitted&prefix_beneficiario=6461801570'
-    )
-    assert resp.status_code == 200
-    assert str(trx_in.id) == resp.json[0]['_id']['$oid']
-
-    resp = client.get('/transactions')
-    assert resp.status_code == 200
-    assert len(resp.json) == 2
-    trx_out.delete()
-
-
-def test_get_transactions_with_status(
-    client,
-    default_income_transaction,
-    default_outcome_transaction,
-    mock_callback_api,
-):
-    resp = client.post('/ordenes', json=default_income_transaction)
-    assert resp.status_code == 201
-
-    trx_out = Transaction(**default_outcome_transaction)
-    trx_out.stp_id = DEFAULT_ORDEN_ID
-    trx_out.save()
-
-    resp = client.get(
-        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
-    )
-    assert resp.status_code == 200
-    assert str(trx_out.id) == resp.json[0]['_id']['$oid']
-
-    resp = client.get(
-        '/transactions?' 'estado=submitted&prefix_beneficiario=6461801570'
-    )
-    assert resp.status_code == 200
-
-    resp = client.get('/transactions')
-    assert resp.status_code == 200
-    assert len(resp.json) == 2
-    trx_out.delete()
-
-
-@pytest.mark.vcr
-def test_process_transaction(
-    client, default_outcome_transaction, create_account
-):
-    trx = Transaction(**default_outcome_transaction)
-    trx.save()
-
-    assert trx.estado is Estado.created
-
-    resp = client.get(
-        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
-    )
-    assert resp.status_code == 200
-
-    resp = client.patch(f'/transactions/{resp.json[0]["_id"]["$oid"]}/process')
-    assert resp.status_code == 201
-    trx = Transaction.objects.get(id=resp.json["_id"]["$oid"])
-
-    resp = client.patch('/transactions/1234ff550ade83aadce648cb/process')
-    assert resp.status_code == 401
-
-    assert trx.estado is Estado.submitted
-    assert trx.stp_id is not None
-    trx.delete()
-
-
-def test_reverse_transaction(
-    client, default_outcome_transaction, mock_callback_api
-):
-    trx = Transaction(**default_outcome_transaction)
-    trx.stp_id = DEFAULT_ORDEN_ID
-    trx.save()
-
-    assert trx.estado is Estado.created
-
-    resp = client.get(
-        '/transactions?' 'status=submitted&prefix_ordenante=6461801570'
-    )
-    assert resp.status_code == 200
-
-    resp = client.patch(f'/transactions/{resp.json[0]["_id"]["$oid"]}/reverse')
-    assert resp.status_code == 201
-    trx = Transaction.objects.get(id=resp.json["_id"]["$oid"])
-
-    resp = client.patch('/transactions/1234ff550ade83aadce648cb/reverse')
-    assert resp.status_code == 401
-
-    assert trx.estado is Estado.failed
-    trx.delete()

@@ -1,5 +1,7 @@
-import json
 from datetime import datetime
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from speid.helpers.callback_helper import (
     auth_header,
@@ -18,11 +20,12 @@ def test_auth_header():
     assert auth['Authorization'] == 'Basic VEVTVElORzpQQVNTV09SRA=='
 
 
-def test_send_transaction(mock_callback_api):
-    transaction = Transaction(
-        fecha_operacion=datetime.today(),
-        institucion_ordenante=40012,
-        institucion_beneficiaria=90646,
+@patch('speid.helpers.callback_helper.Celery.send_task')
+def test_send_transaction(mock_send_transaction: MagicMock):
+    params = dict(
+        fecha_operacion=datetime.now(),
+        institucion_ordenante='40012',
+        institucion_beneficiaria='90646',
         clave_rastreo="PRUEBATAMIZI1",
         monto=100.0,
         nombre_ordenante="BANCO",
@@ -37,17 +40,31 @@ def test_send_transaction(mock_callback_api):
         referencia_numerica=2423,
         empresa="TAMIZI",
     )
-    res = send_transaction(transaction.to_dict())
-    assert res['status'] == 'succeeded'
+
+    transaction = Transaction(**params)
+    send_transaction(transaction.to_dict())
+
+    task_params = mock_send_transaction.call_args[1]['kwargs']['transaction']
+
+    for param, value in params.items():
+        if param == 'fecha_operacion':
+            continue
+        assert value == task_params[param]
+    assert (
+        params['fecha_operacion'].isoformat() == task_params['fecha_operacion']
+    )
 
 
-def test_set_status_transaction(mock_callback_api):
-    res = set_status_transaction(123, 'success')
-    assert res.status_code == 201
-    assert json.loads(res.text)['status'] == 'succeeded'
+@patch('speid.helpers.callback_helper.Celery.send_task')
+@pytest.mark.parametrize(
+    "speid_id, state",
+    [pytest.param('UN_ID', 'success'), pytest.param('DOS_ID', 'fail')],
+)
+def test_set_status_transaction(
+    mock_set_status_transaction: MagicMock, speid_id: str, state: str
+):
+    params = dict(speid_id=speid_id, state=state)
+    set_status_transaction(**params)
 
-
-def test_set_status_transaction_fail(mock_callback_api_fail):
-    res = set_status_transaction(000, 'fail')
-    assert res.status_code == 403
-    assert json.loads(res.text)['status'] == 'failed'
+    task_params = mock_set_status_transaction.call_args[1]['kwargs']
+    assert all(params[param] == task_params[param] for param in params)

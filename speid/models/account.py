@@ -1,3 +1,5 @@
+from enum import Enum
+
 from mongoengine import (
     DateTimeField,
     Document,
@@ -29,7 +31,7 @@ from .helpers import (
 class Account(Document, BaseModel):
     created_at = date_now()
     updated_at = DateTimeField()
-    estado = EnumField(Estado, default=Estado.created)  # type: ignore
+    estado: Enum = EnumField(Estado, default=Estado.created)
 
     nombre = StringField()
     apellido_paterno = StringField()

@@ -1,7 +1,7 @@
 ## SPEID
 
-[![Build Status](https://travis-ci.com/cuenca-mx/speid.svg?branch=master)](https://travis-ci.com/cuenca-mx/speid)
-[![Coverage Status](https://coveralls.io/repos/github/cuenca-mx/speid/badge.svg?branch=HEAD)](https://coveralls.io/github/cuenca-mx/speid?branch=HEAD)
+[![Test](https://github.com/cuenca-mx/speid/workflows/Test/badge.svg)](https://github.com/cuenca-mx/speid/actions?query=workflow%3ATest)
+[![codecov](https://codecov.io/gh/cuenca-mx/speid/branch/master/graph/badge.svg)](https://codecov.io/gh/cuenca-mx/speid)
 [![](https://images.microbadger.com/badges/image/cuenca/speid:1.9.4.svg)](https://microbadger.com/images/cuenca/speid:1.9.4 "Get your own image badge on microbadger.com")
 [![](https://images.microbadger.com/badges/version/cuenca/speid:1.9.4.svg)](https://microbadger.com/images/cuenca/speid:1.9.4 "Get your own version badge on microbadger.com")
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)

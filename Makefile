@@ -35,7 +35,6 @@ clean-pyc:
 
 test: clean-pyc lint
 		pytest --cov-report term-missing tests/ --cov=speid
-		coveralls
 
 travis-test:
 		$(MAKE) install-dev
