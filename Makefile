@@ -59,7 +59,7 @@ docker-test: docker-build
 	$(DOCKER) scripts/test.sh || $(MAKE) docker-stop
 	$(MAKE) docker-stop
 
-docker-build: clean-pyc
+docker-build: clean
 	docker-compose build
 	touch docker-build
 
