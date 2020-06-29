@@ -1,7 +1,7 @@
 blinker==1.4
 boto3==1.14.9
 celery==4.4.6
-clabe==1.2.0
+clabe==1.2.1
 docker==4.2.1
 Flask==1.1.2
 flask-mongoengine==0.9.5
