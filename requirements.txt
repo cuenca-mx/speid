@@ -1,5 +1,5 @@
 blinker==1.4
-boto3==1.14.13
+boto3==1.14.17
 celery==4.4.6
 docker==4.2.1
 Flask==1.1.2
