@@ -20,15 +20,15 @@ def callback_spei_transaction(transaction_id, transaction_status):
     """Establece el estado de la transacción,
     valores permitidos succeeded y failed"""
     transaction = Transaction.objects.get(id=transaction_id)
-    if transaction_status == Estado.succeeded.name:
+    if transaction_status == Estado.succeeded.value:
         transaction.estado = Estado.succeeded
         event_type = EventType.completed
-    elif transaction_status == Estado.failed.name:
+    elif transaction_status == Estado.failed.value:
         transaction.estado = Estado.failed
         event_type = EventType.error
     else:
         raise ValueError('Invalid event type')
-    set_status_transaction(transaction.speid_id, transaction.estado.name)
+    set_status_transaction(transaction.speid_id, transaction.estado.value)
     transaction.events.append(
         Event(type=event_type, metadata=str('Reversed by SPEID command'))
     )
