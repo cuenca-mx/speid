@@ -10,4 +10,4 @@ pandas==1.0.5
 python-hosts==1.0.0
 sentry-sdk==0.15.1
 pydantic==1.5.1
-stpmex==3.5.2
+stpmex==3.5.4
