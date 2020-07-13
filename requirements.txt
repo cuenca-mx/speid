@@ -8,5 +8,5 @@ newrelic==5.14.1.144
 pandas==1.0.5
 python-hosts==1.0.0
 sentry-sdk==0.16.1
-pydantic==1.5.1
+pydantic==1.6
 stpmex==3.5.4
