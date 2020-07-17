@@ -15,7 +15,7 @@ def client():
 
 
 @pytest.fixture
-def default_outcome_transaction() -> Generator[Transaction, None, None]:
+def outcome_transaction() -> Generator[Transaction, None, None]:
     transaction = Transaction(
         stp_id=2456305,
         concepto_pago='PRUEBA',

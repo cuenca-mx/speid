@@ -18,99 +18,93 @@ def test_health_check(client):
 
 
 @pytest.mark.usefixtures('mock_callback_queue')
-def test_create_order_event(client, default_outcome_transaction):
+def test_create_order_event(client, outcome_transaction):
     data = dict(
-        id=default_outcome_transaction.stp_id,
-        Estado='LIQUIDACION',
-        Detalle="0",
+        id=outcome_transaction.stp_id, Estado='LIQUIDACION', Detalle="0",
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=default_outcome_transaction.id)
+    trx = Transaction.objects.get(id=outcome_transaction.id)
     assert trx.estado is Estado.succeeded
 
 
 @pytest.mark.usefixtures('mock_callback_queue')
-def test_create_order_event_failed_twice(client, default_outcome_transaction):
+def test_create_order_event_failed_twice(client, outcome_transaction):
     data = dict(
-        id=default_outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
+        id=outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=default_outcome_transaction.id)
+    trx = Transaction.objects.get(id=outcome_transaction.id)
     assert trx.estado is Estado.failed
 
     num_events = len(trx.events)
     data = dict(
-        id=default_outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
+        id=outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=default_outcome_transaction.id)
+    trx = Transaction.objects.get(id=outcome_transaction.id)
     assert trx.estado is Estado.failed
     assert len(trx.events) == num_events
 
 
 @pytest.mark.usefixtures('mock_callback_queue')
-def test_cancelled_transaction(client, default_outcome_transaction) -> None:
+def test_cancelled_transaction(client, outcome_transaction) -> None:
     data = dict(
-        id=default_outcome_transaction.stp_id,
-        Estado='CANCELACION',
-        Detalle="0",
+        id=outcome_transaction.stp_id, Estado='CANCELACION', Detalle="0",
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=default_outcome_transaction.id)
+    trx = Transaction.objects.get(id=outcome_transaction.id)
     assert trx.estado is Estado.failed
 
 
-def test_invalid_order_event(client, default_outcome_transaction):
+def test_invalid_order_event(client, outcome_transaction):
     data = dict(Estado='LIQUIDACION', Detalle="0")
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=default_outcome_transaction.id)
+    trx = Transaction.objects.get(id=outcome_transaction.id)
     assert trx.estado is Estado.created
 
 
-def test_invalid_id_order_event(client, default_outcome_transaction):
+def test_invalid_id_order_event(client, outcome_transaction):
     data = dict(id='9', Estado='LIQUIDACION', Detalle="0")
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=default_outcome_transaction.id)
+    trx = Transaction.objects.get(id=outcome_transaction.id)
     assert trx.estado is Estado.created
 
 
 @pytest.mark.usefixtures('mock_callback_queue')
-def test_order_event_duplicated(client, default_outcome_transaction):
+def test_order_event_duplicated(client, outcome_transaction):
     data = dict(
-        id=default_outcome_transaction.stp_id,
-        Estado='LIQUIDACION',
-        Detalle="0",
+        id=outcome_transaction.stp_id, Estado='LIQUIDACION', Detalle="0",
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
     data = dict(
-        id=default_outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
+        id=outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=default_outcome_transaction.id)
+    trx = Transaction.objects.get(id=outcome_transaction.id)
     assert trx.estado is Estado.failed
 
 
