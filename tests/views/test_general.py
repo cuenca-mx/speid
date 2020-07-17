@@ -80,7 +80,6 @@ def test_invalid_order_event(client, default_outcome_transaction):
 
     trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.created
-    trx.delete()
 
 
 def test_invalid_id_order_event(client, default_outcome_transaction):
@@ -91,7 +90,6 @@ def test_invalid_id_order_event(client, default_outcome_transaction):
 
     trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.created
-    trx.delete()
 
 
 @pytest.mark.usefixtures('mock_callback_queue')
@@ -114,7 +112,6 @@ def test_order_event_duplicated(client, default_outcome_transaction):
 
     trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.failed
-    trx.delete()
 
 
 @pytest.mark.usefixtures('mock_callback_queue')
