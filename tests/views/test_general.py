@@ -1,11 +1,10 @@
 from unittest.mock import patch
 
+import pytest
 from celery import Celery
 
 from speid.models import Transaction
 from speid.types import Estado
-
-DEFAULT_ORDEN_ID = '2456305'
 
 
 def test_ping(client):
@@ -18,110 +17,108 @@ def test_health_check(client):
     assert res.status_code == 200
 
 
-def test_create_order_event(
-    mock_callback_queue, client, default_outcome_transaction
-):
-    trx = Transaction(**default_outcome_transaction)
-    trx.stp_id = DEFAULT_ORDEN_ID
-    trx.save()
-    id_trx = trx.id
-
-    data = dict(id=DEFAULT_ORDEN_ID, Estado='LIQUIDACION', Detalle="0")
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_order_event(client, default_outcome_transaction):
+    data = dict(
+        id=default_outcome_transaction.stp_id,
+        Estado='LIQUIDACION',
+        Detalle="0",
+    )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=id_trx)
+    trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.succeeded
-    trx.delete()
 
 
-def test_create_order_event_failed_twice(
-    mock_callback_queue, client, default_outcome_transaction
-):
-    trx = Transaction(**default_outcome_transaction)
-    trx.stp_id = DEFAULT_ORDEN_ID
-    trx.save()
-    id_trx = trx.id
-
-    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_order_event_failed_twice(client, default_outcome_transaction):
+    data = dict(
+        id=default_outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
+    )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=id_trx)
+    trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.failed
 
     num_events = len(trx.events)
-    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+    data = dict(
+        id=default_outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
+    )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=id_trx)
+    trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.failed
     assert len(trx.events) == num_events
-    trx.delete()
 
-    trx.delete()
+
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_cancelled_transaction(client, default_outcome_transaction) -> None:
+    data = dict(
+        id=default_outcome_transaction.stp_id,
+        Estado='CANCELACION',
+        Detalle="0",
+    )
+    resp = client.post('/orden_events', json=data)
+    assert resp.status_code == 200
+    assert resp.data == "got it!".encode()
+
+    trx = Transaction.objects.get(id=default_outcome_transaction.id)
+    assert trx.estado is Estado.failed
 
 
 def test_invalid_order_event(client, default_outcome_transaction):
-    trx = Transaction(**default_outcome_transaction)
-    trx.stp_id = DEFAULT_ORDEN_ID
-    trx.save()
-    id_trx = trx.id
-
     data = dict(Estado='LIQUIDACION', Detalle="0")
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=id_trx)
+    trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.created
     trx.delete()
 
 
 def test_invalid_id_order_event(client, default_outcome_transaction):
-    trx = Transaction(**default_outcome_transaction)
-    trx.stp_id = DEFAULT_ORDEN_ID
-    trx.save()
-    id_trx = trx.id
-
     data = dict(id='9', Estado='LIQUIDACION', Detalle="0")
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=id_trx)
+    trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.created
     trx.delete()
 
 
-def test_order_event_duplicated(
-    client, default_outcome_transaction, mock_callback_queue
-):
-    trx = Transaction(**default_outcome_transaction)
-    trx.stp_id = DEFAULT_ORDEN_ID
-    trx.save()
-    id_trx = trx.id
-
-    data = dict(id=DEFAULT_ORDEN_ID, Estado='LIQUIDACION', Detalle="0")
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_order_event_duplicated(client, default_outcome_transaction):
+    data = dict(
+        id=default_outcome_transaction.stp_id,
+        Estado='LIQUIDACION',
+        Detalle="0",
+    )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    data = dict(id=DEFAULT_ORDEN_ID, Estado='DEVOLUCION', Detalle="0")
+    data = dict(
+        id=default_outcome_transaction.stp_id, Estado='DEVOLUCION', Detalle="0"
+    )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
     assert resp.data == "got it!".encode()
 
-    trx = Transaction.objects.get(id=id_trx)
+    trx = Transaction.objects.get(id=default_outcome_transaction.id)
     assert trx.estado is Estado.failed
     trx.delete()
 
 
-def test_create_orden(client, default_income_transaction, mock_callback_queue):
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_orden(client, default_income_transaction):
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.succeeded
@@ -130,7 +127,8 @@ def test_create_orden(client, default_income_transaction, mock_callback_queue):
     transaction.delete()
 
 
-def test_create_mal_formed_orden(client, mock_callback_queue):
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_mal_formed_orden(client):
     request = {
         "Clave": 17658976,
         "ClaveRastreo": "clave-restreo",
@@ -148,9 +146,8 @@ def test_create_mal_formed_orden(client, mock_callback_queue):
     assert resp.json['estado'] == 'LIQUIDACION'
 
 
-def test_create_orden_duplicated(
-    client, default_income_transaction, mock_callback_queue
-):
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_orden_duplicated(client, default_income_transaction):
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.succeeded
@@ -171,9 +168,8 @@ def test_create_orden_duplicated(
         t.delete()
 
 
-def test_create_orden_blocked(
-    client, default_blocked_transaction, mock_callback_queue
-):
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_orden_blocked(client, default_blocked_transaction):
     resp = client.post('/ordenes', json=default_blocked_transaction)
     transaction = Transaction.objects.get(
         stp_id=default_blocked_transaction['Clave']
@@ -184,8 +180,9 @@ def test_create_orden_blocked(
     transaction.delete()
 
 
+@pytest.mark.usefixtures('mock_callback_queue')
 def test_create_incoming_orden_blocked(
-    client, default_blocked_incoming_transaction, mock_callback_queue
+    client, default_blocked_incoming_transaction
 ):
     resp = client.post('/ordenes', json=default_blocked_incoming_transaction)
     transaction = Transaction.objects.get(
@@ -209,7 +206,8 @@ def test_create_orden_exception(client, default_income_transaction):
         transaction.delete()
 
 
-def test_create_orden_without_ordenante(client, mock_callback_queue):
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_orden_without_ordenante(client):
     data = dict(
         Clave=123123233,
         FechaOperacion=20190129,

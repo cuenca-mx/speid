@@ -1,8 +1,10 @@
 from datetime import datetime
+from typing import Generator
 
 import pytest
 
 from speid import app
+from speid.models import Transaction
 
 
 @pytest.fixture
@@ -13,8 +15,9 @@ def client():
 
 
 @pytest.fixture
-def default_outcome_transaction():
-    return dict(
+def default_outcome_transaction() -> Generator[Transaction, None, None]:
+    transaction = Transaction(
+        stp_id=2456305,
         concepto_pago='PRUEBA',
         institucion_ordenante='90646',
         cuenta_beneficiario='072691004495711499',
@@ -28,6 +31,9 @@ def default_outcome_transaction():
         speid_id='go' + datetime.now().strftime('%m%d%H%M%S'),
         version=1,
     )
+    transaction.save()
+    yield transaction
+    transaction.delete()
 
 
 @pytest.fixture

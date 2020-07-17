@@ -25,7 +25,9 @@ class Estado(Enum):
     @classmethod
     def get_state_from_stp(cls, stp_state: str) -> Enum:
         status_from_stp = dict(
-            LIQUIDACION=cls.succeeded, DEVOLUCION=cls.failed
+            LIQUIDACION=cls.succeeded,
+            DEVOLUCION=cls.failed,
+            CANCELACION=cls.failed,
         )
         return status_from_stp.get(stp_state, cls.error)
 
