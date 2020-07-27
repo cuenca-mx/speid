@@ -20,7 +20,9 @@ def make_celery(app: Flask) -> Celery:
     celery_app.conf.task_default_queue = os.environ['CORE_NEW_ORDER_QUEUE']
     celery_app.conf.task_routes = {
         'speid.tasks.accounts.*': {'queue': os.environ['CORE_ACCOUNT_QUEUE']},
-        'speid.tasks.transactions.*': {'queue': os.environ['RECON_TRANSACTION_QUEUE']},
+        'speid.tasks.transactions.*': {
+            'queue': os.environ['RECON_TRANSACTION_QUEUE']
+        },
     }
 
     class ContextTask(celery_app.Task):  # type: ignore
