@@ -204,9 +204,19 @@ definido en la variable de ambiente `CALLBACK_URL` con el ID del request en la U
 
 Cuando STP responde con el resultado de la operación, se recibe en el
 servicio `/orden_events` el cual busca la transacción por el ID de la orden y
-almacena un nuevo Evento. Posteriormente se se notifica al backend haciendo un PATCH al 
+almacena un nuevo Evento. Posteriormente se notifica al backend haciendo un PATCH al 
 endpoint definido en la variable de ambiente `CALLBACK_URL` con el ID del request en la 
 URL.
+
+El estado en el que puede responder STP para una transferencia son los siguientes:
+1. `LIQUIDACION`: La transferencia fue exitosa.
+2. `DEVOLUCION`: No fue posible realizar la transferencia. Este caso aplica 
+para transferencias con destino a Instituciones participantes directos de SPEI.
+3. `CANCELACION`: No fue posible realizar la transferencia. Este caso aplica 
+para transferencias con destino a Instituciones que en su CLABE tengan el prefijo **646**, es decir, clientes de STP.
+
+Cabe aclarar que en `speid` el estado `LIQUIDACION` mapea a `succeeded`, mientras que 
+`DEVOLUCION` y `CANCELACION` mapean a `failed` para retornarse al backend.
 
 Este es el cuerpo del mensaje en RabbitMQ:
 
