@@ -8,7 +8,7 @@ black = black -S -l 79 --target-version py37 $(PROJECT) tests
 default: install
 
 install:
-	pip install -q requirements.txt
+	pip install -r requirements.txt
 
 install-dev: install
 	pip install wheel
