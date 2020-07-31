@@ -11,6 +11,7 @@ install:
 	pip install -q -r requirements.txt
 
 install-dev: install
+	pip install wheel
 	pip install -q -r requirements-dev.txt
 
 install-test: install-dev
