@@ -13,7 +13,6 @@ jobs:
         python-version: '3.8'
     - name: Install dependencies
       run: |
-        pip install wheel
         make install-dev
     - name: Lint
       run: make lint
