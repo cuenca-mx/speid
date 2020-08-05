@@ -8,7 +8,7 @@ black = black -S -l 79 --target-version py37 $(PROJECT) tests
 default: install
 
 install:
-	pip install -r requirements.txt
+	pip install -r -q requirements.txt
 
 install-dev:
 	# Trying to install `flask-mongoengine` package in virtual environment of GitHub Actions
