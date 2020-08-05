@@ -23,7 +23,7 @@ def health_check():
 def create_orden_events():
     try:
         transaction = Transaction.objects.get(stp_id=request.json['id'])
-
+        transaction.detalle = str(request.json['Detalle'])
         state = Estado.get_state_from_stp(request.json['Estado'])
 
         if state is Estado.failed:

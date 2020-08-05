@@ -90,6 +90,7 @@ class Transaction(Document, BaseModel):
     medio_entrega = IntField()
     prioridad = IntField()
     compound_key = StringField()
+    detalle = StringField()
 
     events = ListField(ReferenceField(Event))
 
