@@ -58,7 +58,9 @@ def test_create_order_event_failed_twice(client, outcome_transaction):
 @pytest.mark.usefixtures('mock_callback_queue')
 def test_cancelled_transaction(client, outcome_transaction) -> None:
     data = dict(
-        id=outcome_transaction.stp_id, Estado='CANCELACION', Detalle=0,
+        id=outcome_transaction.stp_id,
+        Estado='CANCELACION',
+        Detalle='something went wrong',
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
@@ -66,7 +68,7 @@ def test_cancelled_transaction(client, outcome_transaction) -> None:
 
     trx = Transaction.objects.get(id=outcome_transaction.id)
     assert trx.estado is Estado.failed
-    assert trx.detalle == '0'
+    assert trx.detalle == 'something went wrong'
 
 
 def test_invalid_order_event(client, outcome_transaction):
