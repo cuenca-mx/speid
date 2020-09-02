@@ -7,6 +7,6 @@ luhnmod10==1.0.2
 newrelic==5.14.1.144
 pandas==1.0.5
 python-hosts==1.0.0
-sentry-sdk==0.16.1
+sentry-sdk==0.17.3
 pydantic==1.6.1
 stpmex==3.5.6
