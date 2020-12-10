@@ -1,3 +1,4 @@
+import datetime as dt
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,6 +21,8 @@ def test_create_account():
         cuenta='646180157069665325',
         rfc_curp='SACR891125HDFGHI01',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
 
     execute_create_account(account_dict)
@@ -49,6 +52,8 @@ def test_create_account_existing_account():
         cuenta='646180157069665325',
         rfc_curp='SACR891125HDFGHI01',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
     account.estado = Estado.error
     account.save()
@@ -59,6 +64,8 @@ def test_create_account_existing_account():
         cuenta='646180157069665325',
         rfc_curp='SACR891125HDFGHI01',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
 
     execute_create_account(account_dict)
@@ -76,6 +83,8 @@ def test_create_account_existing_succeeded_account():
         cuenta='646180157069665325',
         rfc_curp='SACR891125HDFGHI01',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
     account.estado = Estado.succeeded
     account.stp_id = 123
@@ -87,6 +96,8 @@ def test_create_account_existing_succeeded_account():
         cuenta='646180157069665325',
         rfc_curp='SACR891125HDFGHI01',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
 
     execute_create_account(account_dict)
@@ -108,6 +119,8 @@ def test_does_not_retry_when_validation_error_raised(
         cuenta='646180157069665325',
         rfc_curp=None,
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
     create_account(account_dict)
     mock_capture_exception.assert_called_once()
@@ -127,6 +140,8 @@ def test_does_not_retry_when_invalid_rfc_raised(
         cuenta='646180157069665325',
         rfc_curp='VIN2810417HNECPX01',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
     create_account(account_dict)
     mock_capture_exception.assert_called_once()
@@ -167,6 +182,8 @@ def test_update_account_successfully(
         apellido_paterno='San',
         cuenta='646180157000000004',
         rfc_curp='SACR891125HDFABC01',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
 
     # debe existir una cuenta guardada en los registros de Account
@@ -203,6 +220,8 @@ def test_update_account_failed_with_validation_error_raised(
         apellido_paterno='San',
         cuenta='646180157000000004',
         rfc_curp=None,
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
 
     update_account(account_dict)
@@ -224,6 +243,8 @@ def test_update_account_does_not_exists_then_create_account(
         apellido_paterno='Sánchez',
         cuenta='646180157000000004',
         rfc_curp='SACR891125HDFABC01',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
 
     update_account(account_dict)

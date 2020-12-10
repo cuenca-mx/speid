@@ -1,3 +1,5 @@
+import datetime as dt
+
 import pytest
 from pydantic import ValidationError
 from stpmex.exc import InvalidRfcOrCurp
@@ -14,6 +16,8 @@ def test_account():
         cuenta='646180157063641989',
         rfc_curp='SACR891125M47',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
     account = account_validation.transform()
 
@@ -41,6 +45,8 @@ def test_account_bad_curp():
             cuenta='646180157063641989',
             rfc_curp='S1CR891125HDFGHI01',
             telefono='5567980796',
+            fecha_nacimiento=dt.date(1989, 11, 25),
+            pais_nacimiento='MX',
         )
 
 
@@ -52,6 +58,8 @@ def test_create_account():
         cuenta='646180157069665325',
         rfc_curp='SACR891125HDFGHI01',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
 
     account = account_validation.transform()
@@ -73,6 +81,8 @@ def test_create_account_failed():
         cuenta='646180157063641989',
         rfc_curp='SACR89112501',
         telefono='5567980796',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
 
     account = account_validation.transform()

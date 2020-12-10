@@ -17,11 +17,12 @@ class Account:
     apellido_paterno: str
     cuenta: str
     rfc_curp: str
+    fecha_nacimiento: dt.date
+    pais_nacimiento: str
 
     telefono: Optional[str] = None
     apellido_materno: Optional[str] = None
     genero: Optional[str] = None
-    fecha_nacimiento: Optional[dt.datetime] = None
     entidad_federativa: Optional[str] = None
     actividad_economica: Optional[str] = None
     calle: Optional[str] = None
@@ -30,7 +31,6 @@ class Account:
     colonia: Optional[str] = None
     alcaldia_municipio: Optional[str] = None
     cp: Optional[str] = None
-    pais: Optional[str] = None
     email: Optional[str] = None
     id_identificacion: Optional[str] = None
 

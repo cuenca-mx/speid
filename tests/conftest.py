@@ -1,3 +1,4 @@
+import datetime as dt
 import os
 from unittest.mock import patch
 
@@ -17,7 +18,7 @@ def mock_callback_queue():
 @pytest.fixture(scope='module')
 def vcr_config():
     config = dict()
-    config['record_mode'] = 'none'
+    # config['record_mode'] = 'none'
     return config
 
 
@@ -36,6 +37,8 @@ def create_account():
         cuenta='646180157000000004',
         rfc_curp='SACR891125HDFABC01',
         telefono='5567890123',
+        fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
     )
     account.save()
 
