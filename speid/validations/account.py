@@ -17,7 +17,7 @@ class Account:
     apellido_paterno: str
     cuenta: str
     rfc_curp: str
-    fecha_nacimiento: dt.date
+    fecha_nacimiento: dt.datetime
     pais_nacimiento: str
 
     telefono: Optional[str] = None
