@@ -3,6 +3,10 @@ updates:
 - package-ecosystem: pip
   directory: "/"
   schedule:
-    interval: daily
-    time: '11:00'
-  open-pull-requests-limit: 10
+    interval: weekly
+    time: "11:00"
+    day: wednesday
+    timezone: "America/Mexico_City"
+  open-pull-requests-limit: 5
+  reviewers:
+    - "cuenca-mx/admin"
