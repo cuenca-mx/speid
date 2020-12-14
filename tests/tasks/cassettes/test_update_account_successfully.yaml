@@ -16,7 +16,7 @@ interactions:
       User-Agent:
       - stpmex-python/3.1.0
     method: PUT
-    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
+    uri: https://demo.stpmex.com:7024/speiws/rest/cuentaModule/fisica
   response:
     body:
       string: '{"descripcion":"rfc/curp invalido","id":1}'
@@ -47,7 +47,7 @@ interactions:
       User-Agent:
       - stpmex-python/3.1.0
     method: DELETE
-    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
+    uri: https://demo.stpmex.com:7024/speiws/rest/cuentaModule/fisica
   response:
     body:
       string: '{"descripcion":"","id":0}'
@@ -78,7 +78,7 @@ interactions:
       User-Agent:
       - stpmex-python/3.1.0
     method: PUT
-    uri: https://demo.stpmex.com:7024/speidemows/rest/cuentaModule/fisica
+    uri: https://demo.stpmex.com:7024/speiws/rest/cuentaModule/fisica
   response:
     body:
       string: '{"descripcion":"","id":0}'

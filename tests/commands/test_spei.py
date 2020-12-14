@@ -87,7 +87,6 @@ def test_re_execute_transactions(runner, transaction, create_account):
     assert transaction.events[-1].type is EventType.completed
 
 
-@pytest.mark.vcr
 def test_re_execute_transaction_not_found(runner, transaction, create_account):
     id_trx = transaction.id
     assert transaction.estado is Estado.created
