@@ -12,6 +12,7 @@ from speid.exc import (
     ResendSuccessOrderException,
     ScheduleError,
 )
+from speid.helpers.task_helpers import time_in_range
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
@@ -19,9 +20,12 @@ from speid.validations import factory
 
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 IGNORED_EXCEPTIONS = os.getenv('IGNORED_EXCEPTIONS', '').split(',')
-
-STP_FROM_DOWNTIME = datetime(2020, 12, 28, 21, 55).time()
-STP_TO_DOWNTIME = datetime(2020, 12, 28, 0, 5).time()
+START_DOWNTIME = datetime.strptime(
+    os.getenv('STP_DOWN', '11:55PM'), "%I:%M%p"
+).time()
+STOP_DOWNTIME = datetime.strptime(
+    os.getenv('STP_DOWN', '12:05AM'), "%I:%M%p"
+).time()
 STP_COUNTDOWN = 600  # Tiempo en el que puede estar abajo STP en segundos
 
 
@@ -53,9 +57,7 @@ def execute(order_val: dict):
     version = 0
     if "version" in order_val:
         version = order_val['version']
-    request_time = datetime.utcnow().time()
-    # Se pone un or debido a que debe ser menor que 0:05 o mayor que 11:55
-    if request_time <= STP_TO_DOWNTIME or request_time >= STP_FROM_DOWNTIME:
+    if time_in_range(START_DOWNTIME, STOP_DOWNTIME, datetime.utcnow().time()):
         raise ScheduleError
     transaction = Transaction()
     try:

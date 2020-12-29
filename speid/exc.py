@@ -12,7 +12,7 @@ class ResendSuccessOrderException(ValueError):
 
 class ScheduleError(Exception):
     """
-    Schedule STP error from 5:55pm to 6:05pm
+    Schedule STP error from 5:55pm to 6:05pm GMT
     """
 
     pass

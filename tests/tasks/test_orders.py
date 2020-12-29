@@ -207,7 +207,7 @@ def test_stp_schedule_limit(
     mock_capture_exception: MagicMock, mock_callback_queue
 ):
     with patch('speid.tasks.orders.datetime') as mock_date:
-        mock_date.utcnow.return_value = datetime(2020, 9, 1, 21, 57)
+        mock_date.utcnow.return_value = datetime(2020, 9, 1, 23, 57)
         order = dict(
             concepto_pago='PRUEBA Version 2',
             institucion_ordenante='90646',
