@@ -20,10 +20,9 @@ from speid.validations import factory
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 IGNORED_EXCEPTIONS = os.getenv('IGNORED_EXCEPTIONS', '').split(',')
 
-STP_FROM_DOWNTIME = datetime(2020, 12, 28, 11, 55)
-STP_TO_DOWNTIME = datetime(2020, 12, 28, 0, 5)
-STP_COUNTDOWN = 600 # Tiempo en el que puede estar abajo STP en segundos
-
+STP_FROM_DOWNTIME = datetime(2020, 12, 28, 11, 55).time()
+STP_TO_DOWNTIME = datetime(2020, 12, 28, 0, 5).time()
+STP_COUNTDOWN = 600  # Tiempo en el que puede estar abajo STP en segundos
 
 
 def retry_timeout(attempts: int) -> int:
@@ -41,7 +40,7 @@ def send_order(self, order_val: dict):
         execute(order_val)
     except (MalformedOrderException, ResendSuccessOrderException) as exc:
         capture_exception(exc)
-    except ScheduleError:
+    except ScheduleError as exc:
         capture_exception(exc)
         raise self.retry(countdown=STP_COUNTDOWN)
     except Exception as exc:
@@ -56,9 +55,7 @@ def execute(order_val: dict):
         version = order_val['version']
     request_time = datetime.now().time()
     # Se pone un or debido a que debe ser menor que 0:05 o mayor que 11:55
-    if  request_time <= STP_TO_DOWNTIME or(
-        request_time >= STP_FROM_DOWNTIME
-    ) :
+    if request_time <= STP_TO_DOWNTIME or (request_time >= STP_FROM_DOWNTIME):
         raise ScheduleError
     transaction = Transaction()
     try:

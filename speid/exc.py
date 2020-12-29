@@ -9,8 +9,10 @@ class MalformedOrderException(ValueError):
 class ResendSuccessOrderException(ValueError):
     pass
 
+
 class ScheduleError(Exception):
     """
     Schedule STP error from 5:55pm to 6:05pm
     """
+
     pass
