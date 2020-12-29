@@ -201,7 +201,11 @@ def test_hold_max_amount():
     transaction.delete()
 
 
-def test_stp_schedule_limit():
+@patch('speid.tasks.orders.capture_exception')
+@patch('speid.tasks.orders.send_order.retry')
+def test_stp_schedule_limit(
+    mock_capture_exception: MagicMock, mock_callback_queue
+):
     with patch('speid.tasks.orders.datetime') as mock_date:
         mock_date.utcnow.return_value = datetime(2020, 9, 1, 21, 57)
         order = dict(
@@ -219,6 +223,8 @@ def test_stp_schedule_limit():
         )
         with pytest.raises(ScheduleError):
             execute(order)
+        send_order(order)
+        mock_capture_exception.assert_called_once()
 
 
 @pytest.mark.vcr

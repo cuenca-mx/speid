@@ -42,7 +42,7 @@ def send_order(self, order_val: dict):
         capture_exception(exc)
     except ScheduleError as exc:
         capture_exception(exc)
-        raise self.retry(countdown=STP_COUNTDOWN)
+        self.retry(countdown=STP_COUNTDOWN)
     except Exception as exc:
         capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries))
