@@ -26,7 +26,8 @@ START_DOWNTIME = datetime.strptime(
 STOP_DOWNTIME = datetime.strptime(
     os.getenv('STP_DOWN', '12:05AM'), "%I:%M%p"
 ).time()
-STP_COUNTDOWN = 600  # Tiempo en el que puede estar abajo STP en segundos
+# Tiempo en el que puede estar abajo STP en segundos
+STP_COUNTDOWN = int(os.getenv('STP_COUNTDOWN', '600'))
 
 
 def retry_timeout(attempts: int) -> int:
