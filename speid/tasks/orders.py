@@ -53,7 +53,7 @@ def execute(order_val: dict):
     version = 0
     if "version" in order_val:
         version = order_val['version']
-    request_time = datetime.now().time()
+    request_time = datetime.utcnow().time()
     # Se pone un or debido a que debe ser menor que 0:05 o mayor que 11:55
     if request_time <= STP_TO_DOWNTIME or (request_time >= STP_FROM_DOWNTIME):
         raise ScheduleError
