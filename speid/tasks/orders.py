@@ -7,7 +7,12 @@ from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 from stpmex.exc import InvalidAccountType
 
-from speid.exc import MalformedOrderException, ResendSuccessOrderException
+from speid.exc import (
+    MalformedOrderException,
+    ResendSuccessOrderException,
+    ScheduleError,
+)
+from speid.helpers.task_helpers import time_in_range
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
@@ -15,6 +20,14 @@ from speid.validations import factory
 
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 IGNORED_EXCEPTIONS = os.getenv('IGNORED_EXCEPTIONS', '').split(',')
+START_DOWNTIME = datetime.strptime(
+    os.getenv('START_DOWNTIME', '11:55PM'), "%I:%M%p"
+).time()
+STOP_DOWNTIME = datetime.strptime(
+    os.getenv('STOP_DOWNTIME', '12:05AM'), "%I:%M%p"
+).time()
+# Tiempo en el que puede estar abajo STP en segundos
+STP_COUNTDOWN = int(os.getenv('STP_COUNTDOWN', '600'))
 
 
 def retry_timeout(attempts: int) -> int:
@@ -32,6 +45,9 @@ def send_order(self, order_val: dict):
         execute(order_val)
     except (MalformedOrderException, ResendSuccessOrderException) as exc:
         capture_exception(exc)
+    except ScheduleError as exc:
+        capture_exception(exc)
+        self.retry(countdown=STP_COUNTDOWN)
     except Exception as exc:
         capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries))
@@ -42,7 +58,8 @@ def execute(order_val: dict):
     version = 0
     if "version" in order_val:
         version = order_val['version']
-
+    if time_in_range(START_DOWNTIME, STOP_DOWNTIME, datetime.utcnow().time()):
+        raise ScheduleError
     transaction = Transaction()
     try:
         input = factory.create(version, **order_val)

@@ -1,8 +1,13 @@
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from speid.exc import MalformedOrderException, ResendSuccessOrderException
+from speid.exc import (
+    MalformedOrderException,
+    ResendSuccessOrderException,
+    ScheduleError,
+)
 from speid.models import Transaction
 from speid.tasks.orders import execute, send_order
 from speid.types import Estado, EventType
@@ -194,6 +199,32 @@ def test_hold_max_amount():
 
     transaction = Transaction.objects.order_by('-created_at').first()
     transaction.delete()
+
+
+@patch('speid.tasks.orders.capture_exception')
+@patch('speid.tasks.orders.send_order.retry')
+def test_stp_schedule_limit(
+    mock_capture_exception: MagicMock, mock_callback_queue
+):
+    with patch('speid.tasks.orders.datetime') as mock_date:
+        mock_date.utcnow.return_value = datetime(2020, 9, 1, 23, 57)
+        order = dict(
+            concepto_pago='PRUEBA Version 2',
+            institucion_ordenante='90646',
+            cuenta_beneficiario='072691004495711499',
+            institucion_beneficiaria='40072',
+            monto=102000000,
+            nombre_beneficiario='Pablo Sánchez',
+            nombre_ordenante='BANCO',
+            cuenta_ordenante='646180157000000004',
+            rfc_curp_ordenante='ND',
+            speid_id='stp_id_again',
+            version=2,
+        )
+        with pytest.raises(ScheduleError):
+            execute(order)
+        send_order(order)
+        mock_capture_exception.assert_called_once()
 
 
 @pytest.mark.vcr
