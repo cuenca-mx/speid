@@ -276,7 +276,10 @@ def test_update_account_retries_on_unexpected_exception(
 
 
 @pytest.mark.vcr
-def test_delete_account():
+@patch('speid.tasks.accounts.delete_account.retry')
+def test_delete_account(
+    mock_retry: MagicMock,
+):
     account_dict = dict(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
@@ -294,3 +297,5 @@ def test_delete_account():
     delete_account(account.cuenta)
     account = Account.objects.get(cuenta=account.cuenta)
     assert account.estado == Estado.failed
+    delete_account(account.cuenta)
+    mock_retry.assert_called_once()

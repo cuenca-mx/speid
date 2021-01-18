@@ -74,5 +74,6 @@ def delete_account(self, cuenta: str) -> None:
         cuenta_fisica.baja()
     except Exception as exc:
         self.retry(countdown=COUNTDOWN, exc=exc)
-    account.estado = Estado.failed
-    account.save()
+    else:
+        account.estado = Estado.failed
+        account.save()
