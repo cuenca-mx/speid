@@ -1,0 +1,66 @@
+interactions:
+- request:
+    body: '{"cuenta": "646180157069665325", "rfcCurp": "SACR891125HDFGHI01", "nombre":
+      "RICARDO", "apellidoPaterno": "SANCHEZ", "paisNacimiento": 187, "fechaNacimiento":
+      "19940419", "telefono": "5567980796", "firma": "mD4Sh4bcILdhQ0h2LDrMI11nbkKHjSoLplQYw12QWXEQKDHwCfuRYA/O20DgGJ7uq2xTq3jr2cP0wDllw923YekI7yt1xBOwJMqCLv4kgNmREuq6EFZ+FZkNGyrC8RSZFUlv+DrmePazNbL4X7qLknMaj7grX3eCLd8wRe41XuA=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '402'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.7.2
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speiws/rest/cuentaModule/fisica
+  response:
+    body:
+      string: '{"resultado":{"id":7564945}}'
+    headers:
+      Content-Length:
+      - '67'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 18 Jan 2021 19:06:52 GMT
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"cuenta": "646180157069665325", "empresa": "TAMIZI", "rfcCurp": "SACR891125HDFGHI01",
+      "firma": "mD4Sh4bcILdhQ0h2LDrMI11nbkKHjSoLplQYw12QWXEQKDHwCfuRYA/O20DgGJ7uq2xTq3jr2cP0wDllw923YekI7yt1xBOwJMqCLv4kgNmREuq6EFZ+FZkNGyrC8RSZFUlv+DrmePazNbL4X7qLknMaj7grX3eCLd8wRe41XuA="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '271'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.7.2
+    method: DELETE
+    uri: https://demo.stpmex.com:7024/speiws/rest/cuentaModule/fisica
+  response:
+    body:
+      string: '{"resultado":{"id":7564945}}'
+    headers:
+      Content-Length:
+      - '67'
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 18 Jan 2021 19:18:03 GMT
+    status:
+      code: 200
+      message: OK
+version: 1
