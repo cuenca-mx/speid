@@ -20,8 +20,6 @@ def make_celery(app: Flask) -> Celery:
     )
     celery_app.conf.update(app.config)
     celery_app.conf.task_annotations = {
-        # este nombre es el que por default de la celery
-        'speid.tasks.orders.send_order': {'rate_limit': '1/h'},
         # este nombre es el que está configurado en la variable de entorno
         'speid.daemon.tasks.send_order': {'rate_limit': '1/h'},
     }
