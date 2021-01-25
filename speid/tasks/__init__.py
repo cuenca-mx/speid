@@ -5,6 +5,8 @@ from flask.app import Flask
 
 from speid import app
 
+CREATE_ORDER_TASK = os.environ['CELERY_TASK_NAME']
+
 
 def make_celery(app: Flask) -> Celery:
     celery_app = Celery(
@@ -21,7 +23,7 @@ def make_celery(app: Flask) -> Celery:
     celery_app.conf.update(app.config)
     celery_app.conf.task_annotations = {
         # este nombre es el que está configurado en la variable de entorno
-        'speid.daemon.tasks.send_order': {'rate_limit': '1/h'},
+        CREATE_ORDER_TASK: {'rate_limit': '1/h'},
     }
     celery_app.conf.task_default_queue = os.environ['CORE_NEW_ORDER_QUEUE']
     celery_app.conf.task_routes = {
