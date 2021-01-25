@@ -12,11 +12,19 @@ def make_celery(app: Flask) -> Celery:
         broker=app.config['CELERY_BROKER_URL'],
         include=[
             'speid.tasks.orders',
-            'speid.tasks.accounts',
-            'speid.tasks.transactions',
+            # comentar otros tasks para evitar que se ejecuten innecesariamente
+            # durante pruebas
+            # 'speid.tasks.accounts',
+            # 'speid.tasks.transactions',
         ],
     )
     celery_app.conf.update(app.config)
+    celery_app.conf.task_annotations = {
+        # este nombre es el que por default de la celery
+        'speid.tasks.orders.send_order': {'rate_limit': '1/h'},
+        # este nombre es el que está configurado en la variable de entorno
+        'speid.daemon.tasks.send_order': {'rate_limit': '1/h'},
+    }
     celery_app.conf.task_default_queue = os.environ['CORE_NEW_ORDER_QUEUE']
     celery_app.conf.task_routes = {
         'speid.tasks.accounts.*': {'queue': os.environ['CORE_ACCOUNT_QUEUE']},

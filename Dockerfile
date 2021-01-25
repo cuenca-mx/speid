@@ -14,5 +14,4 @@ ADD . /speid/
 ENV PORT 3000
 EXPOSE $PORT
 
-CMD NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} NEW_RELIC_APP_NAME=speid newrelic-admin run-program celery worker -A speid.tasks.celery -D --loglevel=info -c 5 -Q ${CORE_ACCOUNT_QUEUE},${CORE_NEW_ORDER_QUEUE},${RECON_TRANSACTION_QUEUE} && \
-    NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} NEW_RELIC_APP_NAME=speid newrelic-admin run-program gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:3000 --workers=${SPEID_WORKERS:-5} speid:app
+CMD NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} NEW_RELIC_APP_NAME=speid newrelic-admin run-program gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:3000 --workers=${SPEID_WORKERS:-5} speid:app
