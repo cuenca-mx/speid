@@ -21,6 +21,9 @@ def make_celery(app: Flask) -> Celery:
         ],
     )
     celery_app.conf.update(app.config)
+    # reserve one task at a time
+    celery_app.conf.task_acks_late = True
+    celery_app.conf.worker_prefetch_multiplier = 1
     celery_app.conf.task_annotations = {
         # este nombre es el que está configurado en la variable de entorno
         CREATE_ORDER_TASK: {'rate_limit': '1/h'},
