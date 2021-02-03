@@ -46,8 +46,7 @@ def send_order(self, order_val: dict):
         execute(order_val)
     except (MalformedOrderException, ResendSuccessOrderException) as exc:
         capture_exception(exc)
-    except ScheduleError as exc:
-        capture_exception(exc)
+    except ScheduleError:
         self.retry(countdown=STP_COUNTDOWN)
     except Exception as exc:
         capture_exception(exc)
