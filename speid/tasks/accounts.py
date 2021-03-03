@@ -1,9 +1,8 @@
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
-from stpmex.exc import InvalidRfcOrCurp
-from stpmex.resources import CuentaFisica
-from stpmex.types import Pais
+from stpmex.exc import InvalidRfcOrCurp, StpmexException
+from stpmex.resources.cuentas import Cuenta
 
 from speid.models import Account, Event
 from speid.tasks import celery
@@ -59,21 +58,16 @@ def update_account(self, account_dict: dict) -> None:
 
 
 @celery.task(bind=True, max_retries=5)
-def delete_account(self, cuenta: str) -> None:
+def deactivate_account(self, cuenta: str) -> None:
     account = Account.objects.get(cuenta=cuenta)
-    cuenta_fisica = CuentaFisica(  # type: ignore
-        apellidoPaterno=account.apellido_paterno,
-        apellidoMaterno=account.apellido_materno,
+    stp_cuenta = Cuenta(  # type: ignore
         rfcCurp=account.rfc_curp,
-        nombre=account.nombre,
-        paisNacimiento=Pais[account.pais_nacimiento],
-        fechaNacimiento=account.fecha_nacimiento,
         cuenta=account.cuenta,
     )
     try:
-        cuenta_fisica.baja()
-    except Exception as exc:
+        stp_cuenta.baja(stp_cuenta._base_endpoint + '/fisica')
+    except StpmexException as exc:
         self.retry(countdown=COUNTDOWN, exc=exc)
     else:
-        account.estado = Estado.failed
+        account.estado = Estado.deactivated
         account.save()

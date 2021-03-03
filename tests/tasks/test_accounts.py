@@ -7,7 +7,7 @@ from stpmex.exc import InvalidRfcOrCurp
 from speid.models import Account
 from speid.tasks.accounts import (
     create_account,
-    delete_account,
+    deactivate_account,
     execute_create_account,
     update_account,
 )
@@ -276,8 +276,8 @@ def test_update_account_retries_on_unexpected_exception(
 
 
 @pytest.mark.vcr
-@patch('speid.tasks.accounts.delete_account.retry')
-def test_delete_account(
+@patch('speid.tasks.accounts.deactivate_account.retry')
+def test_deactivate_account(
     mock_retry: MagicMock,
 ):
     account_dict = dict(
@@ -294,8 +294,8 @@ def test_delete_account(
     account = Account.objects.get(cuenta='646180157069665325')
     assert account.estado == Estado.succeeded
     # Elimina la cuenta
-    delete_account(account.cuenta)
+    deactivate_account(account.cuenta)
     account = Account.objects.get(cuenta=account.cuenta)
-    assert account.estado == Estado.failed
-    delete_account(account.cuenta)
+    assert account.estado == Estado.deactivated
+    deactivate_account(account.cuenta)
     mock_retry.assert_called_once()
