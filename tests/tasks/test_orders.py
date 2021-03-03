@@ -132,6 +132,34 @@ def test_ignore_invalid_account_type(
 
 
 @patch('speid.tasks.orders.capture_exception')
+@patch('speid.tasks.orders.send_order.retry')
+def test_ignore_transfers_to_blocked_banks(
+    mock_retry: MagicMock,
+    mock_capture_exception: MagicMock,
+    create_account,
+    mock_callback_queue,
+) -> None:
+    order = dict(
+        concepto_pago='PRUEBA bloqueo',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='659802025000339321',
+        institucion_beneficiaria='90659',
+        monto=1020,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157000000004',
+        rfc_curp_ordenante='ND',
+        speid_id='ANOTHER_RANDOM_ID',
+        version=2,
+    )
+    send_order(order)
+    mock_retry.assert_not_called()
+    mock_capture_exception.assert_not_called()
+    transaction = Transaction.objects.order_by('-created_at').first()
+    transaction.delete()
+
+
+@patch('speid.tasks.orders.capture_exception')
 def test_malformed_order_exception(
     mock_capture_exception: MagicMock, mock_callback_queue
 ):

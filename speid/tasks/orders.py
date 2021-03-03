@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
+from pydantic import ValidationError
 from sentry_sdk import capture_exception
 from stpmex.exc import InvalidAccountType
 
@@ -45,8 +46,7 @@ def send_order(self, order_val: dict):
         execute(order_val)
     except (MalformedOrderException, ResendSuccessOrderException) as exc:
         capture_exception(exc)
-    except ScheduleError as exc:
-        capture_exception(exc)
+    except ScheduleError:
         self.retry(countdown=STP_COUNTDOWN)
     except Exception as exc:
         capture_exception(exc)
@@ -100,6 +100,6 @@ def execute(order_val: dict):
         # Return transaction after 2 hours of creation
         assert (now - transaction.created_at) < timedelta(hours=2)
         transaction.create_order()
-    except (AssertionError, InvalidAccountType):
+    except (AssertionError, InvalidAccountType, ValidationError):
         transaction.set_state(Estado.failed)
         transaction.save()
