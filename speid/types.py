@@ -20,6 +20,7 @@ class Estado(Enum):
     succeeded = 'succeeded'  # LIQUIDACION from STP
     failed = 'failed'  # DEVOLUCION from STP
     error = 'error'  # Malformed order
+    deactivated = 'deactivated'
 
     @classmethod
     def get_state_from_stp(cls, stp_state: str) -> Enum:
