@@ -1,6 +1,6 @@
 blinker==1.4
 boto3==1.16.*
-celery==4.4.6
+celery==5.0.5
 Flask==1.1.2
 flask-mongoengine==1.0.0
 luhnmod10==1.0.2
