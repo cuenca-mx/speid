@@ -1,15 +1,18 @@
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
-from stpmex.exc import InvalidRfcOrCurp
+from stpmex.exc import InvalidRfcOrCurp, StpmexException
+from stpmex.resources.cuentas import Cuenta
 
 from speid.models import Account, Event
 from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import Account as AccountValidation
 
+COUNTDOWN = 600
 
-@celery.task(bind=True, max_retries=60)
+
+@celery.task(bind=True, max_retries=10)
 def create_account(self, account_dict: dict) -> None:
     try:
         execute_create_account(account_dict)
@@ -17,7 +20,7 @@ def create_account(self, account_dict: dict) -> None:
         capture_exception(exc)
     except Exception as exc:
         capture_exception(exc)
-        self.retry(countdown=600, exc=exc)  # Reintenta en 10 minutos
+        self.retry(countdown=COUNTDOWN, exc=exc)  # Reintenta en 10 minutos
 
 
 def execute_create_account(account_dict: dict):
@@ -51,4 +54,20 @@ def update_account(self, account_dict: dict) -> None:
         create_account.apply((account_dict,))
     except Exception as exc:
         capture_exception(exc)
-        self.retry(countdown=600, exc=exc)
+        self.retry(countdown=COUNTDOWN, exc=exc)
+
+
+@celery.task(bind=True, max_retries=5)
+def deactivate_account(self, cuenta: str) -> None:
+    account = Account.objects.get(cuenta=cuenta)
+    stp_cuenta = Cuenta(  # type: ignore
+        rfcCurp=account.rfc_curp,
+        cuenta=account.cuenta,
+    )
+    try:
+        stp_cuenta.baja(stp_cuenta._base_endpoint + '/fisica')
+    except StpmexException as exc:
+        self.retry(countdown=COUNTDOWN, exc=exc)
+    else:
+        account.estado = Estado.deactivated
+        account.save()
