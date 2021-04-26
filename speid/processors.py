@@ -19,5 +19,5 @@ stpmex_client = Client(
     priv_key=private_key,
     priv_key_passphrase=STP_KEY_PASSPHRASE,
     demo=SPEID_ENV != 'prod',
-    base_url=SPEID_ENV,
+    base_url=STP_BASE_URL,
 )
