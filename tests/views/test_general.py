@@ -20,7 +20,9 @@ def test_health_check(client):
 @pytest.mark.usefixtures('mock_callback_queue')
 def test_create_order_event(client, outcome_transaction):
     data = dict(
-        id=outcome_transaction.stp_id, Estado='LIQUIDACION', Detalle="0",
+        id=outcome_transaction.stp_id,
+        Estado='LIQUIDACION',
+        Detalle="0",
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
@@ -94,7 +96,9 @@ def test_invalid_id_order_event(client, outcome_transaction):
 @pytest.mark.usefixtures('mock_callback_queue')
 def test_order_event_duplicated(client, outcome_transaction):
     data = dict(
-        id=outcome_transaction.stp_id, Estado='LIQUIDACION', Detalle="0",
+        id=outcome_transaction.stp_id,
+        Estado='LIQUIDACION',
+        Detalle="0",
     )
     resp = client.post('/orden_events', json=data)
     assert resp.status_code == 200
