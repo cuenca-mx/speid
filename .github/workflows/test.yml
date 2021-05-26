@@ -12,9 +12,7 @@ jobs:
       with:
         python-version: '3.8'
     - name: Install dependencies
-      run: |
-        pip install wheel
-        make install-dev
+      run: make install-dev
     - name: Lint
       run: make lint
 
@@ -28,7 +26,6 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        pip install wheel
         make install-dev
     - name: Run tests
       run: |
@@ -45,7 +42,6 @@ jobs:
           python-version: 3.8
       - name: Install dependencies
         run: |
-          pip install wheel
           make install-dev
       - name: Generate coverage report
         run: |
