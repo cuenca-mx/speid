@@ -59,8 +59,6 @@ def update_account(self, account_dict: dict) -> None:
 
 @celery.task(bind=True, max_retries=5)
 def deactivate_account(self, cuenta: str) -> None:
-    # import pdb
-    # pdb.set_trace()
     try:
         account = Account.objects.get(cuenta=cuenta)
     except DoesNotExist:
