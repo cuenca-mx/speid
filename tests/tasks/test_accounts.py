@@ -299,3 +299,11 @@ def test_deactivate_account(
     assert account.estado == Estado.deactivated
     deactivate_account(account.cuenta)
     mock_retry.assert_called_once()
+
+
+@patch('speid.tasks.accounts.deactivate_account.retry')
+def test_deactivate_account_doesnot_exist(
+    mock_retry: MagicMock,
+):
+    deactivate_account('646180157000011122')
+    mock_retry.assert_not_called()
