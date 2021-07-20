@@ -59,7 +59,11 @@ def update_account(self, account_dict: dict) -> None:
 
 @celery.task(bind=True, max_retries=5)
 def deactivate_account(self, cuenta: str) -> None:
-    account = Account.objects.get(cuenta=cuenta)
+    try:
+        account = Account.objects.get(cuenta=cuenta)
+    except DoesNotExist:
+        return
+
     stp_cuenta = Cuenta(  # type: ignore
         rfcCurp=account.rfc_curp,
         cuenta=account.cuenta,

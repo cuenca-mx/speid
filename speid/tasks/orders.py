@@ -6,7 +6,7 @@ import luhnmod10
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
-from stpmex.exc import InvalidAccountType
+from stpmex.exc import InvalidAccountType, InvalidTrackingKey
 
 from speid.exc import (
     MalformedOrderException,
@@ -100,6 +100,11 @@ def execute(order_val: dict):
         # Return transaction after 2 hours of creation
         assert (now - transaction.created_at) < timedelta(hours=2)
         transaction.create_order()
-    except (AssertionError, InvalidAccountType, ValidationError):
+    except (
+        AssertionError,
+        InvalidAccountType,
+        InvalidTrackingKey,
+        ValidationError,
+    ):
         transaction.set_state(Estado.failed)
         transaction.save()
