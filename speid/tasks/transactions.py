@@ -1,4 +1,5 @@
 from typing import List
+
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
@@ -33,7 +34,7 @@ def execute_create_incoming_transactions(transactions: list):
             transaction_helper.process_incoming_transaction(transaction)
 
 
-@celery.task()
+@celery.task
 def retry_incoming_transactions(self, speid_ids: List[str]) -> None:
     for speid_id in speid_ids:
         transaction = Transaction.objects.get(speid_id=speid_id)
