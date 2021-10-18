@@ -34,14 +34,15 @@ def execute_create_incoming_transactions(transactions: list):
 
 
 @celery.task(bind=True, max_retries=5)
-def resend_incoming_transactions(self, transactions: list):
+def retry_incoming_transactions(self, transactions: list):
     for speid_id in transactions:
         try:
             transaction = Transaction.objects.get(speid_id=speid_id)
-            transaction.confirm_callback_transaction()
-            transaction.save()
         except DoesNotExist as ex:
             capture_exception(ex)
+            continue
+        transaction.confirm_callback_transaction()
+        transaction.save()
 
 
 @celery.task(bind=True)
