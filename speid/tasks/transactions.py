@@ -1,6 +1,7 @@
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
+import speid
 from speid.helpers import transaction_helper
 from speid.models import Event, Transaction
 from speid.tasks import celery
@@ -30,6 +31,17 @@ def execute_create_incoming_transactions(transactions: list):
         except DoesNotExist:
             # Not in speid
             transaction_helper.process_incoming_transaction(transaction)
+
+
+@celery.task(bind=True, max_retries=5)
+def resend_incoming_transactions(self, transactions: list):
+    for speid_id in transactions:
+        try:
+            transaction = Transaction.objects.get(speid_id=speid_id)
+            transaction.confirm_callback_transaction()
+            transaction.save()
+        except DoesNotExist as ex:
+            capture_exception(ex)
 
 
 @celery.task(bind=True)
