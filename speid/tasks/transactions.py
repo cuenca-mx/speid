@@ -2,7 +2,6 @@ from typing import List
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
 
-import speid
 from speid.helpers import transaction_helper
 from speid.models import Event, Transaction
 from speid.tasks import celery
