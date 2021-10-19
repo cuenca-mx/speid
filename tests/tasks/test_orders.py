@@ -9,8 +9,15 @@ from speid.exc import (
     ScheduleError,
 )
 from speid.models import Transaction
-from speid.tasks.orders import execute, send_order
+from speid.tasks.orders import execute, retry_timeout, send_order
 from speid.types import Estado, EventType
+
+
+@pytest.mark.parametrize(
+    'attempts, expected', [(1, 2), (5, 10), (10, 1200), (15, 1200)]
+)
+def test_retry_timeout(attempts, expected):
+    assert retry_timeout(attempts) == expected
 
 
 def test_worker_with_incorrect_version(
