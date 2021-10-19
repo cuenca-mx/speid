@@ -16,6 +16,7 @@ from mongoengine import (
 )
 
 from speid.models.base import BaseModel
+from speid.models.helpers import base62_encode, mongo_to_dict
 
 
 def test_doc_to_dict():
@@ -52,6 +53,7 @@ def test_doc_to_dict():
         additional_info = DictField()
         created_at = DateTimeField(default=datetime.now)
         updated_at = ComplexDateTimeField(default=datetime.now)
+        length = FloatField()
 
     serie = Series(
         title="Some Random Series",
@@ -78,6 +80,7 @@ def test_doc_to_dict():
         info=DataSheet(year="2019", author="Kaiu", rank=4.4),
         secret_code="super_secret_code",
         additional_info={"data": "he63oc48r5jv"},
+        length=1.5,
     )
 
     serie.save()
@@ -98,3 +101,12 @@ def test_doc_to_dict():
     assert type(res["additional_info"]) is dict
     assert type(res["created_at"]) is str
     assert type(res["updated_at"]) is str
+    assert type(res["length"]) is float
+
+
+def test_doc_to_dict_none():
+    assert mongo_to_dict(None) is None
+
+
+def test_base_62_encode():
+    assert base62_encode(0) == '0'

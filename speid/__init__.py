@@ -23,7 +23,7 @@ class CJSONEncoder(json.JSONEncoder):
         else:
             try:
                 encoded = o.to_dict()
-            except AttributeError:
+            except AttributeError:  # pragma: no cover
                 encoded = super().default(o)
         return encoded
 
