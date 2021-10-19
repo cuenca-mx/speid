@@ -35,7 +35,7 @@ def execute_create_incoming_transactions(transactions: list):
 
 
 @celery.task
-def retry_incoming_transactions(self, speid_ids: List[str]) -> None:
+def retry_incoming_transactions(speid_ids: List[str]) -> None:
     for speid_id in speid_ids:
         transaction = Transaction.objects.get(speid_id=speid_id)
         transaction.confirm_callback_transaction()

@@ -8,6 +8,7 @@ from speid.tasks.transactions import (
     create_incoming_transactions,
     execute_create_incoming_transactions,
     process_outgoing_transactions,
+    retry_incoming_transactions,
 )
 from speid.types import Estado, EventType
 from speid.validations import SpeidTransaction
@@ -195,3 +196,14 @@ def test_outgoing_transaction_doesnotexist(outgoing_transaction):
 
     transaction = Transaction.objects.get(speid_id=speid_id)
     assert transaction.estado is Estado.created
+
+
+def test_outgoing_transaction_retry_core(
+    outgoing_transaction, mock_callback_queue
+):
+    speid_id = outgoing_transaction.speid_id
+    with patch(
+        'speid.tasks.transactions.Transaction.confirm_callback_transaction'
+    ) as method_mock:
+        retry_incoming_transactions(speid_ids=[speid_id])
+    method_mock.assert_called_once()
