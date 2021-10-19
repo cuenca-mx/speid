@@ -1,37 +1,10 @@
 from typing import List
 
 from mongoengine import DoesNotExist
-from sentry_sdk import capture_exception
 
-from speid.helpers import transaction_helper
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
-
-
-@celery.task(bind=True, max_retries=5)
-def create_incoming_transactions(self, transactions: list):
-    try:
-        execute_create_incoming_transactions(transactions)
-    except Exception as e:
-        capture_exception(e)
-        self.retry(countdown=600, exc=e)
-
-
-def execute_create_incoming_transactions(transactions: list):
-    for transaction in transactions:
-        try:
-            previous_transaction = Transaction.objects.get(
-                clave_rastreo=transaction['ClaveRastreo'],
-                fecha_operacion=transaction['FechaOperacion'],
-            )
-            if previous_transaction.estado == Estado.error:
-                # Not in backend
-                previous_transaction.confirm_callback_transaction()
-                previous_transaction.save()
-        except DoesNotExist:
-            # Not in speid
-            transaction_helper.process_incoming_transaction(transaction)
 
 
 @celery.task
