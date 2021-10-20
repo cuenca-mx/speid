@@ -33,6 +33,7 @@ def test_account():
     assert account_saved.cuenta == account.cuenta
     assert account_saved.rfc_curp == account.rfc_curp
     assert account_saved.telefono == account.telefono
+    assert account_saved.pais_nacimiento == 'SE_DESCONOCE'
 
     account.delete()
 
