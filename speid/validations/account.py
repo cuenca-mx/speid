@@ -50,4 +50,8 @@ class Account:
     def transform(self) -> Model:
         account = Model(**self.to_dict())
         account.estado = Estado.created
+        if not account.apellido_materno:
+            account.pais_nacimiento = 'SE_DESCONOCE'
+            # Suggestion of stp ticket
+            # https://stpmex.zendesk.com/hc/es/requests/74131
         return account
