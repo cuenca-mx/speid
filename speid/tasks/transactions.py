@@ -11,6 +11,7 @@ from speid.types import Estado, EventType
 def retry_incoming_transactions(speid_ids: List[str]) -> None:
     for speid_id in speid_ids:
         transaction = Transaction.objects.get(speid_id=speid_id)
+        transaction.events.append(Event(type=EventType.retry))
         transaction.confirm_callback_transaction()
         transaction.save()
 

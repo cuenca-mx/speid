@@ -109,11 +109,11 @@ def execute(order_val: dict):
     except (
         AssertionError,
         InvalidAccountType,
-        InvalidTrackingKey,
-        ValidationError,
-        PldRejected,
-        InvalidInstitution,
         InvalidAmount,
+        InvalidInstitution,
+        InvalidTrackingKey,
+        PldRejected,
+        ValidationError,
     ):
         transaction.set_state(Estado.failed)
         transaction.save()
