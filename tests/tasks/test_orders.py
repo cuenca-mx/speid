@@ -2,6 +2,14 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+import vcr
+from stpmex.exc import (
+    InvalidAccountType,
+    InvalidAmount,
+    InvalidInstitution,
+    InvalidTrackingKey,
+    PldRejected,
+)
 
 from speid.exc import (
     MalformedOrderException,
@@ -262,8 +270,19 @@ def test_stp_schedule_limit(
         mock_capture_exception.assert_called_once()
 
 
-@pytest.mark.vcr
-def test_resend_not_success_order(create_account, mock_callback_queue):
+@vcr.use_cassette('tests/tasks/cassettes/test_resend_not_success_order.yaml')
+@pytest.mark.parametrize(
+    'exc',
+    [
+        (AssertionError),
+        (InvalidAccountType),
+        (InvalidAmount),
+        (InvalidInstitution),
+        (InvalidTrackingKey),
+        (PldRejected),
+    ],
+)
+def test_resend_not_success_order(exc, create_account, mock_callback_queue):
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',
@@ -280,7 +299,7 @@ def test_resend_not_success_order(create_account, mock_callback_queue):
 
     with patch(
         'speid.tasks.orders.Transaction.create_order',
-        side_effect=AssertionError(),
+        side_effect=exc(),
     ):
         execute(order)
 
