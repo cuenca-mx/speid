@@ -51,7 +51,7 @@ def update_account(self, account_dict: dict) -> None:
     except ValidationError as exc:
         capture_exception(exc)
     except DoesNotExist:
-        create_account.apply((account_dict,))
+        create_account.apply_async((account_dict,))
     except Exception as exc:
         capture_exception(exc)
         self.retry(countdown=COUNTDOWN, exc=exc)
