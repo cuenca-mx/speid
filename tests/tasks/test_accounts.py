@@ -233,7 +233,7 @@ def test_update_account_failed_with_validation_error_raised(
 
 @patch('speid.tasks.accounts.capture_exception')
 @patch('speid.tasks.accounts.update_account.retry')
-@patch('speid.tasks.accounts.create_account.apply')
+@patch('speid.tasks.accounts.create_account.apply_async')
 def test_update_account_does_not_exists_then_create_account(
     mock_apply: MagicMock,
     mock_retry: MagicMock,

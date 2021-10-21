@@ -50,4 +50,4 @@ def re_execute_transactions(speid_id):
 
 
 if __name__ == "__main__":
-    re_execute_transactions()  # pragma: nocover
+    re_execute_transactions()  # pragma: no cover

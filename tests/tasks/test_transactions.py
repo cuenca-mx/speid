@@ -1,13 +1,12 @@
 import datetime as dt
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
-    create_incoming_transactions,
-    execute_create_incoming_transactions,
     process_outgoing_transactions,
+    retry_incoming_transactions,
 )
 from speid.types import Estado, EventType
 from speid.validations import SpeidTransaction
@@ -82,56 +81,6 @@ def outgoing_transaction():
     transaction.delete()
 
 
-@pytest.mark.vcr
-def test_transaction_not_in_speid(incoming_transactions, mock_callback_queue):
-    create_incoming_transactions(incoming_transactions)
-
-    saved_transaction = Transaction.objects.get(
-        clave_rastreo=incoming_transactions[0]['ClaveRastreo']
-    )
-    assert saved_transaction.estado == Estado.succeeded
-
-
-@patch('speid.tasks.transactions.capture_exception')
-@patch('speid.tasks.transactions.create_incoming_transactions.retry')
-def test_retry_on_exception(
-    mock_retry: MagicMock,
-    mock_capture_exception: MagicMock,
-    incoming_transactions,
-):
-    with patch(
-        'speid.tasks.transactions.execute_create_incoming_transactions',
-        side_effect=Exception(),
-    ):
-        create_incoming_transactions(incoming_transactions)
-
-    mock_capture_exception.assert_called_once()
-    mock_retry.assert_called_once()
-
-
-@pytest.mark.vcr
-def test_transaction_not_in_backend_but_in_speid(
-    incoming_transactions, mock_callback_queue
-):
-    execute_create_incoming_transactions(incoming_transactions)
-
-    saved_transaction = Transaction.objects.get(
-        clave_rastreo=incoming_transactions[0]['ClaveRastreo']
-    )
-
-    assert saved_transaction.estado == Estado.succeeded
-    saved_transaction.estado = Estado.error
-    saved_transaction.save()
-
-    execute_create_incoming_transactions([incoming_transactions[0]])
-
-    sent_transaction = Transaction.objects.get(
-        clave_rastreo=saved_transaction.clave_rastreo
-    )
-
-    assert sent_transaction.estado == Estado.succeeded
-
-
 def test_outgoing_transaction_succeeded(
     outgoing_transaction, mock_callback_queue
 ):
@@ -195,3 +144,14 @@ def test_outgoing_transaction_doesnotexist(outgoing_transaction):
 
     transaction = Transaction.objects.get(speid_id=speid_id)
     assert transaction.estado is Estado.created
+
+
+def test_outgoing_transaction_retry_core(
+    outgoing_transaction, mock_callback_queue
+):
+    speid_id = outgoing_transaction.speid_id
+    with patch(
+        'speid.tasks.transactions.Transaction.confirm_callback_transaction'
+    ) as method_mock:
+        retry_incoming_transactions(speid_ids=[speid_id])
+    method_mock.assert_called_once()

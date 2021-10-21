@@ -192,7 +192,7 @@ def mongo_to_python_type(field, data):
         rv = data.isoformat()
     elif field_type is ComplexDateTimeField:
         rv = field.to_python(data).isoformat()
-    elif rv is FloatField:
+    elif field_type is FloatField:
         rv = float(data)
     elif field_type is IntField:
         rv = int(data)

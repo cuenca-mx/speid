@@ -6,7 +6,13 @@ import luhnmod10
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
-from stpmex.exc import InvalidAccountType, InvalidTrackingKey
+from stpmex.exc import (
+    InvalidAccountType,
+    InvalidAmount,
+    InvalidInstitution,
+    InvalidTrackingKey,
+    PldRejected,
+)
 
 from speid.exc import (
     MalformedOrderException,
@@ -103,7 +109,10 @@ def execute(order_val: dict):
     except (
         AssertionError,
         InvalidAccountType,
+        InvalidAmount,
+        InvalidInstitution,
         InvalidTrackingKey,
+        PldRejected,
         ValidationError,
     ):
         transaction.set_state(Estado.failed)
