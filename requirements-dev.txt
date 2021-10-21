@@ -3,7 +3,7 @@ flake8==3.8.*
 isort[requirements]==5.7.*
 mongomock==3.22.*
 moto==1.3.*
-mypy==0.790
+mypy==0.910
 pytest==6.2.*
 pytest-cov==2.11.*
 pytest-mock==3.5.*
