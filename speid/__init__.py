@@ -65,7 +65,7 @@ app = Flask('speid')
 
 app.config['MONGODB_HOST'] = DATABASE_URI
 
-app.json_encoder = CJSONEncoder
+app.json_encoder = CJSONEncoder  # type: ignore
 
 db = MongoEngine(app)
 
