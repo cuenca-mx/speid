@@ -4,11 +4,12 @@ from sentry_sdk import capture_exception
 from stpmex.exc import InvalidRfcOrCurp, StpmexException
 from stpmex.resources.cuentas import Cuenta
 
-from speid.models import PhysicalAccount, Event
+from speid.models import Event, PhysicalAccount
 from speid.models.account import Account
 from speid.tasks import celery
 from speid.types import Estado, EventType
-from speid.validations import PhysicalAccount as PhysicalAccountValidation, MoralAccount as MoralAccountValidation
+from speid.validations import MoralAccount as MoralAccountValidation
+from speid.validations import PhysicalAccount as PhysicalAccountValidation
 
 COUNTDOWN = 600
 
@@ -50,7 +51,9 @@ def execute_create_account(account_dict: dict):
 @celery.task(bind=True, max_retries=0)
 def update_account(self, account_dict: dict) -> None:
     try:
-        validation_model = PhysicalAccountValidation(**account_dict)  # type: ignore
+        validation_model = PhysicalAccountValidation(
+            **account_dict
+        )  # type: ignore
         account = PhysicalAccount.objects.get(cuenta=validation_model.cuenta)
         account.update_account(validation_model.transform())
     except ValidationError as exc:

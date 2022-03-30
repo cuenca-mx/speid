@@ -6,7 +6,7 @@ __all__ = [
     'MoralAccount',
 ]
 
-from .account import PhysicalAccount, MoralAccount
+from .account import MoralAccount, PhysicalAccount
 from .speid_transaction import SpeidTransaction
 from .speid_transaction_factory import TransactionFactory
 from .stp_transaction import StpTransaction

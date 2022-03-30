@@ -39,6 +39,9 @@ class Account(Document, BaseModel):
     nombre = StringField()
     cuenta = StringField(unique=True)
     rfc_curp = StringField()
+    is_restricted = BooleanField(required=False)
+    rfc = StringField(required=False)
+    curp = StringField(required=False)
 
     events = ListField(ReferenceField(Event))
 
@@ -65,9 +68,6 @@ class PhysicalAccount(Account):
     email = StringField(required=False)
     id_identificacion = StringField(required=False)
 
-    is_restricted = BooleanField(required=False)
-    rfc = StringField(required=False)
-    curp = StringField(required=False)
     events = ListField(ReferenceField(Event))
 
     def create_account(self) -> CuentaFisica:

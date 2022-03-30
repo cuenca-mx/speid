@@ -20,7 +20,7 @@ from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
-from .account import PhysicalAccount
+from .account import Account, PhysicalAccount
 from .base import BaseModel
 from .events import Event
 from .helpers import (
@@ -139,7 +139,9 @@ class Transaction(Document, BaseModel):
         # Validate account has already been created
         if not SKIP_VALIDATION_PRIOR_SEND_ORDER:
             try:
-                account = PhysicalAccount.objects.get(cuenta=self.cuenta_ordenante)
+                account = PhysicalAccount.objects.get(
+                    cuenta=self.cuenta_ordenante
+                )
                 assert account.estado is Estado.succeeded
             except (DoesNotExist, AssertionError):
                 self.estado = Estado.error

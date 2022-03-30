@@ -6,7 +6,9 @@ from clabe import Clabe
 from pydantic import ValidationError, validator
 from pydantic.dataclasses import dataclass
 
-from speid.models import Account as AccountModel, PhysicalAccount as PhysicalAccountModel, MoralAccount as MoralAccountModel
+from speid.models import Account as AccountModel
+from speid.models import MoralAccount as MoralAccountModel
+from speid.models import PhysicalAccount as PhysicalAccountModel
 from speid.types import Estado
 
 CURP_RE = re.compile(r'^[A-Z]{4}[0-9]{6}[A-Z]{6}[A-Z|0-9][0-9]$')
@@ -21,10 +23,12 @@ class Account:
     @validator('rfc_curp')
     def validate_curp_regex(cls, v) -> str:
         if (len(v) == 18 and re.match(CURP_RE, v)) or (  # CURP
-                len(v) == 12 or len(v) == 13  # RFC
+            len(v) == 12 or len(v) == 13  # RFC
         ):
             return v
-        raise ValidationError(errors=['Invalid curp format'], model=AccountModel)
+        raise ValidationError(
+            errors=['Invalid curp format'], model=AccountModel
+        )
 
     def to_dict(self) -> dict:
         return {
