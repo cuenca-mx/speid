@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from stpmex.exc import InvalidRfcOrCurp
 
-from speid.models import Account
+from speid.models import PhysicalAccount
 from speid.tasks.accounts import (
     create_account,
     deactivate_account,
@@ -28,7 +28,7 @@ def test_create_account():
 
     execute_create_account(account_dict)
 
-    account = Account.objects.get(cuenta='646180157069665325')
+    account = PhysicalAccount.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
 
     account.delete()
@@ -47,7 +47,7 @@ def test_create_account_no_name():
 
 @pytest.mark.vcr
 def test_create_account_existing_account():
-    account = Account(
+    account = PhysicalAccount(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -71,14 +71,14 @@ def test_create_account_existing_account():
 
     execute_create_account(account_dict)
 
-    account = Account.objects.get(cuenta='646180157069665325')
+    account = PhysicalAccount.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
 
     account.delete()
 
 
 def test_create_account_existing_succeeded_account():
-    account = Account(
+    account = PhysicalAccount(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -103,7 +103,7 @@ def test_create_account_existing_succeeded_account():
 
     execute_create_account(account_dict)
 
-    account = Account.objects.get(cuenta='646180157069665325')
+    account = PhysicalAccount.objects.get(cuenta='646180157069665325')
     assert account.estado is Estado.succeeded
 
     account.delete()
@@ -202,7 +202,7 @@ def test_update_account_successfully(
     mock_capture_exception.assert_not_called()
     mock_retry.assert_not_called()
 
-    account = Account.objects.get(cuenta='646180157000000004')
+    account = PhysicalAccount.objects.get(cuenta='646180157000000004')
     assert account.nombre == 'Ricardo'
     assert account.apellido_paterno == 'Sánchez'
     assert account.apellido_materno == 'Castillo'
@@ -291,11 +291,11 @@ def test_deactivate_account(
     )
     # Crea la cuenta
     execute_create_account(account_dict)
-    account = Account.objects.get(cuenta='646180157069665325')
+    account = PhysicalAccount.objects.get(cuenta='646180157069665325')
     assert account.estado == Estado.succeeded
     # Elimina la cuenta
     deactivate_account(account.cuenta)
-    account = Account.objects.get(cuenta=account.cuenta)
+    account = PhysicalAccount.objects.get(cuenta=account.cuenta)
     assert account.estado == Estado.deactivated
     deactivate_account(account.cuenta)
     mock_retry.assert_called_once()

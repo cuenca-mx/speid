@@ -4,13 +4,13 @@ import pytest
 from pydantic import ValidationError
 from stpmex.exc import InvalidRfcOrCurp
 
-from speid.models import Account
+from speid.models import PhysicalAccount
 from speid.types import Estado
-from speid.validations import PhysicalAccount as AccountValidation
+from speid.validations import PhysicalAccount as PhysicalAccountValidation
 
 
 def test_account():
-    account_validation = AccountValidation(
+    account_validation = PhysicalAccountValidation(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157063641989',
@@ -22,7 +22,7 @@ def test_account():
     account = account_validation.transform()
 
     account.save()
-    account_saved = Account.objects.get(id=account.id)
+    account_saved = PhysicalAccount.objects.get(id=account.id)
 
     assert account_saved.created_at is not None
     assert account_saved.updated_at is not None
@@ -40,7 +40,7 @@ def test_account():
 
 def test_account_bad_curp():
     with pytest.raises(ValidationError):
-        AccountValidation(
+        PhysicalAccountValidation(
             nombre='Ricardo',
             apellido_paterno='Sánchez',
             cuenta='646180157063641989',
@@ -53,7 +53,7 @@ def test_account_bad_curp():
 
 @pytest.mark.vcr
 def test_create_account():
-    account_validation = AccountValidation(
+    account_validation = PhysicalAccountValidation(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -76,7 +76,7 @@ def test_create_account():
 
 @pytest.mark.vcr
 def test_create_account_failed():
-    account_validation = AccountValidation(
+    account_validation = PhysicalAccountValidation(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157063641989',
@@ -94,7 +94,7 @@ def test_create_account_failed():
     with pytest.raises(InvalidRfcOrCurp):
         account.create_account()
 
-    account = Account.objects.get(id=account_id)
+    account = PhysicalAccount.objects.get(id=account_id)
     assert account.estado is Estado.error
 
     account.delete()

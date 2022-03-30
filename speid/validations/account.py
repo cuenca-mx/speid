@@ -6,7 +6,7 @@ from clabe import Clabe
 from pydantic import ValidationError, validator
 from pydantic.dataclasses import dataclass
 
-from speid.models import Account as AccountModel
+from speid.models import PhysicalAccount as AccountModel
 from speid.types import Estado
 
 CURP_RE = re.compile(r'^[A-Z]{4}[0-9]{6}[A-Z]{6}[A-Z|0-9][0-9]$')

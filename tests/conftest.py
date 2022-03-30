@@ -27,10 +27,10 @@ def create_account():
     # Pongo los import aquí porque de otra forma no puedo hacer tests del
     # __init__ sin que se haya importado ya. Y así no repito el mismo fixture
     # en todos los lugares donde se usa
-    from speid.models import Account
+    from speid.models import PhysicalAccount
     from speid.types import Estado
 
-    account = Account(
+    account = PhysicalAccount(
         estado=Estado.succeeded,
         nombre='Ricardo',
         apellido_paterno='Sánchez',

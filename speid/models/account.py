@@ -8,7 +8,7 @@ from mongoengine import (
     ReferenceField,
     StringField,
 )
-from stpmex.resources import CuentaFisica
+from stpmex.resources import CuentaFisica, CuentaMoral
 from stpmex.types import Genero, Pais
 
 from speid.processors import stpmex_client
@@ -29,15 +29,25 @@ from .helpers import (
 @save_events.apply
 @delete_events.apply
 class Account(Document, BaseModel):
+    meta = {'allow_inheritance': True}
+
     created_at = date_now()
     updated_at = DateTimeField()
     estado: Enum = EnumField(Estado, default=Estado.created)
 
     nombre = StringField()
-    apellido_paterno = StringField()
-    apellido_materno = StringField(required=False)
     cuenta = StringField(unique=True)
     rfc_curp = StringField()
+
+    events = ListField(ReferenceField(Event))
+
+
+@updated_at.apply
+@save_events.apply
+@delete_events.apply
+class PhysicalAccount(Account):
+    apellido_paterno = StringField()
+    apellido_materno = StringField(required=False)
     telefono = StringField()
     fecha_nacimiento = DateTimeField(required=False)
     pais_nacimiento = StringField(required=False)
@@ -53,8 +63,6 @@ class Account(Document, BaseModel):
     cp = StringField(required=False)
     email = StringField(required=False)
     id_identificacion = StringField(required=False)
-
-    events = ListField(ReferenceField(Event))
 
     def create_account(self) -> CuentaFisica:
         self.estado = Estado.submitted
@@ -99,7 +107,7 @@ class Account(Document, BaseModel):
             self.save()
             return cuenta
 
-    def update_account(self, account: 'Account') -> None:
+    def update_account(self, account: 'PhysicalAccount') -> None:
         attributes_to_update = [
             'rfc_curp',
             'nombre',
@@ -123,3 +131,40 @@ class Account(Document, BaseModel):
             setattr(self, attr, getattr(account, attr))
         self.estado = Estado.succeeded
         self.save()
+
+
+@updated_at.apply
+@save_events.apply
+@delete_events.apply
+class MoralAccount(Account):
+    empresa = StringField(required=True)
+    pais = StringField(required=False)
+    fecha_constitucion = DateTimeField(required=True)
+    entidad_federativa = StringField()
+    actividad_economica = StringField()
+
+    def create_account(self) -> CuentaMoral:
+        self.estado = Estado.submitted
+        self.save()
+        optionals = dict(
+            entidadFederativa=self.entidad_federativa,
+            actividadEconomica=self.actividadEconomica,
+        )
+        optionals = {key: val for key, val in optionals.items() if val}
+
+        try:
+            cuenta = stpmex_client.cuentas_morales.create(
+                empresa=self.empresa,
+                pais=Pais[self.pais],
+                fechaConstitucion=self.fecha_constitucion,
+                **optionals,
+            )
+        except Exception as e:
+            self.events.append(Event(type=EventType.error, metadata=str(e)))
+            self.estado = Estado.error
+            self.save()
+            raise e
+        else:
+            self.estado = Estado.succeeded
+            self.save()
+            return cuenta

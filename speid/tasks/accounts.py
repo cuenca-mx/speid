@@ -4,7 +4,7 @@ from sentry_sdk import capture_exception
 from stpmex.exc import InvalidRfcOrCurp, StpmexException
 from stpmex.resources.cuentas import Cuenta
 
-from speid.models import Account, Event
+from speid.models import PhysicalAccount, Event
 from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import PhysicalAccount as PhysicalAccountValidation, MoralAccount as MoralAccountValidation
@@ -32,7 +32,7 @@ def execute_create_account(account_dict: dict):
     # Look for previous accounts
     account = account_val.transform()
     try:
-        previous_account = Account.objects.get(cuenta=account.cuenta)
+        previous_account = PhysicalAccount.objects.get(cuenta=account.cuenta)
     except DoesNotExist:
         account.events.append(Event(type=EventType.created))
         account.save()
@@ -50,7 +50,7 @@ def execute_create_account(account_dict: dict):
 def update_account(self, account_dict: dict) -> None:
     try:
         validation_model = PhysicalAccountValidation(**account_dict)  # type: ignore
-        account = Account.objects.get(cuenta=validation_model.cuenta)
+        account = PhysicalAccount.objects.get(cuenta=validation_model.cuenta)
         account.update_account(validation_model.transform())
     except ValidationError as exc:
         capture_exception(exc)
@@ -64,7 +64,7 @@ def update_account(self, account_dict: dict) -> None:
 @celery.task(bind=True, max_retries=5)
 def deactivate_account(self, cuenta: str) -> None:
     try:
-        account = Account.objects.get(cuenta=cuenta)
+        account = PhysicalAccount.objects.get(cuenta=cuenta)
     except DoesNotExist:
         return
 
