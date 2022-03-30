@@ -6,7 +6,7 @@ from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import Account
 from speid.types import Estado
-from speid.validations import Account as AccountValidation
+from speid.validations import PhysicalAccount as AccountValidation
 
 
 def test_account():

@@ -256,7 +256,7 @@ def test_update_account_does_not_exists_then_create_account(
 
 
 @pytest.mark.vcr
-@patch('speid.tasks.accounts.AccountValidation', side_effect=Exception())
+@patch('speid.tasks.accounts.PhysicalAccountValidation', side_effect=Exception())
 @patch('speid.tasks.accounts.capture_exception')
 @patch('speid.tasks.accounts.update_account.retry', return_value=None)
 def test_update_account_retries_on_unexpected_exception(

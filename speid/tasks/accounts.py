@@ -7,7 +7,7 @@ from stpmex.resources.cuentas import Cuenta
 from speid.models import Account, Event
 from speid.tasks import celery
 from speid.types import Estado, EventType
-from speid.validations import Account as AccountValidation
+from speid.validations import PhysicalAccount as PhysicalAccountValidation, MoralAccount as MoralAccountValidation
 
 COUNTDOWN = 600
 
@@ -24,7 +24,11 @@ def create_account(self, account_dict: dict) -> None:
 
 
 def execute_create_account(account_dict: dict):
-    account_val = AccountValidation(**account_dict)  # type: ignore
+    if 'apellido_paterno' in account_dict:
+        account_val = PhysicalAccountValidation(**account_dict)  # type: ignore
+    else:
+        account_val = MoralAccountValidation(**account_dict)
+
     # Look for previous accounts
     account = account_val.transform()
     try:
@@ -45,7 +49,7 @@ def execute_create_account(account_dict: dict):
 @celery.task(bind=True, max_retries=0)
 def update_account(self, account_dict: dict) -> None:
     try:
-        validation_model = AccountValidation(**account_dict)  # type: ignore
+        validation_model = PhysicalAccountValidation(**account_dict)  # type: ignore
         account = Account.objects.get(cuenta=validation_model.cuenta)
         account.update_account(validation_model.transform())
     except ValidationError as exc:
