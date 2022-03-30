@@ -148,12 +148,12 @@ class MoralAccount(Account):
         self.save()
         optionals = dict(
             entidadFederativa=self.entidad_federativa,
-            actividadEconomica=self.actividadEconomica,
+            actividadEconomica=self.actividad_economica,
         )
         optionals = {key: val for key, val in optionals.items() if val}
 
         try:
-            cuenta = stpmex_client.cuentas_morales.create(
+            cuenta = stpmex_client.cuentas_morales.alta(
                 empresa=self.empresa,
                 pais=Pais[self.pais],
                 fechaConstitucion=self.fecha_constitucion,

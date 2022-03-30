@@ -5,6 +5,7 @@ import pytest
 from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import PhysicalAccount
+from speid.models.account import MoralAccount
 from speid.tasks.accounts import (
     create_account,
     deactivate_account,
@@ -29,6 +30,27 @@ def test_create_account():
     execute_create_account(account_dict)
 
     account = PhysicalAccount.objects.get(cuenta='646180157069665325')
+    assert account.estado is Estado.succeeded
+
+    account.delete()
+
+
+# Mocks en vez de cassettes en lo que resolvemos el problema de
+# el signature en STP
+@patch('stpmex.resources.cuentas.Cuenta.alta')
+def test_create_moral_account(mock_create):
+    account_dict = dict(
+        cuenta='646180157062429678',
+        rfc_curp='TCU200828RX8',
+        nombre='TARJETAS CUENCA',
+        empresa='TARJETAS CUENCA',
+        pais='MX',
+        fecha_constitucion='2021-01-01T00:00:00',
+    )
+
+    execute_create_account(account_dict)
+
+    account = MoralAccount.objects.get(cuenta='646180157062429678')
     assert account.estado is Estado.succeeded
 
     account.delete()

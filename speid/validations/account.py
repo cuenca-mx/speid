@@ -6,7 +6,7 @@ from clabe import Clabe
 from pydantic import ValidationError, validator
 from pydantic.dataclasses import dataclass
 
-from speid.models import PhysicalAccount as AccountModel
+from speid.models import Account as AccountModel, PhysicalAccount as PhysicalAccountModel, MoralAccount as MoralAccountModel
 from speid.types import Estado
 
 CURP_RE = re.compile(r'^[A-Z]{4}[0-9]{6}[A-Z]{6}[A-Z|0-9][0-9]$')
@@ -53,7 +53,7 @@ class PhysicalAccount(Account):
     id_identificacion: Optional[str] = None
 
     def transform(self) -> AccountModel:
-        account = AccountModel(**self.to_dict())
+        account = PhysicalAccountModel(**self.to_dict())
         account.estado = Estado.created
         if not account.apellido_materno:
             account.pais_nacimiento = 'SE_DESCONOCE'
@@ -66,11 +66,11 @@ class PhysicalAccount(Account):
 class MoralAccount(Account):
     empresa: str
     pais: str
-    fecha_constitucion: dt.date
+    fecha_constitucion: dt.datetime
 
     entidad_federativa: Optional[str] = None
     actividad_economica: Optional[str] = None
 
     def transform(self) -> AccountModel:
-        account = AccountModel(**self.to_dict())
+        account = MoralAccountModel(**self.to_dict())
         return account

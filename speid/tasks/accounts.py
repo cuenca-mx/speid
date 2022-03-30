@@ -5,6 +5,7 @@ from stpmex.exc import InvalidRfcOrCurp, StpmexException
 from stpmex.resources.cuentas import Cuenta
 
 from speid.models import PhysicalAccount, Event
+from speid.models.account import Account
 from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import PhysicalAccount as PhysicalAccountValidation, MoralAccount as MoralAccountValidation
@@ -32,7 +33,7 @@ def execute_create_account(account_dict: dict):
     # Look for previous accounts
     account = account_val.transform()
     try:
-        previous_account = PhysicalAccount.objects.get(cuenta=account.cuenta)
+        previous_account = Account.objects.get(cuenta=account.cuenta)
     except DoesNotExist:
         account.events.append(Event(type=EventType.created))
         account.save()
