@@ -115,7 +115,6 @@ class Transaction(Document, BaseModel):
         response = ''
         self.events.append(Event(type=EventType.created))
         self.save()
-        self.estado = Estado.succeeded
         callback_helper.send_transaction(self.to_dict())
 
         self.events.append(
@@ -125,7 +124,7 @@ class Transaction(Document, BaseModel):
     def is_valid_account(self) -> bool:
         is_valid = True
         try:
-            account = Account.objects.get(self.cuenta_beneficiario)
+            account = Account.objects.get(cuenta=self.cuenta_beneficiario)
             if account.is_restricted:
                 ordenante = self.rfc_curp_ordenante
                 is_valid = (

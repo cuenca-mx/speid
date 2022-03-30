@@ -231,3 +231,17 @@ def test_create_orden_without_ordenante(client):
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
     transaction.delete()
+
+
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_incoming_restricted_account(
+    client, default_income_transaction, create_account
+):
+    create_account.is_restricted = True
+    create_account.save()
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.rejected
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'DEVOLUCION'
+    transaction.delete()
