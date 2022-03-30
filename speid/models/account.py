@@ -1,6 +1,7 @@
 from enum import Enum
 
 from mongoengine import (
+    BooleanField,
     DateTimeField,
     Document,
     IntField,
@@ -63,6 +64,11 @@ class PhysicalAccount(Account):
     cp = StringField(required=False)
     email = StringField(required=False)
     id_identificacion = StringField(required=False)
+
+    is_restricted = BooleanField(required=False)
+    rfc = StringField(required=False)
+    curp = StringField(required=False)
+    events = ListField(ReferenceField(Event))
 
     def create_account(self) -> CuentaFisica:
         self.estado = Estado.submitted

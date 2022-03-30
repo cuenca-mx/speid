@@ -122,6 +122,19 @@ class Transaction(Document, BaseModel):
             Event(type=EventType.completed, metadata=str(response))
         )
 
+    def is_valid_account(self) -> bool:
+        is_valid = True
+        try:
+            account = Account.objects.get(self.cuenta_beneficiario)
+            if account.is_restricted:
+                ordenante = self.rfc_curp_ordenante
+                is_valid = (
+                    ordenante == account.rfc or ordenante == account.curp
+                )
+        except DoesNotExist:
+            pass
+        return is_valid
+
     def create_order(self) -> Orden:
         # Validate account has already been created
         if not SKIP_VALIDATION_PRIOR_SEND_ORDER:

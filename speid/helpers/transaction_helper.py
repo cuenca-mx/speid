@@ -23,6 +23,8 @@ def process_incoming_transaction(incoming_transaction: dict) -> dict:
             ):
                 capture_message('Transacción retenida')
                 raise Exception
+        if not transaction.is_valid_account():
+            transaction.estado = Estado.rejected
         transaction.confirm_callback_transaction()
         transaction.save()
         r = incoming_transaction
