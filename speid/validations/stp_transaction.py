@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from typing import Optional
 
@@ -6,6 +7,8 @@ from pydantic.dataclasses import dataclass
 
 from speid.models import Transaction
 from speid.models.helpers import base62_uuid, camel_to_snake
+
+regex = re.compile(r'^[A-Z]{4}[0-9]{6}[A-Z]{6}[A-Z|0-9][0-9]$')
 
 
 @dataclass
@@ -41,4 +44,18 @@ class StpTransaction:
         transaction.fecha_operacion = datetime.strptime(
             str(transaction.fecha_operacion), '%Y%m%d'
         ).date()
+
+        (
+            transaction.curp_ordenante,
+            transaction.rfc_ordenante,
+        ) = self.get_rfc_curp()
         return transaction
+
+    def get_rfc_curp(self):
+        curp = None
+        rfc = None
+        if regex.match(self.RFCCurpOrdenante):
+            curp = self.RFCCurpOrdenante
+        elif len(self.RFCCurpOrdenante) == 13:
+            rfc = self.RFCCurpOrdenante
+        return rfc, curp
