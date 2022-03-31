@@ -92,6 +92,9 @@ class Transaction(Document, BaseModel):
     compound_key = StringField()
     detalle = StringField()
 
+    curp_ordenante = StringField()
+    rfc_ordenante = StringField()
+
     events = ListField(ReferenceField(Event))
 
     meta = {

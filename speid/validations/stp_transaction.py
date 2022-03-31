@@ -46,8 +46,8 @@ class StpTransaction:
         ).date()
 
         (
-            transaction.curp_ordenante,
             transaction.rfc_ordenante,
+            transaction.curp_ordenante,
         ) = self.get_rfc_curp()
         return transaction
 
