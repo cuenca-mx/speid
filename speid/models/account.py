@@ -39,9 +39,12 @@ class Account(Document, BaseModel):
     nombre = StringField()
     cuenta = StringField(unique=True)
     rfc_curp = StringField()
+
+    # if is_restricted check ordenante_curp_rfc is
+    # self.allowed_rfc o self.allowed_curp
     is_restricted = BooleanField(required=False)
-    rfc = StringField(required=False)
-    curp = StringField(required=False)
+    allowed_rfc = StringField(required=False)
+    allowed_curp = StringField(required=False)
 
     events = ListField(ReferenceField(Event))
 

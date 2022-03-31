@@ -128,7 +128,8 @@ class Transaction(Document, BaseModel):
             if account.is_restricted:
                 ordenante = self.rfc_curp_ordenante
                 is_valid = (
-                    ordenante == account.rfc or ordenante == account.curp
+                    ordenante == account.allowed_rfc
+                    or ordenante == account.allowed_curp
                 )
         except DoesNotExist:
             pass
