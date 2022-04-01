@@ -1,6 +1,6 @@
 SHELL := bash
 PROJECT = speid
-PYTHON = python3.7
+PYTHON = python3.8
 DOCKER = docker-compose run --rm $(PROJECT)
 isort = isort $(PROJECT) tests
 black = black -S -l 79 --target-version py37 $(PROJECT) tests

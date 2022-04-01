@@ -68,7 +68,6 @@ class PhysicalAccount(Account):
 
 @dataclass
 class MoralAccount(Account):
-    empresa: str
     pais: str
     fecha_constitucion: dt.datetime
 

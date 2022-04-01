@@ -5,6 +5,7 @@ import pytest
 from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import PhysicalAccount
+from speid.validations import MoralAccount
 from speid.models.account import MoralAccount
 from speid.tasks.accounts import (
     create_account,
@@ -18,6 +19,7 @@ from speid.types import Estado
 @pytest.mark.vcr
 def test_create_account():
     account_dict = dict(
+        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -35,15 +37,13 @@ def test_create_account():
     account.delete()
 
 
-# Mocks en vez de cassettes en lo que resolvemos el problema de
-# el signature en STP
-@patch('stpmex.resources.cuentas.Cuenta.alta')
-def test_create_moral_account(mock_create):
+@pytest.mark.vcr
+def test_create_moral_account():
     account_dict = dict(
+        type='moral',
         cuenta='646180157062429678',
         rfc_curp='TCU200828RX8',
         nombre='TARJETAS CUENCA',
-        empresa='TARJETAS CUENCA',
         pais='MX',
         fecha_constitucion='2021-01-01T00:00:00',
     )
@@ -58,6 +58,7 @@ def test_create_moral_account(mock_create):
 
 def test_create_account_no_name():
     account_dict = dict(
+        type='physical',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
         rfc_curp='SACR891125HDFGHI01',
@@ -82,6 +83,7 @@ def test_create_account_existing_account():
     account.save()
 
     account_dict = dict(
+        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -114,6 +116,7 @@ def test_create_account_existing_succeeded_account():
     account.save()
 
     account_dict = dict(
+        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -137,6 +140,7 @@ def test_does_not_retry_when_validation_error_raised(
     mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
+        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -157,6 +161,7 @@ def test_does_not_retry_when_invalid_rfc_raised(
     mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
+        type='physical',
         nombre='24',
         apellido_paterno='napoli',
         apellido_materno='vico pergola sant antonio abate 24',
@@ -201,6 +206,7 @@ def test_update_account_successfully(
     mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
+        type='physical',
         nombre='Ric',
         apellido_paterno='San',
         cuenta='646180157000000004',
@@ -305,6 +311,7 @@ def test_deactivate_account(
     mock_retry: MagicMock,
 ):
     account_dict = dict(
+        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',

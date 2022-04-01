@@ -1,4 +1,5 @@
 black==21.5b2
+click==8.0.1
 flake8==3.8.*
 isort[requirements]==5.7.*
 mongomock==3.22.*

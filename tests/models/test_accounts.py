@@ -3,9 +3,11 @@ import datetime as dt
 import pytest
 from pydantic import ValidationError
 from stpmex.exc import InvalidRfcOrCurp
+from stpmex.types import EntidadFederativa, Pais
 
 from speid.models import PhysicalAccount
 from speid.types import Estado
+from speid.validations import MoralAccount as MoralAccountValidation
 from speid.validations import PhysicalAccount as PhysicalAccountValidation
 
 
@@ -38,6 +40,24 @@ def test_account():
     account.delete()
 
 
+def test_account_moral():
+    account_validation = MoralAccountValidation(
+        nombre='TARJETAS CUENCA',
+        rfc_curp='TCU200828RX8',
+        cuenta='646180157063641989',
+        pais='MX',
+        fecha_constitucion=dt.datetime(2021, 1, 1),
+        entidad_federativa='DF',
+    )
+    account = account_validation.transform()
+    account.save()
+    assert account.nombre == account_validation.nombre
+    assert account.pais == Pais.MX.name
+    assert account.entidad_federativa == EntidadFederativa.DF.name
+    assert not account.actividad_economica
+    account.delete()
+
+
 def test_account_bad_curp():
     with pytest.raises(ValidationError):
         PhysicalAccountValidation(
@@ -48,6 +68,16 @@ def test_account_bad_curp():
             telefono='5567980796',
             fecha_nacimiento=dt.date(1989, 11, 25),
             pais_nacimiento='MX',
+        )
+
+    with pytest.raises(ValidationError):
+        MoralAccountValidation(
+            nombre='TARJETAS CUENCA',
+            rfc_curp='TCU200828',
+            cuenta='646180157063641989',
+            pais='MX',
+            fecha_constitucion=dt.datetime(2021, 1, 1),
+            entidad_federativa='DF',
         )
 
 
