@@ -45,3 +45,27 @@ def create_account():
     yield account
 
     account.delete()
+
+
+@pytest.fixture
+def moral_account():
+    # Pongo los import aquí porque de otra forma no puedo hacer tests del
+    # __init__ sin que se haya importado ya. Y así no repito el mismo fixture
+    # en todos los lugares donde se usa
+    from speid.models import MoralAccount
+    from speid.types import Estado
+
+    account = MoralAccount(
+        estado=Estado.succeeded,
+        nombre='Ricardo',
+        cuenta='646180157000000004',
+        rfc_curp='SACR891125HDFABC01',
+        empresa='El Richard',
+        fecha_constitucion=dt.date(1989, 11, 25),
+        pais='MX',
+    )
+    account.save()
+
+    yield account
+
+    account.delete()

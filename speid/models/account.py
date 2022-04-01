@@ -40,12 +40,6 @@ class Account(Document, BaseModel):
     cuenta = StringField(unique=True)
     rfc_curp = StringField()
 
-    # if is_restricted check ordenante_curp_rfc is
-    # self.allowed_rfc o self.allowed_curp
-    is_restricted = BooleanField(required=False)
-    allowed_rfc = StringField(required=False)
-    allowed_curp = StringField(required=False)
-
     events = ListField(ReferenceField(Event))
 
 
@@ -151,6 +145,12 @@ class MoralAccount(Account):
     fecha_constitucion = DateTimeField(required=True)
     entidad_federativa = StringField()
     actividad_economica = StringField()
+
+    # if is_restricted check ordenante_curp_rfc is
+    # self.allowed_rfc o self.allowed_curp
+    is_restricted = BooleanField(required=False)
+    allowed_rfc = StringField(required=False)
+    allowed_curp = StringField(required=False)
 
     def create_account(self) -> CuentaMoral:
         self.estado = Estado.submitted

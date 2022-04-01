@@ -235,10 +235,10 @@ def test_create_orden_without_ordenante(client):
 
 @pytest.mark.usefixtures('mock_callback_queue')
 def test_create_incoming_restricted_account(
-    client, default_income_transaction, create_account
+    client, default_income_transaction, moral_account
 ):
-    create_account.is_restricted = True
-    create_account.save()
+    moral_account.is_restricted = True
+    moral_account.save()
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.rejected
