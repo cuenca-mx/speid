@@ -1,7 +1,7 @@
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
-from stpmex.exc import DuplicatedAccount, InvalidRfcOrCurp, StpmexException
+from stpmex.exc import InvalidRfcOrCurp, StpmexException
 from stpmex.resources.cuentas import Cuenta
 
 from speid.models import Event, PhysicalAccount
@@ -28,9 +28,9 @@ def create_account(self, account_dict: dict) -> None:
 def execute_create_account(account_dict: dict):
     account_type = account_dict.pop('type')
     if account_type == 'physical':
-        account_val = PhysicalAccountValidation(**account_dict)
+        account_val = PhysicalAccountValidation(**account_dict)  # type: ignore
     else:
-        account_val = MoralAccountValidation(**account_dict)
+        account_val = MoralAccountValidation(**account_dict)  # type: ignore
 
     # Look for previous accounts
     account = account_val.transform()

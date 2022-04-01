@@ -5,7 +5,6 @@ import pytest
 from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import PhysicalAccount
-from speid.validations import MoralAccount
 from speid.models.account import MoralAccount
 from speid.tasks.accounts import (
     create_account,
