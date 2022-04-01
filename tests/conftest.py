@@ -60,7 +60,6 @@ def moral_account():
         nombre='Ricardo',
         cuenta='646180157000000004',
         rfc_curp='SACR891125HDFABC01',
-        empresa='El Richard',
         fecha_constitucion=dt.date(1989, 11, 25),
         pais='MX',
     )
