@@ -53,7 +53,7 @@ def test_account_moral():
     account.save()
     assert account.nombre == account_validation.nombre
     assert account.pais == Pais.MX.name
-    assert account.entidad_federativa == EntidadFederativa.DF.name
+    assert account.entidad_federativa == EntidadFederativa.DF
     assert not account.actividad_economica
     account.delete()
 

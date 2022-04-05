@@ -5,6 +5,7 @@ from typing import Optional
 from clabe import Clabe
 from pydantic import ValidationError, validator
 from pydantic.dataclasses import dataclass
+from stpmex.types import EntidadFederativa
 
 from speid.models import Account as AccountModel
 from speid.models import MoralAccount as MoralAccountModel
@@ -79,5 +80,13 @@ class MoralAccount(Account):
     allowed_rfc: Optional[str] = None
 
     def transform(self) -> AccountModel:
-        account = MoralAccountModel(**self.to_dict())
+        data = self.to_dict()
+        try:
+            data['entidad_federativa'] = EntidadFederativa[
+                data['entidad_federativa']
+            ]
+        except KeyError:
+            ...
+
+        account = MoralAccountModel(**data)
         return account

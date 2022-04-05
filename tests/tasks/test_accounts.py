@@ -40,18 +40,27 @@ def test_create_account():
 def test_create_moral_account():
     account_dict = dict(
         type='moral',
-        cuenta='646180157062429678',
-        rfc_curp='TCU200828RX8',
         nombre='TARJETAS CUENCA',
-        pais='MX',
+        rfc_curp='TCU200828RX8',
+        cuenta='646180157062429678',
         fecha_constitucion='2021-01-01T00:00:00',
+        pais='MX',
+        allowed_rfc='POHF880201R4H',
+        allowed_curp='POHF880201MCSKRL09',
     )
 
     execute_create_account(account_dict)
 
     account = MoralAccount.objects.get(cuenta='646180157062429678')
     assert account.estado is Estado.succeeded
-
+    assert account.nombre == 'TARJETAS CUENCA'
+    assert account.allowed_curp == 'POHF880201MCSKRL09'
+    assert account.allowed_rfc == 'POHF880201R4H'
+    assert account.rfc_curp == 'TCU200828RX8'
+    assert account.fecha_constitucion == dt.datetime(2021, 1, 1)
+    assert account.pais == 'MX'
+    assert not account.entidad_federativa
+    assert not account.actividad_economica
     account.delete()
 
 

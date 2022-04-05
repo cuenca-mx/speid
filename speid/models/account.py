@@ -41,6 +41,8 @@ class Account(Document, BaseModel):
     nombre = StringField()
     cuenta = StringField(unique=True)
     rfc_curp = StringField()
+    entidad_federativa = IntField(required=False)
+    actividad_economica = IntField(required=False)
 
     events = ListField(ReferenceField(Event))
 
@@ -85,8 +87,6 @@ class PhysicalAccount(Account):
     pais_nacimiento = StringField(required=False)
 
     genero = EnumField(Genero, required=False)  # type: ignore
-    entidad_federativa = IntField(required=False)
-    actividad_economica = IntField(required=False)
     calle = StringField(required=False)
     numero_exterior = StringField(required=False)
     numero_interior = StringField(required=False)
@@ -161,8 +161,6 @@ class PhysicalAccount(Account):
 class MoralAccount(Account):
     pais = StringField(required=False)
     fecha_constitucion = DateTimeField(required=True)
-    entidad_federativa = StringField()
-    actividad_economica = StringField()
 
     # if is_restricted check ordenante_curp_rfc is
     # self.allowed_rfc o self.allowed_curp
