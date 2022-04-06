@@ -81,6 +81,9 @@ class MoralAccount(Account):
 
     def transform(self) -> AccountModel:
         data = self.to_dict()
+        data['is_restricted'] = (
+            self.allowed_curp is not None or self.allowed_rfc is not None
+        )
         try:
             data['entidad_federativa'] = EntidadFederativa[
                 data['entidad_federativa']

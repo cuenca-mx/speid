@@ -40,7 +40,27 @@ def test_account():
     account.delete()
 
 
-def test_account_moral():
+def test_account_moral_restricted():
+    account_validation = MoralAccountValidation(
+        nombre='TARJETAS CUENCA',
+        rfc_curp='TCU200828RX8',
+        cuenta='646180157063641989',
+        pais='MX',
+        fecha_constitucion=dt.datetime(2021, 1, 1),
+        entidad_federativa='DF',
+        allowed_rfc='SACR891125M47'
+    )
+    account = account_validation.transform()
+    account.save()
+    assert account.nombre == account_validation.nombre
+    assert account.pais == Pais.MX.name
+    assert account.entidad_federativa == EntidadFederativa.DF
+    assert account.is_restricted
+    assert not account.actividad_economica
+    account.delete()
+
+
+def test_account_moral_not_restricted():
     account_validation = MoralAccountValidation(
         nombre='TARJETAS CUENCA',
         rfc_curp='TCU200828RX8',
@@ -54,6 +74,7 @@ def test_account_moral():
     assert account.nombre == account_validation.nombre
     assert account.pais == Pais.MX.name
     assert account.entidad_federativa == EntidadFederativa.DF
+    assert not account.is_restricted
     assert not account.actividad_economica
     account.delete()
 
