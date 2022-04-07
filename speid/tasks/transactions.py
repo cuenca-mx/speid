@@ -8,6 +8,8 @@ from speid.processors import stpmex_client
 from speid.tasks import celery
 from speid.types import Estado, EventType
 
+CURP_LENGTH = 18
+
 
 @celery.task
 def retry_incoming_transactions(speid_ids: List[str]) -> None:
@@ -71,9 +73,9 @@ def send_transaction_status(self, transaction_id: str) -> None:
             self.retry(countdown=2)
 
         if rfc_curp:
-            if len(rfc_curp) == 18:
+            if len(rfc_curp) == CURP_LENGTH:
                 curp = rfc_curp
-            elif len(rfc_curp) in [12, 13]:
+            else:
                 rfc = rfc_curp
 
             transaction.rfc_curp_beneficiario = rfc_curp
