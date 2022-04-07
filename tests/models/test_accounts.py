@@ -48,7 +48,7 @@ def test_account_moral_restricted():
         pais='MX',
         fecha_constitucion=dt.datetime(2021, 1, 1),
         entidad_federativa='DF',
-        allowed_rfc='SACR891125M47'
+        allowed_rfc='SACR891125M47',
     )
     account = account_validation.transform()
     account.save()

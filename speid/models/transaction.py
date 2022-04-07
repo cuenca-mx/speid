@@ -142,9 +142,7 @@ class Transaction(Document, BaseModel):
         # Validate account has already been created
         if not SKIP_VALIDATION_PRIOR_SEND_ORDER:
             try:
-                account = Account.objects.get(
-                    cuenta=self.cuenta_ordenante
-                )
+                account = Account.objects.get(cuenta=self.cuenta_ordenante)
                 assert account.estado is Estado.succeeded
             except (DoesNotExist, AssertionError):
                 self.estado = Estado.error
