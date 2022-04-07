@@ -48,7 +48,7 @@ def outcome_transaction() -> Generator[Transaction, None, None]:
 
 
 @pytest.fixture
-def create_account():
+def physical_account():
     # Pongo los import aquí porque de otra forma no puedo hacer tests del
     # __init__ sin que se haya importado ya. Y así no repito el mismo fixture
     # en todos los lugares donde se usa
@@ -133,10 +133,7 @@ def orden_pago(outcome_transaction):
             tipoCuentaOrdenante=40,
             tipoPago=1,
             topologia='V',
-            # tsAcuseBanxico=dt.datetime(2022, 4, 6, 23, 19, 16, 396000),
-            # tsCaptura=dt.datetime(2022, 4, 6, 23, 19, 9, 195000),
             tsEntrega=9.155,
-            # tsLiquidacion=dt.datetime(2022, 4, 6, 23, 19, 18, 350000),
             urlCEP='https://www.banxico.org.mx/cep/go?i=90646',
             usuario='foo',
         )

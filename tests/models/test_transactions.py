@@ -234,7 +234,7 @@ def test_transaction_speid_non_valid_cuenta_beneficiario():
 
 
 @pytest.mark.vcr
-def test_send_order(create_account):
+def test_send_order(physical_account):
     transaction = Transaction(
         concepto_pago='PRUEBA',
         institucion_ordenante='90646',

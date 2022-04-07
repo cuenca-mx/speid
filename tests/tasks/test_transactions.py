@@ -275,7 +275,7 @@ def test_send_transaction_not_restricted_accounts(
 
 @patch('celery.Celery.send_task')
 def test_send_transaction_not_restricted_accounts_persona_fisica(
-    mock_send_task, outcome_transaction, create_account, orden_pago
+    mock_send_task, outcome_transaction, physical_account, orden_pago
 ):
     with patch('stpmex.client.Client.post', return_value=orden_pago):
         send_transaction_status(outcome_transaction.id)
