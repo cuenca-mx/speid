@@ -20,7 +20,7 @@ from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
-from .account import Account, PhysicalAccount
+from .account import Account
 from .base import BaseModel
 from .events import Event
 from .helpers import (
@@ -43,6 +43,10 @@ def pre_save_transaction(sender, document):
     document.compound_key = (
         f'{document.clave_rastreo}:{date.strftime("%Y%m%d")}'
     )
+
+
+# Min amount accepted in restricted accounts
+MIN_AMOUNT = 100_00
 
 
 @updated_at.apply
@@ -133,7 +137,7 @@ class Transaction(Document, BaseModel):
                 is_valid = (
                     ordenante == account.allowed_rfc
                     or ordenante == account.allowed_curp
-                )
+                ) and self.monto > MIN_AMOUNT
         except DoesNotExist:
             pass
         return is_valid
