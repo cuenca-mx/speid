@@ -20,7 +20,7 @@ from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
-from .account import Account
+from .account import Account, MoralAccount
 from .base import BaseModel
 from .events import Event
 from .helpers import (
@@ -116,7 +116,6 @@ class Transaction(Document, BaseModel):
         from ..tasks.transactions import send_transaction_status
 
         send_transaction_status.apply_async([self.id])
-        # callback_helper.set_status_transaction(self.speid_id, state.value)
         self.estado = state
 
         self.events.append(Event(type=EventType.completed))
@@ -134,7 +133,7 @@ class Transaction(Document, BaseModel):
     def is_valid_account(self) -> bool:
         is_valid = True
         try:
-            account = Account.objects.get(cuenta=self.cuenta_beneficiario)
+            account = MoralAccount.objects.get(cuenta=self.cuenta_beneficiario)
             if account.is_restricted:
                 ordenante = self.rfc_curp_ordenante
                 is_valid = (
