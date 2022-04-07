@@ -2,14 +2,17 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
+from celery.exceptions import Retry
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
     process_outgoing_transactions,
     retry_incoming_transactions,
+    send_transaction_status,
 )
 from speid.types import Estado, EventType
 from speid.validations import SpeidTransaction
+from tests.conftest import SEND_STATUS_TRANSACTION_TASK
 
 
 @pytest.fixture
@@ -155,3 +158,135 @@ def test_outgoing_transaction_retry_core(
     ) as method_mock:
         retry_incoming_transactions(speid_ids=[speid_id])
     method_mock.assert_called_once()
+
+
+@patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_with_rfc(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    with patch('stpmex.client.Client.post', return_value=orden_pago):
+        send_transaction_status(outcome_transaction.id)
+
+    outcome_transaction.reload()
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=outcome_transaction.estado.value,
+            rfc=orden_pago['ordenPago']['rfcCurpBeneficiario'],
+            curp=None,
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_with_curp(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    orden_pago['ordenPago']['rfcCurpBeneficiario'] = 'AAAA951020HMCRQN00'
+
+    with patch('stpmex.client.Client.post', return_value=orden_pago):
+        send_transaction_status(outcome_transaction.id)
+
+    outcome_transaction.reload()
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=outcome_transaction.estado.value,
+            rfc=None,
+            curp=orden_pago['ordenPago']['rfcCurpBeneficiario'],
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_retry_task(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
+
+    with patch('stpmex.client.Client.post', return_value=orden_pago):
+        with pytest.raises(Retry):
+            send_transaction_status(outcome_transaction.id)
+
+    mock_send_task.assert_not_called()
+
+
+@patch('speid.tasks.transactions.send_transaction_status.request.retries', 30)
+@patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
+
+    with patch('stpmex.client.Client.post', return_value=orden_pago):
+        send_transaction_status(outcome_transaction.id)
+
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=outcome_transaction.estado.value,
+            rfc=None,
+            curp=None,
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
+def test_send_transaction_restricted_transaction_does_not_exist(
+    mock_send_task,
+):
+    send_transaction_status('624f53b45809fa4d49258a57')
+    mock_send_task.assert_not_called()
+
+
+@patch('celery.Celery.send_task')
+def test_send_transaction_not_restricted_accounts(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    with patch('stpmex.client.Client.post', return_value=orden_pago):
+        send_transaction_status(outcome_transaction.id)
+
+    outcome_transaction.reload()
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=outcome_transaction.estado.value,
+            rfc=None,
+            curp=None,
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
+def test_send_transaction_not_restricted_accounts_persona_fisica(
+    mock_send_task, outcome_transaction, create_account, orden_pago
+):
+    with patch('stpmex.client.Client.post', return_value=orden_pago):
+        send_transaction_status(outcome_transaction.id)
+
+    outcome_transaction.reload()
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=outcome_transaction.estado.value,
+            rfc=None,
+            curp=None,
+        ),
+    )

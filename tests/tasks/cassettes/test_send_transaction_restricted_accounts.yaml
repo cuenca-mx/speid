@@ -1,0 +1,44 @@
+interactions:
+- request:
+    body: '{"monto": 25.11, "conceptoPago": "PRUEBA", "cuentaBeneficiario": "646010168900168053",
+      "nombreBeneficiario": "Ricardo Sanchez", "institucionContraparte": "90646",
+      "cuentaOrdenante": "646180157092579284", "nombreOrdenante": "Tarjetas Cuenca",
+      "institucionOperante": "90646", "tipoCuentaBeneficiario": 40, "tipoCuentaOrdenante":
+      40, "claveRastreo": "CUENCA99383646467", "referenciaNumerica": 5208812, "rfcCurpBeneficiario":
+      "ND", "rfcCurpOrdenante": "ND", "prioridad": 0, "medioEntrega": 3, "tipoPago":
+      1, "topologia": "T", "firma": "Xfb6D0KjrRKuKaKa/0uR6GMNk1PoTHaOWoH/30P824g1G8W20mwZw5RHiR8wMm/mXc+DUCLludA7CnRjM5wwFicnprGSb8PhPAv+Na/wmD9+nELSMK2oI8wZtNC8qT+PmEysC7G6OldVx+dPKnr+xsrZBMEYVhO1cfBaqSin19M=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '727'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.8.0
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/registra
+  response:
+    body:
+      string: '{"resultado":{"descripcionError":"La Institucion 90646 no es valida
+        para operar con POA","id":-31}}'
+    headers:
+      Content-Length:
+      - '99'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 07 Apr 2022 19:39:08 GMT
+      X-ORACLE-DMS-ECID:
+      - ed75efac-9ad2-4432-8861-88cbc25cfa55-0001f60d
+      X-ORACLE-DMS-RID:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -242,6 +242,7 @@ def test_create_incoming_restricted_account(
     Validate reject a depoist to restricted account if the
     curp_rfc does not match with ordeenante
     '''
+    default_income_transaction['CuentaBeneficiario'] = moral_account.cuenta
     moral_account.is_restricted = True
     moral_account.allowed_curp = 'SAAA343333HFF2G3'
     moral_account.save()
