@@ -1,6 +1,8 @@
 from typing import List
 
+import pytz
 from mongoengine import DoesNotExist
+from stpmex.business_days import current_cdmx_time_zone, get_next_business_day
 
 from speid.helpers import callback_helper
 from speid.models import Account, Event, MoralAccount, Transaction
@@ -63,8 +65,16 @@ def send_transaction_status(self, transaction_id: str) -> None:
     curp = None
 
     if type(account) is MoralAccount and account.is_restricted:
+        cdmx_tz = current_cdmx_time_zone(transaction.created_at)
+
+        created_at_utc = transaction.created_at.replace(tzinfo=pytz.utc)
+        transaction_local_time = created_at_utc.astimezone(
+            pytz.timezone(cdmx_tz)
+        )
+        operational_date = get_next_business_day(transaction_local_time)
+
         stp_transaction = stpmex_client.ordenes.consulta_clave_rastreo(
-            transaction.clave_rastreo, 90646, transaction.created_at.date()
+            transaction.clave_rastreo, 90646, operational_date
         )
         rfc_curp = stp_transaction.rfcCurpBeneficiario
 
