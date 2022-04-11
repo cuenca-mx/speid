@@ -27,9 +27,9 @@ def create_account(self, account_dict: dict) -> None:
 
 def execute_create_account(account_dict: dict):
     try:
-        account_val = PhysicalAccountValidation(**account_dict)
+        account_val = PhysicalAccountValidation(**account_dict)  # type: ignore
     except ValidationError:
-        account_val = MoralAccountValidation(**account_dict)
+        account_val = MoralAccountValidation(**account_dict)  # type: ignore
 
     # Look for previous accounts
     account = account_val.transform()

@@ -3,8 +3,7 @@ import re
 from typing import Optional
 
 from clabe import Clabe
-from pydantic import ValidationError, validator
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel, Extra, ValidationError, validator
 from stpmex.types import EntidadFederativa
 
 from speid.models import Account as AccountModel
@@ -15,8 +14,7 @@ from speid.types import Estado
 CURP_RE = re.compile(r'^[A-Z]{4}[0-9]{6}[A-Z]{6}[A-Z|0-9][0-9]$')
 
 
-@dataclass
-class Account:
+class Account(BaseModel, extra=Extra.ignore):
     nombre: str
     rfc_curp: str
     cuenta: Clabe
@@ -37,7 +35,6 @@ class Account:
         }
 
 
-@dataclass
 class PhysicalAccount(Account):
     apellido_paterno: str
     fecha_nacimiento: dt.datetime
@@ -67,7 +64,6 @@ class PhysicalAccount(Account):
         return account
 
 
-@dataclass
 class MoralAccount(Account):
     pais: str
     fecha_constitucion: dt.datetime
