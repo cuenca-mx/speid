@@ -18,6 +18,9 @@ class Account(BaseModel, extra=Extra.ignore):
     nombre: str
     rfc_curp: str
     cuenta: Clabe
+    is_restricted: bool = False
+    allowed_curp: Optional[str] = None
+    allowed_rfc: Optional[str] = None
 
     @validator('rfc_curp')
     def validate_curp_regex(cls, v) -> str:
@@ -70,10 +73,6 @@ class MoralAccount(Account):
 
     entidad_federativa: Optional[str] = None
     actividad_economica: Optional[str] = None
-
-    is_restricted: Optional[bool] = False
-    allowed_curp: Optional[str] = None
-    allowed_rfc: Optional[str] = None
 
     def transform(self) -> AccountModel:
         data = self.to_dict()
