@@ -26,10 +26,9 @@ def create_account(self, account_dict: dict) -> None:
 
 
 def execute_create_account(account_dict: dict):
-    account_type = account_dict.pop('type')
-    if account_type == 'physical':
+    try:
         account_val = PhysicalAccountValidation(**account_dict)  # type: ignore
-    else:
+    except ValidationError:
         account_val = MoralAccountValidation(**account_dict)  # type: ignore
 
     # Look for previous accounts
@@ -51,7 +50,6 @@ def execute_create_account(account_dict: dict):
 
 @celery.task(bind=True, max_retries=0)
 def update_account(self, account_dict: dict) -> None:
-    account_dict.pop('type', None)
     try:
         validation_model = PhysicalAccountValidation(  # type: ignore
             **account_dict

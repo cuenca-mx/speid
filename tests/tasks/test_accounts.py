@@ -2,6 +2,7 @@ import datetime as dt
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import ValidationError
 from stpmex.exc import InvalidRfcOrCurp
 
 from speid.models import PhysicalAccount
@@ -18,7 +19,6 @@ from speid.types import Estado
 @pytest.mark.vcr
 def test_create_account():
     account_dict = dict(
-        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -39,7 +39,7 @@ def test_create_account():
 @pytest.mark.vcr
 def test_create_moral_account():
     account_dict = dict(
-        type='moral',
+        type='asfasdf',
         nombre='TARJETAS CUENCA',
         rfc_curp='TCU200828RX8',
         cuenta='646180157062429678',
@@ -66,13 +66,12 @@ def test_create_moral_account():
 
 def test_create_account_no_name():
     account_dict = dict(
-        type='physical',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
         rfc_curp='SACR891125HDFGHI01',
     )
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValidationError):
         execute_create_account(account_dict)
 
 
@@ -91,7 +90,6 @@ def test_create_account_existing_account():
     account.save()
 
     account_dict = dict(
-        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -124,7 +122,6 @@ def test_create_account_existing_succeeded_account():
     account.save()
 
     account_dict = dict(
-        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -148,7 +145,6 @@ def test_does_not_retry_when_validation_error_raised(
     mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
-        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -169,7 +165,6 @@ def test_does_not_retry_when_invalid_rfc_raised(
     mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
-        type='physical',
         nombre='24',
         apellido_paterno='napoli',
         apellido_materno='vico pergola sant antonio abate 24',
@@ -214,7 +209,6 @@ def test_update_account_successfully(
     mock_retry: MagicMock, mock_capture_exception: MagicMock
 ) -> None:
     account_dict = dict(
-        type='physical',
         nombre='Ric',
         apellido_paterno='San',
         cuenta='646180157000000004',
@@ -276,6 +270,7 @@ def test_update_account_does_not_exists_then_create_account(
     mock_capture_exception: MagicMock,
 ) -> None:
     account_dict = dict(
+        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157000000004',
@@ -319,7 +314,6 @@ def test_deactivate_account(
     mock_retry: MagicMock,
 ):
     account_dict = dict(
-        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
