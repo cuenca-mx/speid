@@ -269,3 +269,20 @@ def test_create_incoming_restricted_account(
     transaction = Transaction.objects.order_by('-created_at').first()
     assert resp.status_code == 201
     assert transaction.estado is Estado.succeeded
+
+
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_incoming_not_restricted_account(
+    client, default_income_transaction, moral_account
+):
+    '''
+    Happy path when an account is not restricted, deposit should be accepted
+    '''
+    default_income_transaction['CuentaBeneficiario'] = moral_account.cuenta
+    moral_account.save()
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.succeeded
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'LIQUIDACION'
+    transaction.delete()
