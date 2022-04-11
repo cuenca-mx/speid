@@ -51,6 +51,7 @@ def execute_create_account(account_dict: dict):
 
 @celery.task(bind=True, max_retries=0)
 def update_account(self, account_dict: dict) -> None:
+    account_dict.pop('type', None)
     try:
         validation_model = PhysicalAccountValidation(  # type: ignore
             **account_dict
