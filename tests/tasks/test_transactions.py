@@ -207,6 +207,30 @@ def test_send_transaction_restricted_accounts_with_curp(
 
 
 @patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_invalid_rfc_curp(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    orden_pago['ordenPago']['rfcCurpBeneficiario'] = 'NA'
+
+    with patch('stpmex.client.Client.post', return_value=orden_pago):
+        send_transaction_status(outcome_transaction.id)
+
+    outcome_transaction.reload()
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=outcome_transaction.estado.value,
+            rfc=None,
+            curp=None,
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
 def test_send_transaction_restricted_accounts_retry_task(
     mock_send_task, outcome_transaction, moral_account, orden_pago
 ):

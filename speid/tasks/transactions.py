@@ -11,6 +11,7 @@ from speid.tasks import celery
 from speid.types import Estado, EventType
 
 CURP_LENGTH = 18
+RFC_LENGTH = 13
 
 
 @celery.task
@@ -85,11 +86,14 @@ def send_transaction_status(self, transaction_id: str) -> None:
         if rfc_curp:
             if len(rfc_curp) == CURP_LENGTH:
                 curp = rfc_curp
-            else:
+                transaction.rfc_curp_beneficiario = rfc_curp
+                transaction.save()
+            elif len(rfc_curp) == RFC_LENGTH:
                 rfc = rfc_curp
-
-            transaction.rfc_curp_beneficiario = rfc_curp
-            transaction.save()
+                transaction.rfc_curp_beneficiario = rfc_curp
+                transaction.save()
+            else:
+                ...
 
     callback_helper.set_status_transaction(
         transaction.speid_id, transaction.estado.value, curp, rfc
