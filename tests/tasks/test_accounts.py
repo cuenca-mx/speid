@@ -276,6 +276,7 @@ def test_update_account_does_not_exists_then_create_account(
     mock_capture_exception: MagicMock,
 ) -> None:
     account_dict = dict(
+        type='physical',
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157000000004',
