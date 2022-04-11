@@ -7,7 +7,6 @@ luhnmod10==1.0.2
 mongoengine==0.23.1
 newrelic==6.2.0.156
 pandas==1.2.4
-pydantic==1.9.0
 python-hosts==1.0.1
 sentry-sdk==0.19.5
 stpmex==3.9.0
