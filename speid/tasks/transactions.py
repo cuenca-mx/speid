@@ -2,6 +2,7 @@ from typing import List
 
 import pytz
 from mongoengine import DoesNotExist
+from sentry_sdk import capture_exception
 from stpmex.business_days import current_cdmx_time_zone, get_next_business_day
 
 from speid.helpers import callback_helper
@@ -74,9 +75,14 @@ def send_transaction_status(self, transaction_id: str) -> None:
         )
         operational_date = get_next_business_day(transaction_local_time)
 
-        stp_transaction = stpmex_client.ordenes.consulta_clave_rastreo(
-            transaction.clave_rastreo, 90646, operational_date
-        )
+        try:
+            stp_transaction = stpmex_client.ordenes.consulta_clave_rastreo(
+                transaction.clave_rastreo, 90646, operational_date
+            )
+        except Exception as exc:
+            capture_exception(exc)
+            self.retry(countdown=2)
+
         rfc_curp = stp_transaction.rfcCurpBeneficiario
 
         if not rfc_curp and self.request.retries < 30:

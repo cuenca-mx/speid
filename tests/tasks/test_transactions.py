@@ -246,6 +246,25 @@ def test_send_transaction_restricted_accounts_retry_task(
     mock_send_task.assert_not_called()
 
 
+@patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_retry_task_on_unhandled_response(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
+
+    with patch(
+        'stpmex.client.Client.post',
+        side_effect=Exception('something went wrong'),
+    ):
+        with pytest.raises(Retry):
+            send_transaction_status(outcome_transaction.id)
+
+    mock_send_task.assert_not_called()
+
+
 @patch('speid.tasks.transactions.send_transaction_status.request.retries', 30)
 @patch('celery.Celery.send_task')
 def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
