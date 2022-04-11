@@ -19,6 +19,7 @@ class Estado(Enum):
     submitted = 'submitted'  # Sent to STP
     succeeded = 'succeeded'  # LIQUIDACION from STP
     failed = 'failed'  # DEVOLUCION from STP
+    rejected = 'rejected'
     error = 'error'  # Malformed order
     deactivated = 'deactivated'
 
@@ -36,5 +37,6 @@ class Estado(Enum):
         status_to_stp = {
             cls.succeeded: 'LIQUIDACION',
             cls.failed: 'DEVOLUCION',
+            cls.rejected: 'DEVOLUCION',
         }
         return status_to_stp.get(status, 'DEVOLUCION')  # type: ignore

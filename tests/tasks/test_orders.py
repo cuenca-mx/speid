@@ -74,7 +74,7 @@ def test_malformed_order_worker(mock_callback_queue):
 
 
 @pytest.mark.vcr
-def test_create_order_debit_card(create_account):
+def test_create_order_debit_card(physical_account):
     order = dict(
         concepto_pago='DebitCardTest',
         institucion_ordenante='90646',
@@ -96,7 +96,7 @@ def test_create_order_debit_card(create_account):
 
 
 @pytest.mark.vcr
-def test_worker_with_version_2(create_account):
+def test_worker_with_version_2(physical_account):
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',
@@ -123,7 +123,7 @@ def test_worker_with_version_2(create_account):
 def test_ignore_invalid_account_type(
     mock_retry: MagicMock,
     mock_capture_exception: MagicMock,
-    create_account,
+    physical_account,
     mock_callback_queue,
 ) -> None:
     order = dict(
@@ -151,7 +151,7 @@ def test_ignore_invalid_account_type(
 def test_ignore_transfers_to_blocked_banks(
     mock_retry: MagicMock,
     mock_capture_exception: MagicMock,
-    create_account,
+    physical_account,
     mock_callback_queue,
 ) -> None:
     order = dict(
@@ -282,7 +282,7 @@ def test_stp_schedule_limit(
         (PldRejected),
     ],
 )
-def test_resend_not_success_order(exc, create_account, mock_callback_queue):
+def test_resend_not_success_order(exc, physical_account, mock_callback_queue):
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',
@@ -317,7 +317,7 @@ def test_resend_not_success_order(exc, create_account, mock_callback_queue):
 
 
 @pytest.mark.vcr
-def test_resend_success_order(create_account):
+def test_resend_success_order(physical_account):
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',

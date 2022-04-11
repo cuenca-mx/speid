@@ -3,14 +3,16 @@ import datetime as dt
 import pytest
 from pydantic import ValidationError
 from stpmex.exc import InvalidRfcOrCurp
+from stpmex.types import EntidadFederativa, Pais
 
-from speid.models import Account
+from speid.models import PhysicalAccount
 from speid.types import Estado
-from speid.validations import Account as AccountValidation
+from speid.validations import MoralAccount as MoralAccountValidation
+from speid.validations import PhysicalAccount as PhysicalAccountValidation
 
 
 def test_account():
-    account_validation = AccountValidation(
+    account_validation = PhysicalAccountValidation(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157063641989',
@@ -22,7 +24,7 @@ def test_account():
     account = account_validation.transform()
 
     account.save()
-    account_saved = Account.objects.get(id=account.id)
+    account_saved = PhysicalAccount.objects.get(id=account.id)
 
     assert account_saved.created_at is not None
     assert account_saved.updated_at is not None
@@ -38,9 +40,48 @@ def test_account():
     account.delete()
 
 
+def test_account_moral_restricted():
+    account_validation = MoralAccountValidation(
+        nombre='TARJETAS CUENCA',
+        rfc_curp='TCU200828RX8',
+        cuenta='646180157063641989',
+        pais='MX',
+        fecha_constitucion=dt.datetime(2021, 1, 1),
+        entidad_federativa='DF',
+        allowed_rfc='SACR891125M47',
+    )
+    account = account_validation.transform()
+    account.save()
+    assert account.nombre == account_validation.nombre
+    assert account.pais == Pais.MX.name
+    assert account.entidad_federativa == EntidadFederativa.DF
+    assert account.is_restricted
+    assert not account.actividad_economica
+    account.delete()
+
+
+def test_account_moral_not_restricted():
+    account_validation = MoralAccountValidation(
+        nombre='TARJETAS CUENCA',
+        rfc_curp='TCU200828RX8',
+        cuenta='646180157063641989',
+        pais='MX',
+        fecha_constitucion=dt.datetime(2021, 1, 1),
+        entidad_federativa='DF',
+    )
+    account = account_validation.transform()
+    account.save()
+    assert account.nombre == account_validation.nombre
+    assert account.pais == Pais.MX.name
+    assert account.entidad_federativa == EntidadFederativa.DF
+    assert not account.is_restricted
+    assert not account.actividad_economica
+    account.delete()
+
+
 def test_account_bad_curp():
     with pytest.raises(ValidationError):
-        AccountValidation(
+        PhysicalAccountValidation(
             nombre='Ricardo',
             apellido_paterno='Sánchez',
             cuenta='646180157063641989',
@@ -50,10 +91,20 @@ def test_account_bad_curp():
             pais_nacimiento='MX',
         )
 
+    with pytest.raises(ValidationError):
+        MoralAccountValidation(
+            nombre='TARJETAS CUENCA',
+            rfc_curp='TCU200828',
+            cuenta='646180157063641989',
+            pais='MX',
+            fecha_constitucion=dt.datetime(2021, 1, 1),
+            entidad_federativa='DF',
+        )
+
 
 @pytest.mark.vcr
 def test_create_account():
-    account_validation = AccountValidation(
+    account_validation = PhysicalAccountValidation(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157069665325',
@@ -76,7 +127,7 @@ def test_create_account():
 
 @pytest.mark.vcr
 def test_create_account_failed():
-    account_validation = AccountValidation(
+    account_validation = PhysicalAccountValidation(
         nombre='Ricardo',
         apellido_paterno='Sánchez',
         cuenta='646180157063641989',
@@ -94,7 +145,7 @@ def test_create_account_failed():
     with pytest.raises(InvalidRfcOrCurp):
         account.create_account()
 
-    account = Account.objects.get(id=account_id)
+    account = PhysicalAccount.objects.get(id=account_id)
     assert account.estado is Estado.error
 
     account.delete()

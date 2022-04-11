@@ -20,7 +20,7 @@ from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
 
-from .account import Account
+from .account import Account, MoralAccount
 from .base import BaseModel
 from .events import Event
 from .helpers import (
@@ -43,6 +43,10 @@ def pre_save_transaction(sender, document):
     document.compound_key = (
         f'{document.clave_rastreo}:{date.strftime("%Y%m%d")}'
     )
+
+
+# Min amount accepted in restricted accounts
+MIN_AMOUNT = 100_00
 
 
 @updated_at.apply
@@ -92,6 +96,9 @@ class Transaction(Document, BaseModel):
     compound_key = StringField()
     detalle = StringField()
 
+    curp_ordenante = StringField()
+    rfc_ordenante = StringField()
+
     events = ListField(ReferenceField(Event))
 
     meta = {
@@ -106,7 +113,9 @@ class Transaction(Document, BaseModel):
     }
 
     def set_state(self, state: Estado):
-        callback_helper.set_status_transaction(self.speid_id, state.value)
+        from ..tasks.transactions import send_transaction_status
+
+        send_transaction_status.apply_async([self.id])
         self.estado = state
 
         self.events.append(Event(type=EventType.completed))
@@ -115,12 +124,25 @@ class Transaction(Document, BaseModel):
         response = ''
         self.events.append(Event(type=EventType.created))
         self.save()
-        self.estado = Estado.succeeded
         callback_helper.send_transaction(self.to_dict())
 
         self.events.append(
             Event(type=EventType.completed, metadata=str(response))
         )
+
+    def is_valid_account(self) -> bool:
+        is_valid = True
+        try:
+            account = MoralAccount.objects.get(cuenta=self.cuenta_beneficiario)
+            if account.is_restricted:
+                ordenante = self.rfc_curp_ordenante
+                is_valid = (
+                    ordenante == account.allowed_rfc
+                    or ordenante == account.allowed_curp
+                ) and self.monto > MIN_AMOUNT
+        except DoesNotExist:
+            pass
+        return is_valid
 
     def create_order(self) -> Orden:
         # Validate account has already been created

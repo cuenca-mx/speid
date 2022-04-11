@@ -4,6 +4,7 @@ import pytest
 from celery import Celery
 
 from speid.models import Transaction
+from speid.models.transaction import MIN_AMOUNT
 from speid.types import Estado
 
 
@@ -231,3 +232,40 @@ def test_create_orden_without_ordenante(client):
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
     transaction.delete()
+
+
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_create_incoming_restricted_account(
+    client, default_income_transaction, moral_account
+):
+    '''
+    Validate reject a depoist to restricted account if the
+    curp_rfc does not match with ordeenante
+    '''
+    default_income_transaction['CuentaBeneficiario'] = moral_account.cuenta
+    moral_account.is_restricted = True
+    moral_account.allowed_curp = 'SAAA343333HFF2G3'
+    moral_account.save()
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.rejected
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'DEVOLUCION'
+    transaction.delete()
+
+    # Curp Match but Monto does not, the transaction is rejected
+    default_income_transaction['RFCCurpOrdenante'] = moral_account.allowed_curp
+    default_income_transaction['ClaveRastreo'] = 'PRUEBATAMIZI2'
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.rejected
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'DEVOLUCION'
+    transaction.delete()
+
+    # curp and monto match, the transacction is approve
+    default_income_transaction['Monto'] = MIN_AMOUNT + 1
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert resp.status_code == 201
+    assert transaction.estado is Estado.succeeded

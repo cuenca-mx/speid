@@ -163,6 +163,8 @@ def mongo_to_dict(obj, exclude_fields: list = []) -> Union[dict, None]:
             return_data[field_name] = mongo_to_dict(data, [])  # type: ignore
         elif isinstance(obj._fields[field_name], DictField):
             return_data[field_name] = data
+        elif isinstance(obj._fields[field_name], EnumField):
+            return_data[field_name] = data.value
         else:
             return_data[field_name] = mongo_to_python_type(
                 obj._fields[field_name], data

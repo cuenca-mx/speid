@@ -1,10 +1,6 @@
-from datetime import datetime
-from typing import Generator
-
 import pytest
 
 from speid import app
-from speid.models import Transaction
 
 
 @pytest.fixture
@@ -12,28 +8,6 @@ def client():
     app.testing = True
     client = app.test_client()
     return client
-
-
-@pytest.fixture
-def outcome_transaction() -> Generator[Transaction, None, None]:
-    transaction = Transaction(
-        stp_id=2456305,
-        concepto_pago='PRUEBA',
-        institucion_ordenante='90646',
-        cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='40072',
-        monto=2511,
-        nombre_beneficiario='Ricardo Sánchez',
-        tipo_cuenta_beneficiario=40,
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='go' + datetime.now().strftime('%m%d%H%M%S'),
-        version=1,
-    )
-    transaction.save()
-    yield transaction
-    transaction.delete()
 
 
 @pytest.fixture

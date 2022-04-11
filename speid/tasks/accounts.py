@@ -4,10 +4,12 @@ from sentry_sdk import capture_exception
 from stpmex.exc import InvalidRfcOrCurp, StpmexException
 from stpmex.resources.cuentas import Cuenta
 
-from speid.models import Account, Event
+from speid.models import Event, PhysicalAccount
+from speid.models.account import Account
 from speid.tasks import celery
 from speid.types import Estado, EventType
-from speid.validations import Account as AccountValidation
+from speid.validations import MoralAccount as MoralAccountValidation
+from speid.validations import PhysicalAccount as PhysicalAccountValidation
 
 COUNTDOWN = 600
 
@@ -24,7 +26,12 @@ def create_account(self, account_dict: dict) -> None:
 
 
 def execute_create_account(account_dict: dict):
-    account_val = AccountValidation(**account_dict)  # type: ignore
+    account_type = account_dict.pop('type')
+    if account_type == 'physical':
+        account_val = PhysicalAccountValidation(**account_dict)  # type: ignore
+    else:
+        account_val = MoralAccountValidation(**account_dict)  # type: ignore
+
     # Look for previous accounts
     account = account_val.transform()
     try:
@@ -45,8 +52,10 @@ def execute_create_account(account_dict: dict):
 @celery.task(bind=True, max_retries=0)
 def update_account(self, account_dict: dict) -> None:
     try:
-        validation_model = AccountValidation(**account_dict)  # type: ignore
-        account = Account.objects.get(cuenta=validation_model.cuenta)
+        validation_model = PhysicalAccountValidation(  # type: ignore
+            **account_dict
+        )
+        account = PhysicalAccount.objects.get(cuenta=validation_model.cuenta)
         account.update_account(validation_model.transform())
     except ValidationError as exc:
         capture_exception(exc)
@@ -60,7 +69,7 @@ def update_account(self, account_dict: dict) -> None:
 @celery.task(bind=True, max_retries=5)
 def deactivate_account(self, cuenta: str) -> None:
     try:
-        account = Account.objects.get(cuenta=cuenta)
+        account = PhysicalAccount.objects.get(cuenta=cuenta)
     except DoesNotExist:
         return
 
