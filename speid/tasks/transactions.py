@@ -6,7 +6,7 @@ from sentry_sdk import capture_exception
 from stpmex.business_days import current_cdmx_time_zone, get_next_business_day
 
 from speid.helpers import callback_helper
-from speid.models import Account, Event, MoralAccount, Transaction
+from speid.models import Account, Event, Transaction
 from speid.processors import stpmex_client
 from speid.tasks import celery
 from speid.types import Estado, EventType
@@ -66,7 +66,7 @@ def send_transaction_status(self, transaction_id: str) -> None:
     rfc = None
     curp = None
 
-    if type(account) is MoralAccount and account.is_restricted:
+    if account.is_restricted:
         cdmx_tz = current_cdmx_time_zone(transaction.created_at)
 
         created_at_utc = transaction.created_at.replace(tzinfo=pytz.utc)

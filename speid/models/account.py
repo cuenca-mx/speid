@@ -44,6 +44,12 @@ class Account(Document, BaseModel):
     entidad_federativa = IntField(required=False)
     actividad_economica = IntField(required=False)
 
+    # if is_restricted check ordenante_curp_rfc is
+    # self.allowed_rfc o self.allowed_curp
+    is_restricted = BooleanField(required=False)
+    allowed_rfc = StringField(required=False)
+    allowed_curp = StringField(required=False)
+
     events = ListField(ReferenceField(Event))
 
     @abstractmethod
@@ -161,12 +167,6 @@ class PhysicalAccount(Account):
 class MoralAccount(Account):
     pais = StringField(required=False)
     fecha_constitucion = DateTimeField(required=True)
-
-    # if is_restricted check ordenante_curp_rfc is
-    # self.allowed_rfc o self.allowed_curp
-    is_restricted = BooleanField(required=False)
-    allowed_rfc = StringField(required=False)
-    allowed_curp = StringField(required=False)
 
     def _get_optionals(self) -> DictStrAny:
         return dict(
