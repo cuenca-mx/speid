@@ -118,7 +118,6 @@ class Transaction(Document, BaseModel):
         send_transaction_status.apply_async((str(self.id), state))
         self.estado = state
 
-        print('adding events')
         self.events.append(Event(type=EventType.completed))
 
     def confirm_callback_transaction(self):
