@@ -56,12 +56,14 @@ def process_outgoing_transactions(self, transactions: list):
 
 
 @celery.task(bind=True, max_retries=30)
-def send_transaction_status(self, transaction_id: str) -> None:
+def send_transaction_status(self, transaction_id: str, state: str) -> None:
+    print('send_transaction_status before', transaction_id, state)
     try:
         transaction = Transaction.objects.get(id=transaction_id)
     except DoesNotExist:
         return
 
+    print('send_transaction_status', transaction_id)
     account = Account.objects.get(cuenta=transaction.cuenta_ordenante)
     rfc = None
     curp = None
@@ -101,6 +103,7 @@ def send_transaction_status(self, transaction_id: str) -> None:
             else:
                 ...
 
+    print('send_transaction_status sending status', transaction.speid_id, state, curp, rfc)
     callback_helper.set_status_transaction(
-        transaction.speid_id, transaction.estado.value, curp, rfc
+        transaction.speid_id, state, curp, rfc
     )

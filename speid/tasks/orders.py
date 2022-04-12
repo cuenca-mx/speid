@@ -11,7 +11,7 @@ from stpmex.exc import (
     InvalidAmount,
     InvalidInstitution,
     InvalidTrackingKey,
-    PldRejected,
+    PldRejected, AccountDoesNotExist,
 )
 
 from speid.exc import (
@@ -107,6 +107,7 @@ def execute(order_val: dict):
         assert (now - transaction.created_at) < timedelta(hours=2)
         transaction.create_order()
     except (
+        AccountDoesNotExist,
         AssertionError,
         InvalidAccountType,
         InvalidAmount,

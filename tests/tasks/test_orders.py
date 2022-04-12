@@ -8,7 +8,7 @@ from stpmex.exc import (
     InvalidAmount,
     InvalidInstitution,
     InvalidTrackingKey,
-    PldRejected,
+    PldRejected, AccountDoesNotExist,
 )
 
 from speid.exc import (
@@ -274,6 +274,7 @@ def test_stp_schedule_limit(
 @pytest.mark.parametrize(
     'exc',
     [
+        (AccountDoesNotExist),
         (AssertionError),
         (InvalidAccountType),
         (InvalidAmount),
