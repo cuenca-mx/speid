@@ -168,14 +168,14 @@ def test_send_transaction_restricted_accounts_with_rfc(
     moral_account.save()
 
     with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id)
+        send_transaction_status(outcome_transaction.id, Estado.rejected)
 
     outcome_transaction.reload()
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
             speid_id=outcome_transaction.speid_id,
-            state=outcome_transaction.estado.value,
+            state=Estado.rejected.value,
             rfc=orden_pago['ordenPago']['rfcCurpBeneficiario'],
             curp=None,
         ),
@@ -192,14 +192,14 @@ def test_send_transaction_restricted_accounts_with_curp(
     orden_pago['ordenPago']['rfcCurpBeneficiario'] = 'AAAA951020HMCRQN00'
 
     with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id)
+        send_transaction_status(outcome_transaction.id, Estado.rejected)
 
     outcome_transaction.reload()
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
             speid_id=outcome_transaction.speid_id,
-            state=outcome_transaction.estado.value,
+            state=Estado.rejected.value,
             rfc=None,
             curp=orden_pago['ordenPago']['rfcCurpBeneficiario'],
         ),
@@ -216,14 +216,14 @@ def test_send_transaction_restricted_accounts_invalid_rfc_curp(
     orden_pago['ordenPago']['rfcCurpBeneficiario'] = 'NA'
 
     with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id)
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     outcome_transaction.reload()
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
             speid_id=outcome_transaction.speid_id,
-            state=outcome_transaction.estado.value,
+            state=Estado.succeeded.value,
             rfc=None,
             curp=None,
         ),
@@ -241,7 +241,7 @@ def test_send_transaction_restricted_accounts_retry_task(
 
     with patch('stpmex.client.Client.post', return_value=orden_pago):
         with pytest.raises(Retry):
-            send_transaction_status(outcome_transaction.id)
+            send_transaction_status(outcome_transaction.id, Estado.rejected)
 
     mock_send_task.assert_not_called()
 
@@ -260,7 +260,7 @@ def test_send_transaction_restricted_accounts_retry_task_on_unhandled_response(
         side_effect=Exception('something went wrong'),
     ):
         with pytest.raises(Retry):
-            send_transaction_status(outcome_transaction.id)
+            send_transaction_status(outcome_transaction.id, Estado.rejected)
 
     mock_send_task.assert_not_called()
 
@@ -276,13 +276,13 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
     orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
 
     with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id)
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
             speid_id=outcome_transaction.speid_id,
-            state=outcome_transaction.estado.value,
+            state=Estado.succeeded.value,
             rfc=None,
             curp=None,
         ),
@@ -293,7 +293,7 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
 def test_send_transaction_restricted_transaction_does_not_exist(
     mock_send_task,
 ):
-    send_transaction_status('624f53b45809fa4d49258a57')
+    send_transaction_status('624f53b45809fa4d49258a57', Estado.failed)
     mock_send_task.assert_not_called()
 
 
@@ -302,14 +302,14 @@ def test_send_transaction_not_restricted_accounts(
     mock_send_task, outcome_transaction, moral_account, orden_pago
 ):
     with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id)
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     outcome_transaction.reload()
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
             speid_id=outcome_transaction.speid_id,
-            state=outcome_transaction.estado.value,
+            state=Estado.succeeded.value,
             rfc=None,
             curp=None,
         ),
@@ -321,14 +321,14 @@ def test_send_transaction_not_restricted_accounts_persona_fisica(
     mock_send_task, outcome_transaction, physical_account, orden_pago
 ):
     with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id)
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     outcome_transaction.reload()
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
             speid_id=outcome_transaction.speid_id,
-            state=outcome_transaction.estado.value,
+            state=Estado.succeeded.value,
             rfc=None,
             curp=None,
         ),

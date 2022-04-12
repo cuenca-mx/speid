@@ -56,7 +56,7 @@ def process_outgoing_transactions(self, transactions: list):
 
 
 @celery.task(bind=True, max_retries=30)
-def send_transaction_status(self, transaction_id: str) -> None:
+def send_transaction_status(self, transaction_id: str, state: str) -> None:
     try:
         transaction = Transaction.objects.get(id=transaction_id)
     except DoesNotExist:
@@ -102,5 +102,5 @@ def send_transaction_status(self, transaction_id: str) -> None:
                 ...
 
     callback_helper.set_status_transaction(
-        transaction.speid_id, transaction.estado.value, curp, rfc
+        transaction.speid_id, state, curp, rfc
     )

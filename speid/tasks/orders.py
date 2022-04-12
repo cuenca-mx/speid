@@ -7,6 +7,7 @@ from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
 from stpmex.exc import (
+    AccountDoesNotExist,
     InvalidAccountType,
     InvalidAmount,
     InvalidInstitution,
@@ -107,6 +108,7 @@ def execute(order_val: dict):
         assert (now - transaction.created_at) < timedelta(hours=2)
         transaction.create_order()
     except (
+        AccountDoesNotExist,
         AssertionError,
         InvalidAccountType,
         InvalidAmount,

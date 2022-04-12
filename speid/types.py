@@ -14,7 +14,7 @@ class EventType(Enum):
     received = 'RECEIVED'  # When we get the response from a transaction
 
 
-class Estado(Enum):
+class Estado(str, Enum):
     created = 'created'
     submitted = 'submitted'  # Sent to STP
     succeeded = 'succeeded'  # LIQUIDACION from STP

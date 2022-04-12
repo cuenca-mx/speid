@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import vcr
 from stpmex.exc import (
+    AccountDoesNotExist,
     InvalidAccountType,
     InvalidAmount,
     InvalidInstitution,
@@ -274,6 +275,7 @@ def test_stp_schedule_limit(
 @pytest.mark.parametrize(
     'exc',
     [
+        (AccountDoesNotExist),
         (AssertionError),
         (InvalidAccountType),
         (InvalidAmount),
