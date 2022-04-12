@@ -41,7 +41,7 @@ class Account(BaseModel, extra=Extra.ignore):
 class PhysicalAccount(Account):
     apellido_paterno: str
     fecha_nacimiento: dt.datetime
-    pais_nacimiento: str
+    pais_nacimiento: Optional[str] = None
 
     telefono: Optional[str] = None
     apellido_materno: Optional[str] = None
