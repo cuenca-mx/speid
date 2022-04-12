@@ -4,11 +4,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 import vcr
 from stpmex.exc import (
+    AccountDoesNotExist,
     InvalidAccountType,
     InvalidAmount,
     InvalidInstitution,
     InvalidTrackingKey,
-    PldRejected, AccountDoesNotExist,
+    PldRejected,
 )
 
 from speid.exc import (
