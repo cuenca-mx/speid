@@ -3,7 +3,6 @@ from typing import List
 import cep
 import pytz
 from mongoengine import DoesNotExist
-from requests import HTTPError
 from sentry_sdk import capture_exception
 from stpmex.business_days import current_cdmx_time_zone, get_next_business_day
 
