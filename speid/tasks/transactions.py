@@ -15,6 +15,7 @@ from speid.types import Estado, EventType
 CURP_LENGTH = 18
 RFC_LENGTH = 13
 STP_BANK_CODE = 90646
+GET_RFC_TASK_MAX_RETRIES = 30
 
 
 @celery.task
@@ -57,7 +58,7 @@ def process_outgoing_transactions(self, transactions: list):
         transaction.save()
 
 
-@celery.task(bind=True, max_retries=30)
+@celery.task(bind=True, max_retries=GET_RFC_TASK_MAX_RETRIES)
 def send_transaction_status(self, transaction_id: str, state: str) -> None:
     try:
         transaction = Transaction.objects.get(id=transaction_id)
@@ -125,7 +126,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
 
         # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
         # en 2 segundos
-        if not rfc_curp and self.request.retries < 30:
+        if not rfc_curp and self.request.retries < GET_RFC_TASK_MAX_RETRIES:
             self.retry(countdown=2)
 
     callback_helper.set_status_transaction(
