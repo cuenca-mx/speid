@@ -1,5 +1,6 @@
 from typing import List
 
+import cep
 import pytz
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
@@ -13,6 +14,7 @@ from speid.types import Estado, EventType
 
 CURP_LENGTH = 18
 RFC_LENGTH = 13
+STP_BANK_CODE = 90646
 
 
 @celery.task
@@ -77,18 +79,35 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
 
         try:
             stp_transaction = stpmex_client.ordenes.consulta_clave_rastreo(
-                transaction.clave_rastreo, 90646, operational_date
+                transaction.clave_rastreo, STP_BANK_CODE, operational_date
             )
         except Exception as exc:
             capture_exception(exc)
             self.retry(countdown=2)
 
-        rfc_curp = stp_transaction.rfcCurpBeneficiario
+        rfc_curp = (
+            stp_transaction.rfcCEP or stp_transaction.rfcCurpBeneficiario
+        )
 
-        if not rfc_curp and self.request.retries < 30:
-            #  Se intenta obtener el rfc/curp en 2 segundos
-            self.retry(countdown=2)
+        # Si no hay información en la respuesta de STP
+        # hacemos un segundo intento onsultando directamente el CEP
+        if not rfc_curp:
+            transferencia = cep.Transferencia.validar(
+                fecha=transaction_local_time.date(),
+                clave_rastreo=transaction.clave_rastreo,
+                emisor=str(STP_BANK_CODE),
+                receptor=transaction.institucion_beneficiaria,
+                cuenta=transaction.cuenta_beneficiario,
+                monto=stp_transaction.monto,
+            )
+            # breakpoint()
+            if not transferencia:
+                rfc_curp = None
+            else:
+                rfc_curp = transferencia.beneficiario.rfc
 
+        # `rfc_curp` puede contener una CURP o RFC válida
+        # o 'NA' o algún otro identificador no válido
         if rfc_curp:
             if len(rfc_curp) == CURP_LENGTH:
                 curp = rfc_curp
@@ -99,7 +118,13 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
                 transaction.rfc_curp_beneficiario = rfc_curp
                 transaction.save()
             else:
-                ...
+                rfc_curp = None
+                curp = None
+                rfc = None
+        # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
+        # en 2 segundos
+        if not rfc_curp and self.request.retries < 30:
+            self.retry(countdown=2)
 
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc
