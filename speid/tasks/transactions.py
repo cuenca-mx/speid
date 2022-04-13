@@ -3,6 +3,7 @@ from typing import List
 import cep
 import pytz
 from mongoengine import DoesNotExist
+from requests import HTTPError
 from sentry_sdk import capture_exception
 from stpmex.business_days import current_cdmx_time_zone, get_next_business_day
 
@@ -76,6 +77,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
             pytz.timezone(cdmx_tz)
         )
         operational_date = get_next_business_day(transaction_local_time)
+        rfc_curp = None
 
         try:
             stp_transaction = stpmex_client.ordenes.consulta_clave_rastreo(
@@ -84,13 +86,13 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
         except Exception as exc:
             capture_exception(exc)
             self.retry(countdown=2)
-
-        rfc_curp = (
-            stp_transaction.rfcCEP or stp_transaction.rfcCurpBeneficiario
-        )
+        else:
+            rfc_curp = (
+                stp_transaction.rfcCEP or stp_transaction.rfcCurpBeneficiario
+            )
 
         # Si no hay información en la respuesta de STP
-        # hacemos un segundo intento onsultando directamente el CEP
+        # hacemos un segundo intento consultando directamente el CEP
         if not rfc_curp:
             transferencia = cep.Transferencia.validar(
                 fecha=transaction_local_time.date(),
@@ -100,7 +102,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
                 cuenta=transaction.cuenta_beneficiario,
                 monto=stp_transaction.monto,
             )
-            # breakpoint()
+
             if not transferencia:
                 rfc_curp = None
             else:
@@ -121,6 +123,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
                 rfc_curp = None
                 curp = None
                 rfc = None
+
         # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
         # en 2 segundos
         if not rfc_curp and self.request.retries < 30:
