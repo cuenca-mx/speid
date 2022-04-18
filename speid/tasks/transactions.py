@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Tuple
 
 import cep
 import pytz
@@ -58,6 +58,18 @@ def process_outgoing_transactions(self, transactions: list):
         transaction.save()
 
 
+def get_rfc_or_curp(rfc_curp: str) -> Tuple[Optional[str], Optional[str]]:
+    if not rfc_curp:
+        return None, None
+
+    if len(rfc_curp) == CURP_LENGTH:
+        return rfc_curp, 'curp'
+    elif len(rfc_curp) == RFC_LENGTH:
+        return rfc_curp, 'rfc'
+    else:
+        return None, None
+
+
 @celery.task(bind=True, max_retries=GET_RFC_TASK_MAX_RETRIES)
 def send_transaction_status(self, transaction_id: str, state: str) -> None:
     try:
@@ -78,7 +90,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
         )
         operational_date = get_next_business_day(transaction_local_time)
         rfc_curp = None
-
+        id_type = None
         try:
             stp_transaction = stpmex_client.ordenes.consulta_clave_rastreo(
                 transaction.clave_rastreo, STP_BANK_CODE, operational_date
@@ -87,9 +99,11 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
             capture_exception(exc)
             self.retry(countdown=2)
         else:
-            rfc_curp = (
-                stp_transaction.rfcCEP or stp_transaction.rfcCurpBeneficiario
-            )
+            rfc_curp, id_type = get_rfc_or_curp(stp_transaction.rfcCEP)
+            if not rfc_curp:
+                rfc_curp, id_type = get_rfc_or_curp(
+                    stp_transaction.rfcCurpBeneficiario
+                )
 
         # Si no hay información en la respuesta de STP
         # hacemos un segundo intento consultando directamente el CEP
@@ -104,25 +118,28 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
             )
 
             if not transferencia:
-                rfc_curp = None
+                rfc_curp, id_type = None, None
             else:
-                rfc_curp = transferencia.beneficiario.rfc
+                rfc_curp, id_type = get_rfc_or_curp(
+                    transferencia.beneficiario.rfc
+                )
 
         # `rfc_curp` puede contener una CURP o RFC válida
-        # o 'NA' o algún otro identificador no válido
-        if rfc_curp:
-            if len(rfc_curp) == CURP_LENGTH:
-                curp = rfc_curp
-                transaction.rfc_curp_beneficiario = rfc_curp
-                transaction.save()
-            elif len(rfc_curp) == RFC_LENGTH:
-                rfc = rfc_curp
-                transaction.rfc_curp_beneficiario = rfc_curp
-                transaction.save()
-            else:
-                rfc_curp = None
-                curp = None
-                rfc = None
+        # o None si no es un dato válido
+        #
+        # `id_type` puede se 'curp' o rfc' o None si no es dato válido
+        if id_type == 'curp':
+            curp = rfc_curp
+            transaction.rfc_curp_beneficiario = rfc_curp
+            transaction.save()
+        elif id_type == 'rfc':
+            rfc = rfc_curp
+            transaction.rfc_curp_beneficiario = rfc_curp
+            transaction.save()
+        else:
+            rfc_curp = None
+            curp = None
+            rfc = None
 
         # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
         # en 2 segundos

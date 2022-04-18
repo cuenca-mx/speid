@@ -208,6 +208,30 @@ def test_send_transaction_restricted_accounts_with_curp(
 
 
 @patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_with_rfc_cep(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    orden_pago['ordenPago']['rfcCEP'] = 'AAAA951020HMC'
+
+    with patch('stpmex.client.Client.post', return_value=orden_pago):
+        send_transaction_status(outcome_transaction.id, Estado.rejected)
+
+    outcome_transaction.reload()
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=Estado.rejected.value,
+            rfc=orden_pago['ordenPago']['rfcCEP'],
+            curp=None,
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
 @pytest.mark.vcr
 def test_send_transaction_restricted_accounts_retry_task(
     mock_send_task, outcome_transaction, moral_account, orden_pago
