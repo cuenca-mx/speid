@@ -1,0 +1,111 @@
+interactions:
+- request:
+    body: tipoCriterio=T&receptorParticipante=0&captcha=c&tipoConsulta=1&fecha=12-04-2022&criterio=CUENCA954881386503&emisor=90646&receptor=40012&cuenta=012180015839965344&monto=1.0
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '171'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML,
+        like Gecko) Chrome/75.0.3770.142 Safari/537.36
+    method: POST
+    uri: http://www.banxico.org.mx/cep/valida.do
+  response:
+    body:
+      string: ''
+    headers:
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '0'
+      Date:
+      - Wed, 13 Apr 2022 18:13:16 GMT
+      Location:
+      - https://www.banxico.org.mx/cep/valida.do
+      Server:
+      - mxbanxico
+    status:
+      code: 307
+      message: Temporary Redirect
+- request:
+    body: tipoCriterio=T&receptorParticipante=0&captcha=c&tipoConsulta=1&fecha=12-04-2022&criterio=CUENCA954881386503&emisor=90646&receptor=40012&cuenta=012180015839965344&monto=1.0
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '171'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML,
+        like Gecko) Chrome/75.0.3770.142 Safari/537.36
+    method: POST
+    uri: https://www.banxico.org.mx/cep/valida.do
+  response:
+    body:
+      string: "\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1.0,user-scalable=no\"
+        />\n<meta charset=\"utf-8\" /> \n<meta http-equiv=\"X-UA-Compatible\" content=\"IE=9;
+        IE=8; IE=7; IE=edge\" />\n<link rel=\"apple-touch-icon\" href=\"images/icon.png\"/>\n<link
+        rel=\"shortcut icon\" href=\"images/icon.png\">\n<!--Bootstrap-->\n<!--<link
+        href=\"//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css\"
+        rel=\"stylesheet\">\n<link rel=stylesheet href=\"css/bootstrap/bootstrap.min.css\"
+        type=\"text/css\">\n<link rel=\"stylesheet\" href=\"css/bootstrap/dataTables.bootstrap.min.css\"
+        type=\"text/css\" >-->\n<link rel=stylesheet href=\"css/fuentes.css\" type=\"text/css\">\n\n
+        \   <link rel=stylesheet href=\"css/cep-min.css\" type=\"text/css\">\n\n<!--
+        JQuery -->\n<script type=\"text/javascript\" src=\"js/jquery-3.0.0.min.js\"></script>\n<script
+        type=\"text/javascript\" src=\"js/jquery-ui.min.js\"></script>\n<script type=\"text/javascript\"
+        src=\"js/jquery/jquery.dataTables.min.js\"></script>\n<script type=\"text/javascript\"
+        src=\"js/datepicker-es.js\"></script>\n\n<!-- Validations -->\n<script type=\"text/javascript\"
+        src=\"js/validations/validateInput.js\"></script>\n<script type=\"text/javascript\"
+        src=\"js/validations/validateEvents.js\"></script>\n<script type=\"text/javascript\"
+        src=\"js/validations/validateWriting.js\"></script>\n<script type=\"text/javascript\"
+        src=\"js/validations/validationBussines.js\"></script>\n\n<!--Bootstrap-->\n<!--<script
+        src=\"js/bootstrap/bootstrap.min.js\"></script>-->\n<!--Bootbox Alert-->\n<!--<script
+        type=\"text/javascript\" src=\"js/bootstrap/bootbox.min.js\"></script>-->\n<!--Bootstrap
+        Tables-->\n<!--<script type=\"text/javascript\" src=\"js/bootstrap/dataTables.bootstrap.min.js\"></script>-->\n\r\n<meta
+        http-equiv=\"Content-type\" content=\"text/html; charset=UTF-8\" /> \r\n<div
+        class=\"bg-banxico title-bar\">\r\n    <i class=\"icono-header icon-list\"></i>\r\n
+        \   Informaci&oacute;n del estado del pago\r\n</div>\r\n<div class=\"cuerpo-msg\"
+        style=\"width: 600px;\">\r\n    <div id=\"consultaMISPEI\" style=\"padding:
+        15px;box-sizing: border-box;overflow-x: auto;\">\r\n        <div class=\"info\"
+        style=\"margin-bottom: 10px;\"><center><strong>Lo sentimos, por el momento
+        no es posible generar el CEP. Operaci\xF3n no encontrada. El SPEI no ha recibido
+        una orden de pago que cumpla con el criterio de b\xFAsqueda especificado.
+        Se recomienda verificar la informaci\xF3n o consulte a su banco.</strong></center></div>\r\n
+        \                   \r\n        <br><br>\r\n        \r\n    </div>               \r\n
+        \          \r\n</div>\r\n\r\n<script>\r\n    $(function () {\r\n        $(\"#htmlCEP\").val($(\"#consultaMISPEI\").html());\r\n
+        \   });\r\n</script>"
+    headers:
+      Content-Language:
+      - es-MX
+      Content-Length:
+      - '2573'
+      Content-Type:
+      - text/html; charset=UTF-8
+      Date:
+      - Wed, 13 Apr 2022 18:13:16 GMT
+      Set-Cookie:
+      - JSESSIONID=YmQkIS9ggcWEGTs34kBZ_BlAXTW8dATe9oICCi71iq9FiT9693Vb!1328161135;
+        path=/; HttpOnly
+      - Hex39714011=!fk49864KygcPlAn405nf5XFqnQVk9JamM6OTI5w+Z2CtixdOYln1hncqvnIMvoKg41oI5aQhHfu6pQ==;
+        expires=Thu, 14-Apr-2022 02:13:16 GMT; path=/; Httponly
+      - TS012f422b=01ab44a5a86690b4b3dc251fa5ded81067229c785c5e537b7b6838a73a3ea63614ff2e39b3d3285c5f8696a9a05f9c9b900f9e00b01c2b16fc4c8ff6768e8f8d1e556c2c45c4ac3775fb8afa07f5b1e2c190951d12;
+        Path=/
+      - TS604574e3027=083fd6a492ab2000d7b23451bd44d994ca78754b254a849a3adb87ee23889c34e7a4133e0967b022080cbc86801130002733c9329199a1857a967a36d2d883f5cfa8e7afa914e46f9f3091eaf63b2a5a7513f91bf12fbbdee7bce24383d4899f;Path=/
+      X-OPNET-Transaction-Trace:
+      - a2_966e9810-1c33-42ba-a5cc-b33898e07ed1
+    status:
+      code: 200
+      message: OK
+version: 1

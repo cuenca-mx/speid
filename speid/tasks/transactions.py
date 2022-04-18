@@ -1,5 +1,6 @@
 from typing import List
 
+import cep
 import pytz
 from mongoengine import DoesNotExist
 from sentry_sdk import capture_exception
@@ -13,6 +14,8 @@ from speid.types import Estado, EventType
 
 CURP_LENGTH = 18
 RFC_LENGTH = 13
+STP_BANK_CODE = 90646
+GET_RFC_TASK_MAX_RETRIES = 30
 
 
 @celery.task
@@ -55,7 +58,7 @@ def process_outgoing_transactions(self, transactions: list):
         transaction.save()
 
 
-@celery.task(bind=True, max_retries=30)
+@celery.task(bind=True, max_retries=GET_RFC_TASK_MAX_RETRIES)
 def send_transaction_status(self, transaction_id: str, state: str) -> None:
     try:
         transaction = Transaction.objects.get(id=transaction_id)
@@ -74,21 +77,39 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
             pytz.timezone(cdmx_tz)
         )
         operational_date = get_next_business_day(transaction_local_time)
+        rfc_curp = None
 
         try:
             stp_transaction = stpmex_client.ordenes.consulta_clave_rastreo(
-                transaction.clave_rastreo, 90646, operational_date
+                transaction.clave_rastreo, STP_BANK_CODE, operational_date
             )
         except Exception as exc:
             capture_exception(exc)
             self.retry(countdown=2)
+        else:
+            rfc_curp = (
+                stp_transaction.rfcCEP or stp_transaction.rfcCurpBeneficiario
+            )
 
-        rfc_curp = stp_transaction.rfcCurpBeneficiario
+        # Si no hay información en la respuesta de STP
+        # hacemos un segundo intento consultando directamente el CEP
+        if not rfc_curp:
+            transferencia = cep.Transferencia.validar(
+                fecha=transaction_local_time.date(),
+                clave_rastreo=transaction.clave_rastreo,
+                emisor=str(STP_BANK_CODE),
+                receptor=transaction.institucion_beneficiaria,
+                cuenta=transaction.cuenta_beneficiario,
+                monto=stp_transaction.monto,
+            )
 
-        if not rfc_curp and self.request.retries < 30:
-            #  Se intenta obtener el rfc/curp en 2 segundos
-            self.retry(countdown=2)
+            if not transferencia:
+                rfc_curp = None
+            else:
+                rfc_curp = transferencia.beneficiario.rfc
 
+        # `rfc_curp` puede contener una CURP o RFC válida
+        # o 'NA' o algún otro identificador no válido
         if rfc_curp:
             if len(rfc_curp) == CURP_LENGTH:
                 curp = rfc_curp
@@ -99,7 +120,14 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
                 transaction.rfc_curp_beneficiario = rfc_curp
                 transaction.save()
             else:
-                ...
+                rfc_curp = None
+                curp = None
+                rfc = None
+
+        # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
+        # en 2 segundos
+        if not rfc_curp and self.request.retries < GET_RFC_TASK_MAX_RETRIES:
+            self.retry(countdown=2)
 
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc
