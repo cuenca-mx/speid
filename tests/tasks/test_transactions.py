@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from celery.exceptions import Retry
+from requests import HTTPError
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
@@ -287,6 +288,25 @@ def test_send_transaction_restricted_accounts_info_from_cep(
             curp=None,
         ),
     )
+
+
+@patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_retry_task_on_http_error(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
+
+    with patch(
+        'stpmex.client.Client.post',
+        return_value=orden_pago,
+    ), patch('cep.Transferencia.validar', side_effect=HTTPError):
+        with pytest.raises(Retry):
+            send_transaction_status(outcome_transaction.id, Estado.rejected)
+
+    mock_send_task.assert_not_called()
 
 
 @patch('celery.Celery.send_task')

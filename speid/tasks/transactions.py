@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 import cep
 import pytz
 from mongoengine import DoesNotExist
+from requests import HTTPError
 from sentry_sdk import capture_exception
 from stpmex.business_days import current_cdmx_time_zone, get_next_business_day
 
@@ -108,16 +109,26 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
         # Si no hay información en la respuesta de STP
         # hacemos un segundo intento consultando directamente el CEP
         if not rfc_curp:
-            transferencia = cep.Transferencia.validar(
-                fecha=transaction_local_time.date(),
-                clave_rastreo=transaction.clave_rastreo,
-                emisor=str(STP_BANK_CODE),
-                receptor=transaction.institucion_beneficiaria,
-                cuenta=transaction.cuenta_beneficiario,
-                monto=stp_transaction.monto,
-            )
-
-            if not transferencia:
+            try:
+                transferencia = cep.Transferencia.validar(
+                    fecha=transaction_local_time.date(),
+                    clave_rastreo=transaction.clave_rastreo,
+                    emisor=str(STP_BANK_CODE),
+                    receptor=transaction.institucion_beneficiaria,
+                    cuenta=transaction.cuenta_beneficiario,
+                    monto=stp_transaction.monto,
+                )
+                assert transferencia is not None
+            except HTTPError:
+                # Hay un error no controlado en la biblioteca cep-python
+                # Cuando el CEP aún no está disponible Banxico su servidor
+                # responde con un error 500 y este código de error aún
+                # no está controlado.
+                #
+                # Este error indica que debe reintentarse obtener el CEP más
+                # tarde
+                rfc_curp, id_type = None, None
+            except AssertionError:
                 rfc_curp, id_type = None, None
             else:
                 rfc_curp, id_type = get_rfc_or_curp(
