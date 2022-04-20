@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from celery.exceptions import Retry
-from requests import HTTPError
+from cep.exc import CepError, MaxRequestError
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
@@ -163,76 +163,6 @@ def test_outgoing_transaction_retry_core(
 
 
 @patch('celery.Celery.send_task')
-def test_send_transaction_restricted_accounts_with_rfc(
-    mock_send_task, outcome_transaction, moral_account, orden_pago
-):
-    moral_account.is_restricted = True
-    moral_account.save()
-
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id, Estado.rejected)
-
-    outcome_transaction.reload()
-    mock_send_task.assert_called_with(
-        SEND_STATUS_TRANSACTION_TASK,
-        kwargs=dict(
-            speid_id=outcome_transaction.speid_id,
-            state=Estado.rejected.value,
-            rfc=orden_pago['ordenPago']['rfcCurpBeneficiario'],
-            curp=None,
-        ),
-    )
-
-
-@patch('celery.Celery.send_task')
-def test_send_transaction_restricted_accounts_with_curp(
-    mock_send_task, outcome_transaction, moral_account, orden_pago
-):
-    moral_account.is_restricted = True
-    moral_account.save()
-
-    orden_pago['ordenPago']['rfcCurpBeneficiario'] = 'AAAA951020HMCRQN00'
-
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id, Estado.rejected)
-
-    outcome_transaction.reload()
-    mock_send_task.assert_called_with(
-        SEND_STATUS_TRANSACTION_TASK,
-        kwargs=dict(
-            speid_id=outcome_transaction.speid_id,
-            state=Estado.rejected.value,
-            rfc=None,
-            curp=orden_pago['ordenPago']['rfcCurpBeneficiario'],
-        ),
-    )
-
-
-@patch('celery.Celery.send_task')
-def test_send_transaction_restricted_accounts_with_rfc_cep(
-    mock_send_task, outcome_transaction, moral_account, orden_pago
-):
-    moral_account.is_restricted = True
-    moral_account.save()
-
-    orden_pago['ordenPago']['rfcCEP'] = 'AAAA951020HMC'
-
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id, Estado.rejected)
-
-    outcome_transaction.reload()
-    mock_send_task.assert_called_with(
-        SEND_STATUS_TRANSACTION_TASK,
-        kwargs=dict(
-            speid_id=outcome_transaction.speid_id,
-            state=Estado.rejected.value,
-            rfc=orden_pago['ordenPago']['rfcCEP'],
-            curp=None,
-        ),
-    )
-
-
-@patch('celery.Celery.send_task')
 @pytest.mark.vcr
 def test_send_transaction_restricted_accounts_retry_task(
     mock_send_task, outcome_transaction, moral_account, orden_pago
@@ -249,12 +179,8 @@ def test_send_transaction_restricted_accounts_retry_task(
     moral_account.is_restricted = True
     moral_account.save()
 
-    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
-    orden_pago['ordenPago']['monto'] = 1.0
-
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        with pytest.raises(Retry):
-            send_transaction_status(outcome_transaction.id, Estado.rejected)
+    with pytest.raises(Retry):
+        send_transaction_status(outcome_transaction.id, Estado.rejected)
 
     mock_send_task.assert_not_called()
 
@@ -274,10 +200,7 @@ def test_send_transaction_restricted_accounts_info_from_cep(
     moral_account.is_restricted = True
     moral_account.save()
 
-    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
-
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id, Estado.succeeded)
+    send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
@@ -286,23 +209,49 @@ def test_send_transaction_restricted_accounts_info_from_cep(
             state=Estado.succeeded.value,
             rfc='MAVM901122UK9',
             curp=None,
+            nombre_beneficiario='MANUEL ALEJANDRO MARTINEZ VIQUEZ',
         ),
     )
 
 
 @patch('celery.Celery.send_task')
-def test_send_transaction_restricted_accounts_retry_task_on_http_error(
+@pytest.mark.vcr
+def test_send_transaction_restricted_accounts_curp_from_cep(
     mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+
+    outcome_transaction.institucion_beneficiaria = '40012'
+    outcome_transaction.clave_rastreo = 'CUENCA22026847429'
+    outcome_transaction.cuenta_beneficiario = '012180015328558878'
+    outcome_transaction.created_at = dt.datetime(2022, 4, 20, 2, 33)
+    outcome_transaction.monto = 1
+    outcome_transaction.save()
+
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    send_transaction_status(outcome_transaction.id, Estado.succeeded)
+
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=Estado.succeeded.value,
+            rfc=None,
+            curp='AOVM910106HCSPRL05',
+            nombre_beneficiario='MIGUEL ACOSTA VENTURA',
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
+def test_send_transaction_restricted_accounts_retry_task_on_cep_error(
+    mock_send_task, outcome_transaction, moral_account
 ):
     moral_account.is_restricted = True
     moral_account.save()
 
-    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
-
-    with patch(
-        'stpmex.client.Client.post',
-        return_value=orden_pago,
-    ), patch('cep.Transferencia.validar', side_effect=HTTPError):
+    with patch('cep.Transferencia.validar', side_effect=CepError):
         with pytest.raises(Retry):
             send_transaction_status(outcome_transaction.id, Estado.rejected)
 
@@ -310,22 +259,25 @@ def test_send_transaction_restricted_accounts_retry_task_on_http_error(
 
 
 @patch('celery.Celery.send_task')
-def test_send_transaction_restricted_accounts_retry_task_on_unhandled_response(
-    mock_send_task, outcome_transaction, moral_account, orden_pago
+def test_send_transaction_status_does_not_retry_task_on_max_retries(
+    mock_send_task, outcome_transaction, moral_account
 ):
     moral_account.is_restricted = True
     moral_account.save()
 
-    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
+    with patch('cep.Transferencia.validar', side_effect=MaxRequestError):
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
-    with patch(
-        'stpmex.client.Client.post',
-        side_effect=Exception('something went wrong'),
-    ):
-        with pytest.raises(Retry):
-            send_transaction_status(outcome_transaction.id, Estado.rejected)
-
-    mock_send_task.assert_not_called()
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=Estado.succeeded.value,
+            rfc=None,
+            curp=None,
+            nombre_beneficiario=None,
+        ),
+    )
 
 
 @patch(
@@ -335,7 +287,7 @@ def test_send_transaction_restricted_accounts_retry_task_on_unhandled_response(
 @patch('celery.Celery.send_task')
 @pytest.mark.vcr
 def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
-    mock_send_task, outcome_transaction, moral_account, orden_pago
+    mock_send_task, outcome_transaction, moral_account
 ):
 
     outcome_transaction.institucion_beneficiaria = '40012'
@@ -349,11 +301,7 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
     moral_account.is_restricted = True
     moral_account.save()
 
-    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
-    orden_pago['ordenPago']['monto'] = 1.0
-
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id, Estado.succeeded)
+    send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
@@ -362,6 +310,7 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
             state=Estado.succeeded.value,
             rfc=None,
             curp=None,
+            nombre_beneficiario='MANUEL AVALOS TOVAR',
         ),
     )
 
@@ -369,7 +318,7 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
 @patch('celery.Celery.send_task')
 @pytest.mark.vcr
 def test_send_transaction_restricted_accounts_cep_not_found(
-    mock_send_task, outcome_transaction, moral_account, orden_pago
+    mock_send_task, outcome_transaction, moral_account
 ):
 
     outcome_transaction.institucion_beneficiaria = '40012'
@@ -383,12 +332,8 @@ def test_send_transaction_restricted_accounts_cep_not_found(
     moral_account.is_restricted = True
     moral_account.save()
 
-    orden_pago['ordenPago']['rfcCurpBeneficiario'] = None
-    orden_pago['ordenPago']['monto'] = 1.0
-
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        with pytest.raises(Retry):
-            send_transaction_status(outcome_transaction.id, Estado.succeeded)
+    with pytest.raises(Retry):
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     mock_send_task.assert_not_called()
 
@@ -403,10 +348,9 @@ def test_send_transaction_restricted_transaction_does_not_exist(
 
 @patch('celery.Celery.send_task')
 def test_send_transaction_not_restricted_accounts(
-    mock_send_task, outcome_transaction, moral_account, orden_pago
+    mock_send_task, outcome_transaction, moral_account
 ):
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id, Estado.succeeded)
+    send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     outcome_transaction.reload()
     mock_send_task.assert_called_with(
@@ -416,18 +360,16 @@ def test_send_transaction_not_restricted_accounts(
             state=Estado.succeeded.value,
             rfc=None,
             curp=None,
+            nombre_beneficiario=None,
         ),
     )
 
 
 @patch('celery.Celery.send_task')
 def test_send_transaction_not_restricted_accounts_persona_fisica(
-    mock_send_task, outcome_transaction, physical_account, orden_pago
+    mock_send_task, outcome_transaction, physical_account
 ):
-    with patch('stpmex.client.Client.post', return_value=orden_pago):
-        send_transaction_status(outcome_transaction.id, Estado.succeeded)
-
-    outcome_transaction.reload()
+    send_transaction_status(outcome_transaction.id, Estado.succeeded)
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
@@ -435,5 +377,6 @@ def test_send_transaction_not_restricted_accounts_persona_fisica(
             state=Estado.succeeded.value,
             rfc=None,
             curp=None,
+            nombre_beneficiario=None,
         ),
     )

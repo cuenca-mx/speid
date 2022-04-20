@@ -21,6 +21,7 @@ def set_status_transaction(
     state: str,
     curp: Optional[str] = None,
     rfc: Optional[str] = None,
+    nombre_beneficiario: Optional[str] = None,
 ) -> None:
     queue = Celery('back_end_client', broker=BROKER)
     queue.send_task(
@@ -30,6 +31,7 @@ def set_status_transaction(
             state=state,
             rfc=rfc,
             curp=curp,
+            nombre_beneficiario=nombre_beneficiario,
         ),
     )
 
