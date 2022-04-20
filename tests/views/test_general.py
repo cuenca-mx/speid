@@ -4,7 +4,6 @@ import pytest
 from celery import Celery
 
 from speid.models import Transaction
-from speid.models.transaction import MIN_AMOUNT
 from speid.types import Estado
 
 
@@ -253,7 +252,9 @@ def test_create_incoming_restricted_account(
     assert resp.json['estado'] == 'DEVOLUCION'
     transaction.delete()
 
-    # Curp Match but Monto does not, the transaction is rejected
+    # Curp Match but Monto does not, the transaction is rejected,
+    # less than $100.0
+    default_income_transaction['Monto'] = 99.99
     default_income_transaction['RFCCurpOrdenante'] = moral_account.allowed_curp
     default_income_transaction['ClaveRastreo'] = 'PRUEBATAMIZI2'
     resp = client.post('/ordenes', json=default_income_transaction)
@@ -263,8 +264,8 @@ def test_create_incoming_restricted_account(
     assert resp.json['estado'] == 'DEVOLUCION'
     transaction.delete()
 
-    # curp and monto match, the transacction is approve
-    default_income_transaction['Monto'] = MIN_AMOUNT + 1
+    # curp and monto match, the transaction is approve, at least $100.0
+    default_income_transaction['Monto'] = 100.0
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert resp.status_code == 201

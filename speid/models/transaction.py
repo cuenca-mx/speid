@@ -139,7 +139,7 @@ class Transaction(Document, BaseModel):
                 is_valid = (
                     ordenante == account.allowed_rfc
                     or ordenante == account.allowed_curp
-                ) and self.monto > MIN_AMOUNT
+                ) and self.monto >= MIN_AMOUNT
         except DoesNotExist:
             pass
         return is_valid
