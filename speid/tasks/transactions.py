@@ -2,6 +2,7 @@ from typing import List, Optional, Tuple
 
 import cep
 import pytz
+from cep.exc import MaxRequestError, CepError
 from mongoengine import DoesNotExist
 from requests import HTTPError
 from sentry_sdk import capture_exception
@@ -16,7 +17,8 @@ from speid.types import Estado, EventType
 CURP_LENGTH = 18
 RFC_LENGTH = 13
 STP_BANK_CODE = 90646
-GET_RFC_TASK_MAX_RETRIES = 30
+GET_RFC_TASK_MAX_RETRIES = 7  # reintentos
+GET_RFC_TASK_DELAY = 4  # Segundos
 
 
 @celery.task
@@ -98,7 +100,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
             )
         except Exception as exc:
             capture_exception(exc)
-            self.retry(countdown=2)
+            self.retry(countdown=GET_RFC_TASK_DELAY)
         else:
             rfc_curp, id_type = get_rfc_or_curp(stp_transaction.rfcCEP)
             if not rfc_curp:
@@ -119,15 +121,10 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
                     monto=stp_transaction.monto,
                 )
                 assert transferencia is not None
-            except HTTPError:
-                # Hay un error no controlado en la biblioteca cep-python
-                # Cuando el CEP aún no está disponible Banxico su servidor
-                # responde con un error 500 y este código de error aún
-                # no está controlado.
-                #
-                # Este error indica que debe reintentarse obtener el CEP más
-                # tarde
+            except MaxRequestError:
                 rfc_curp, id_type = None, None
+            except CepError:
+                self.retry(countdown=GET_RFC_TASK_DELAY)
             except AssertionError:
                 rfc_curp, id_type = None, None
             else:
@@ -155,7 +152,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
         # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
         # en 2 segundos
         if not rfc_curp and self.request.retries < GET_RFC_TASK_MAX_RETRIES:
-            self.retry(countdown=2)
+            self.retry(countdown=GET_RFC_TASK_DELAY)
 
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc
