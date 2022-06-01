@@ -1,5 +1,5 @@
 blinker==1.4
-boto3==1.16.*
+boto3==1.24.*
 celery==5.2.3
 cepmex==0.2.0
 Flask==2.0.3
