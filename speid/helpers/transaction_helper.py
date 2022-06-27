@@ -5,7 +5,7 @@ from sentry_sdk import capture_exception, capture_message
 
 from speid.models import Transaction
 from speid.models.events import Event
-from speid.types import Estado, EventType, TipoTransaccion
+from speid.types import Estado, EventType
 from speid.validations import StpTransaction
 
 CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
@@ -16,7 +16,7 @@ def process_incoming_transaction(incoming_transaction: dict) -> dict:
     try:
         external_tx = StpTransaction(**incoming_transaction)  # type: ignore
         transaction = external_tx.transform()
-        transaction.tipo_transaccion = TipoTransaccion.deposito
+        # transaction.tipo = TipoTransaccion.deposito
         if CLABES_BLOCKED:
             clabes = CLABES_BLOCKED.split(',')
             if transaction.cuenta_beneficiario in clabes or (

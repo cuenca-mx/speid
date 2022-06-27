@@ -7,6 +7,7 @@ from pydantic.dataclasses import dataclass
 
 from speid.models import Transaction
 from speid.models.helpers import base62_uuid, camel_to_snake
+from speid.types import TipoTransaccion
 
 regex = re.compile(r'^[A-Z]{4}[0-9]{6}[A-Z]{6}[A-Z|0-9][0-9]$')
 
@@ -39,6 +40,7 @@ class StpTransaction:
         }
         trans_dict['stp_id'] = trans_dict.pop('clave', None)
         trans_dict['monto'] = round(trans_dict['monto'] * 100)
+        trans_dict['tipo'] = TipoTransaccion.deposito
         transaction = Transaction(**trans_dict)
         transaction.speid_id = base62_uuid('SR')()
         transaction.fecha_operacion = datetime.strptime(

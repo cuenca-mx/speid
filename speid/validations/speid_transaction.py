@@ -5,6 +5,7 @@ from pydantic.dataclasses import dataclass
 from stpmex.types import TipoCuenta
 
 from speid.models import Transaction
+from speid.types import TipoTransaccion
 
 
 @dataclass
@@ -59,5 +60,7 @@ class SpeidTransaction:
             raise ValueError(f'{cuenta_len} is not a valid cuenta length')
 
     def transform(self) -> Transaction:
+        transaction_dict = self.to_dict()
+        transaction_dict['tipo'] = TipoTransaccion.retiro
         transaction = Transaction(**self.to_dict())
         return transaction

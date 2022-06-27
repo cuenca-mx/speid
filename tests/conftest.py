@@ -42,7 +42,7 @@ def outcome_transaction() -> Generator[Transaction, None, None]:
         rfc_curp_ordenante='ND',
         speid_id='go' + dt.datetime.now().strftime('%m%d%H%M%S'),
         version=1,
-        tipo_transaccion=TipoTransaccion.retiro,
+        tipo=TipoTransaccion.retiro,
     )
     transaction.save()
     yield transaction
