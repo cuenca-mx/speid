@@ -62,5 +62,5 @@ class SpeidTransaction:
     def transform(self) -> Transaction:
         transaction_dict = self.to_dict()
         transaction_dict['tipo'] = TipoTransaccion.retiro
-        transaction = Transaction(**self.to_dict())
+        transaction = Transaction(**transaction_dict)
         return transaction
