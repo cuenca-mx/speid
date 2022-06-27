@@ -39,7 +39,7 @@ def test_send_transaction(mock_send_transaction: MagicMock):
         concepto_pago="PRUEBA",
         referencia_numerica=2423,
         empresa="TAMIZI",
-        tipo_transaccion='retiro',
+        tipo_transaccion='deposito',
     )
 
     transaction = Transaction(**params)

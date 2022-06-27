@@ -57,7 +57,7 @@ class Transaction(Document, BaseModel):
     created_at = date_now()
     updated_at = DateTimeField()
     stp_id = IntField()
-    tipo_transaccion = EnumField(TipoTransaccion)
+    tipo_transaccion: TipoTransaccion = EnumField(TipoTransaccion)
     fecha_operacion = DateTimeField()
     institucion_ordenante = StringField()
     institucion_beneficiaria = StringField()

@@ -24,7 +24,7 @@ from speid.exc import (
 from speid.helpers.task_helpers import time_in_range
 from speid.models import Event, Transaction
 from speid.tasks import celery
-from speid.types import Estado, EventType
+from speid.types import Estado, EventType, TipoTransaccion
 from speid.validations import factory
 
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
@@ -72,6 +72,7 @@ def execute(order_val: dict):
     try:
         input = factory.create(version, **order_val)
         transaction = input.transform()
+        transaction.tipo_transaccion = TipoTransaccion.retiro
 
         if not clabe.validate_clabe(transaction.cuenta_beneficiario) and (
             not luhnmod10.valid(transaction.cuenta_beneficiario)
