@@ -72,7 +72,6 @@ def execute(order_val: dict):
     try:
         input = factory.create(version, **order_val)
         transaction = input.transform()
-        # transaction.tipo = TipoTransaccion.retiro
 
         if not clabe.validate_clabe(transaction.cuenta_beneficiario) and (
             not luhnmod10.valid(transaction.cuenta_beneficiario)
