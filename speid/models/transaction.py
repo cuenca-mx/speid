@@ -18,7 +18,7 @@ from speid import STP_EMPRESA
 from speid.exc import MalformedOrderException
 from speid.helpers import callback_helper
 from speid.processors import stpmex_client
-from speid.types import Estado, EventType
+from speid.types import Estado, EventType, TipoTransaccion
 
 from .account import Account
 from .base import BaseModel
@@ -57,6 +57,7 @@ class Transaction(Document, BaseModel):
     created_at = date_now()
     updated_at = DateTimeField()
     stp_id = IntField()
+    tipo_transaccion = EnumField(TipoTransaccion)
     fecha_operacion = DateTimeField()
     institucion_ordenante = StringField()
     institucion_beneficiaria = StringField()
@@ -109,6 +110,12 @@ class Transaction(Document, BaseModel):
             # The Unique-Sparse index skips over any document that is missing
             # the indexed field (null values)
             {'fields': ['+compound_key'], 'unique': True, 'sparse': True},
+            {
+                'fields': ['+stp_id', '+tipo_transaccion'],
+                'partialFilterExpression': {
+                    'tipo_transaccion': TipoTransaccion.retiro
+                },
+            },
         ]
     }
 

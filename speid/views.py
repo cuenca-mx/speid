@@ -7,7 +7,7 @@ from sentry_sdk import capture_exception
 from speid import app
 from speid.helpers.transaction_helper import process_incoming_transaction
 from speid.models import Transaction
-from speid.types import Estado
+from speid.types import Estado, TipoTransaccion
 from speid.utils import post
 
 logging.basicConfig(level=logging.INFO, format='SPEID: %(message)s')
@@ -22,7 +22,9 @@ def health_check():
 @app.route('/orden_events', methods=['POST'])
 def create_orden_events():
     try:
-        transaction = Transaction.objects.get(stp_id=request.json['id'])
+        transaction = Transaction.objects.get(
+            stp_id=request.json['id'], tipo_transaccion=TipoTransaccion.retiro
+        )
         state = Estado.get_state_from_stp(request.json['Estado'])
         transaction.detalle = str(request.json.get('Detalle', ''))
 

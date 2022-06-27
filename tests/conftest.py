@@ -7,6 +7,7 @@ import pytest
 from celery import Celery
 
 from speid.models import Transaction
+from speid.types import TipoTransaccion
 
 SEND_TRANSACTION_TASK = os.environ['SEND_TRANSACTION_TASK']
 SEND_STATUS_TRANSACTION_TASK = os.environ['SEND_STATUS_TRANSACTION_TASK']
@@ -41,6 +42,7 @@ def outcome_transaction() -> Generator[Transaction, None, None]:
         rfc_curp_ordenante='ND',
         speid_id='go' + dt.datetime.now().strftime('%m%d%H%M%S'),
         version=1,
+        tipo_transaccion=TipoTransaccion.retiro,
     )
     transaction.save()
     yield transaction
