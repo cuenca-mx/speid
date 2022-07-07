@@ -1,2 +1,2 @@
 web:  NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} NEW_RELIC_APP_NAME=speid newrelic-admin run-program gunicorn --access-logfile=- --error-logfile=- --bind=0.0.0.0:3000 --workers=${SPEID_WORKERS:-5} speid:app
-worker:NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} NEW_RELIC_APP_NAME=speid newrelic-admin run-program celery -A speid.tasks.celery worker -D --loglevel=info -c 5 -Q ${CORE_ACCOUNT_QUEUE},${CORE_NEW_ORDER_QUEUE},${RECON_TRANSACTION_QUEUE}
+worker:NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY} NEW_RELIC_APP_NAME=speid newrelic-admin run-program celery -A speid.tasks.celery worker --loglevel=info -c 5 -Q ${CORE_ACCOUNT_QUEUE},${CORE_NEW_ORDER_QUEUE},${RECON_TRANSACTION_QUEUE}
