@@ -7,6 +7,7 @@ from celery import Celery
 BROKER = os.environ['AMPQ_ADDRESS']
 SEND_TRANSACTION_TASK = os.environ['SEND_TRANSACTION_TASK']
 SEND_STATUS_TRANSACTION_TASK = os.environ['SEND_STATUS_TRANSACTION_TASK']
+queue = Celery('back_end_client', broker=BROKER)
 
 
 def auth_header(username: str, password: str) -> dict:
@@ -23,7 +24,6 @@ def set_status_transaction(
     rfc: Optional[str] = None,
     nombre_beneficiario: Optional[str] = None,
 ) -> None:
-    queue = Celery('back_end_client', broker=BROKER)
     queue.send_task(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
@@ -37,7 +37,6 @@ def set_status_transaction(
 
 
 def send_transaction(transaction: dict):
-    queue = Celery('back_end_client', broker=BROKER)
     queue.send_task(
         SEND_TRANSACTION_TASK, kwargs=dict(transaction=transaction)
     )
