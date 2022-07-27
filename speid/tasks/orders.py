@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from sentry_sdk import capture_exception
 from stpmex.exc import (
     AccountDoesNotExist,
+    BankCodeClabeMismatch,
     InvalidAccountType,
     InvalidAmount,
     InvalidInstitution,
@@ -110,6 +111,7 @@ def execute(order_val: dict):
     except (
         AccountDoesNotExist,
         AssertionError,
+        BankCodeClabeMismatch,
         InvalidAccountType,
         InvalidAmount,
         InvalidInstitution,

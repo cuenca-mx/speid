@@ -5,6 +5,7 @@ import pytest
 import vcr
 from stpmex.exc import (
     AccountDoesNotExist,
+    BankCodeClabeMismatch,
     InvalidAccountType,
     InvalidAmount,
     InvalidInstitution,
@@ -277,6 +278,7 @@ def test_stp_schedule_limit(
     [
         (AccountDoesNotExist),
         (AssertionError),
+        (BankCodeClabeMismatch),
         (InvalidAccountType),
         (InvalidAmount),
         (InvalidInstitution),
