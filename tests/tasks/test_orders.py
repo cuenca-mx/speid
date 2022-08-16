@@ -20,7 +20,7 @@ from speid.exc import (
 )
 from speid.models import Transaction
 from speid.tasks.orders import execute, retry_timeout, send_order
-from speid.types import Estado, EventType
+from speid.types import Estado, EventType, TipoTransaccion
 
 
 @pytest.mark.parametrize(
@@ -94,6 +94,7 @@ def test_create_order_debit_card(physical_account):
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.submitted
     assert transaction.events[-1].type is EventType.completed
+    assert transaction.tipo is TipoTransaccion.retiro
     transaction.delete()
 
 
@@ -116,6 +117,7 @@ def test_worker_with_version_2(physical_account):
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.submitted
     assert transaction.events[-1].type is EventType.completed
+    assert transaction.tipo is TipoTransaccion.retiro
     transaction.delete()
 
 

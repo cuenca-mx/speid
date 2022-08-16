@@ -40,3 +40,8 @@ class Estado(str, Enum):
             cls.rejected: 'DEVOLUCION',
         }
         return status_to_stp.get(status, 'DEVOLUCION')  # type: ignore
+
+
+class TipoTransaccion(str, Enum):
+    retiro = 'retiro'
+    deposito = 'deposito'

@@ -4,7 +4,7 @@ import pytest
 from celery import Celery
 
 from speid.models import Transaction
-from speid.types import Estado
+from speid.types import Estado, TipoTransaccion
 
 
 def test_ping(client):
@@ -120,6 +120,7 @@ def test_create_orden(client, default_income_transaction):
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.succeeded
+    assert transaction.tipo is TipoTransaccion.deposito
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
     transaction.delete()
