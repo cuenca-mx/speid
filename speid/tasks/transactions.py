@@ -123,16 +123,17 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
             self.retry(countdown=GET_RFC_TASK_DELAY)
 
     if Estado(state) == Estado.failed:
-        # check status in stp
+        # checa status en stp
         stp_order = None
         try:
-            stp_order = stpmex_client.ordenes._consulta_clave_rastreo_enviada(
-                claveRastreo=self.clave_rastreo,
-                institucionOperante=self.institucion_ordenante,
-                fechaOperacion=get_next_business_day(self.created_at),
+            stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
+                claveRastreo=transaction.clave_rastreo,
+                institucionOperante=transaction.institucion_ordenante,
+                fechaOperacion=get_next_business_day(transaction.created_at),
             )
-        except StpmexException:  # pragma: no cover
-            ...
+        except StpmexException as ex:
+            if 'No entity found for query' not in str(ex):
+                raise
         if stp_order and stp_order.estado not in [
             STPEstado.traspaso_cancelado,
             STPEstado.cancelada,

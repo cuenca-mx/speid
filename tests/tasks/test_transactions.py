@@ -347,6 +347,51 @@ def test_send_transaction_restricted_transaction_does_not_exist(
 
 
 @patch('celery.Celery.send_task')
+@pytest.mark.vcr
+def test_send_transaction_failed_with_succeeded_in_stp(
+    mock_send_task,
+    outgoing_transaction,
+    physical_account,
+):
+    outgoing_transaction.clave_rastreo = 'CUENCA871574313626'
+    outgoing_transaction.cuenta_ordenante = '646180157093203384'
+    outgoing_transaction.created_at = dt.datetime(2022, 4, 7, 11, 31)
+    outgoing_transaction.save()
+    physical_account.cuenta = '646180157093203384'
+    physical_account.save()
+    send_transaction_status(outgoing_transaction.id, Estado.failed)
+
+    assert mock_send_task.assert_not_called()
+
+
+@pytest.mark.vcr
+@patch('celery.Celery.send_task')
+def test_send_transaction_failed_with_no_stp(
+    mock_send_task,
+    outgoing_transaction,
+    physical_account,
+):
+    outgoing_transaction.clave_rastreo = 'NON-EXISTANT'
+    outgoing_transaction.cuenta_ordenante = '646180157093203384'
+    outgoing_transaction.created_at = dt.datetime(2022, 4, 7, 11, 31)
+    outgoing_transaction.save()
+    physical_account.cuenta = '646180157093203384'
+    physical_account.save()
+    send_transaction_status(outgoing_transaction.id, Estado.failed)
+
+    assert mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outgoing_transaction.speid_id,
+            state=Estado.failed.value,
+            rfc=None,
+            curp=None,
+            nombre_beneficiario=None,
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
 def test_send_transaction_not_restricted_accounts(
     mock_send_task, outcome_transaction, moral_account
 ):
