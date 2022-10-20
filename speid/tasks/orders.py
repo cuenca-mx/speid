@@ -134,5 +134,6 @@ def execute(order_val: dict):
         ) and get_next_business_day(
             transaction.created_at
         ) == datetime.utcnow().date:
+            # we can only return transactions for the current working day
             transaction.set_state(Estado.failed)
             transaction.save()
