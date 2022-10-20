@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import clabe
 import luhnmod10
@@ -109,6 +109,7 @@ def execute(order_val: dict):
     try:
         # Return transaction after 2 hours of creation
         assert (now - transaction.created_at) < timedelta(hours=2)
+        assert get_next_business_day(transaction.created_at) == date.today()
         transaction.create_order()
     except (
         AccountDoesNotExist,
@@ -122,18 +123,11 @@ def execute(order_val: dict):
         ValidationError,
     ):
         estado = transaction.check_stp_status()
-        if (
-            not estado
-            or estado
-            in [
-                STPEstado.traspaso_cancelado,
-                STPEstado.cancelada,
-                STPEstado.cancelada_adapter,
-                STPEstado.cancelada_rechazada,
-            ]
-        ) and get_next_business_day(
-            transaction.created_at
-        ) == datetime.utcnow().date:
-            # we can only return transactions for the current working day
+        if not estado or estado in [
+            STPEstado.traspaso_cancelado,
+            STPEstado.cancelada,
+            STPEstado.cancelada_adapter,
+            STPEstado.cancelada_rechazada,
+        ]:
             transaction.set_state(Estado.failed)
             transaction.save()
