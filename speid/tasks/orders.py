@@ -66,9 +66,7 @@ def send_order(self, order_val: dict):
 
 def execute(order_val: dict):
     # Get version
-    version = 0
-    if "version" in order_val:
-        version = order_val['version']
+    version = order_val.get('version', 0)
     if time_in_range(START_DOWNTIME, STOP_DOWNTIME, datetime.utcnow().time()):
         raise ScheduleError
     transaction = Transaction()
