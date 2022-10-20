@@ -349,7 +349,9 @@ def test_resend_success_order(physical_account):
 
 
 @pytest.mark.vcr()
-def test_fail_transaction_with_stp_succeeded(physical_account, mock_callback_queue):
+def test_fail_transaction_with_stp_succeeded(
+    physical_account, mock_callback_queue
+):
     physical_account.cuenta = '646180157082332965'
     physical_account.save()
     order = dict(
@@ -379,7 +381,9 @@ def test_fail_transaction_with_stp_succeeded(physical_account, mock_callback_que
 
 
 @pytest.mark.vcr()
-def test_fail_transaction_with_stp_failed(physical_account, mock_callback_queue):
+def test_fail_transaction_with_stp_failed(
+    physical_account, mock_callback_queue
+):
     physical_account.cuenta = '646180157082332965'
     physical_account.save()
     order = dict(
