@@ -360,7 +360,7 @@ def test_fail_transaction_with_stp_succeeded(physical_account):
         monto=1020,
         nombre_beneficiario='Pablo Sánchez',
         nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157082332965',
+        cuenta_ordenante=physical_account.cuenta,
         rfc_curp_ordenante='ND',
         speid_id='SP121342564uhb',
         version=2,
@@ -390,7 +390,7 @@ def test_fail_transaction_with_stp_failed(physical_account):
         monto=1030,
         nombre_beneficiario='Pablo Sánchez',
         nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157082332965',
+        cuenta_ordenante=physical_account.cuenta,
         rfc_curp_ordenante='ND',
         speid_id='SP21r4f8h4tv',
         version=2,
@@ -421,7 +421,7 @@ def test_fail_transaction_with_no_stp(physical_account):
         monto=1040,
         nombre_beneficiario='Pablo Sánchez',
         nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157082332965',
+        cuenta_ordenante=physical_account.cuenta,
         rfc_curp_ordenante='ND',
         speid_id='SPf893h4cntrg',
         version=2,
@@ -441,5 +441,5 @@ def test_fail_transaction_with_no_stp(physical_account):
     execute(order)
     transaction.reload()
     # status did not change
-    assert transaction.estado is Estado.error
+    assert transaction.estado is Estado.failed
     transaction.delete()

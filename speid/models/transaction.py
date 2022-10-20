@@ -157,6 +157,8 @@ class Transaction(Document, BaseModel):
         # checa status en stp
         stp_order = None
         estado = None
+        if not self.clave_rastreo:
+            return estado
         try:
             stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
                 claveRastreo=self.clave_rastreo,
