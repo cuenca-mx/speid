@@ -14,6 +14,7 @@ from stpmex.exc import (
     InvalidInstitution,
     InvalidTrackingKey,
     PldRejected,
+    StpmexException,
 )
 from stpmex.types import Estado as STPEstado
 
@@ -122,12 +123,16 @@ def execute(order_val: dict):
         PldRejected,
         ValidationError,
     ):
-        estado = transaction.check_stp_status()
-        if not estado or estado in [
-            STPEstado.traspaso_cancelado,
-            STPEstado.cancelada,
-            STPEstado.cancelada_adapter,
-            STPEstado.cancelada_rechazada,
-        ]:
-            transaction.set_state(Estado.failed)
-            transaction.save()
+        try:
+            estado = transaction.check_stp_status()
+        except StpmexException as ex:
+            capture_exception(ex)
+        else:
+            if not estado or estado in [
+                STPEstado.traspaso_cancelado,
+                STPEstado.cancelada,
+                STPEstado.cancelada_adapter,
+                STPEstado.cancelada_rechazada,
+            ]:
+                transaction.set_state(Estado.failed)
+                transaction.save()
