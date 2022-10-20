@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import clabe
 import luhnmod10
@@ -26,8 +26,8 @@ from speid.helpers.task_helpers import time_in_range
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
-from speid.validations import factory
 from speid.utils import get_next_business_day
+from speid.validations import factory
 
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 IGNORED_EXCEPTIONS = os.getenv('IGNORED_EXCEPTIONS', '').split(',')
@@ -109,7 +109,7 @@ def execute(order_val: dict):
     try:
         # Return transaction after 2 hours of creation
         assert (now - transaction.created_at) < timedelta(hours=2)
-        assert transaction.created_at
+        assert get_next_business_day(transaction.created_at) == date.today()
         transaction.create_order()
     except (
         AccountDoesNotExist,

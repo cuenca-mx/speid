@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -345,4 +345,101 @@ def test_resend_success_order(physical_account):
     # Ejecuta nuevamente la misma orden
     with pytest.raises(ResendSuccessOrderException):
         execute(order)
+    transaction.delete()
+
+
+@pytest.mark.vcr()
+def test_fail_transaction_with_stp_succeeded(physical_account):
+    physical_account.cuenta = '646180157082332965'
+    physical_account.save()
+    order = dict(
+        concepto_pago='PRUEBA',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='40072',
+        monto=1020,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157082332965',
+        rfc_curp_ordenante='ND',
+        speid_id='SP121342564uhb',
+        version=2,
+    )
+    execute(order)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+    # changing time to 4 hours ago so transaction fails in the next step
+    transaction.created_at = datetime.utcnow() - timedelta(hours=4)
+    transaction.save()
+    # executing again so time assert fails
+    execute(order)
+    # status didn't change because transaction was succesful in STP
+    assert transaction.estado is Estado.submitted
+    transaction.delete()
+
+
+@pytest.mark.vcr()
+def test_fail_transaction_with_stp_failed(physical_account):
+    physical_account.cuenta = '646180157082332965'
+    physical_account.save()
+    order = dict(
+        concepto_pago='PRUEBA 2',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='40072',
+        monto=1030,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157082332965',
+        rfc_curp_ordenante='ND',
+        speid_id='SP21r4f8h4tv',
+        version=2,
+    )
+    execute(order)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+    # changing time to 4 hours ago so transaction fails in the next step
+    transaction.created_at = datetime.utcnow() - timedelta(hours=4)
+    transaction.save()
+    # executing again so time assert fails
+    execute(order)
+    # status changed because transaction was failed in STP
+    transaction.reload()
+    assert transaction.estado is Estado.failed
+    transaction.delete()
+
+
+@pytest.mark.vcr()
+def test_fail_transaction_with_no_stp(physical_account):
+    physical_account.cuenta = '646180157082332965'
+    physical_account.save()
+    order = dict(
+        concepto_pago='PRUEBA 3',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='123456789012345678',
+        institucion_beneficiaria='40072',
+        monto=1040,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante='646180157082332965',
+        rfc_curp_ordenante='ND',
+        speid_id='SPf893h4cntrg',
+        version=2,
+    )
+    # new transaction with errors so it does not reach stp
+    try:
+        execute(order)
+    except MalformedOrderException:
+        ...
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.error
+    transaction.clave_rastreo = 'CRINEXISTENTE'
+    transaction.save()
+
+    # fixing order so it will pass ths time
+    order['cuenta_beneficiario'] = '072691004495711499'
+    execute(order)
+    transaction.reload()
+    # status did not change
+    assert transaction.estado is Estado.error
     transaction.delete()

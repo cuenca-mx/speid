@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "CRINEXISTENTE", "institucionOperante":
+      90646, "fechaOperacion": "20221020", "firma": "InMoA+mGcOV+z5qgKphy0lmjaeCtMpL+ns2cqbvePvJSW9//gC5bxOyUyDMeT1O6ENBCxsr9IBi22gW5p91cDxEnwC3pq1EuOXcez28dPp3pRpB93laOs3ANsaG6Q583QKbriBa1yXcT8iz1gTxqKn6OE2mFeZzFok+oINKiobY="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '299'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.9.1
+    method: POST
+    uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/consOrdEnvRastreo
+  response:
+    body:
+      string: '{"resultado":{"descripcionError":"Firma invalida No entity found for
+        query","id":0}}'
+    headers:
+      Content-Length:
+      - '84'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 20 Oct 2022 16:17:52 GMT
+      X-ORACLE-DMS-ECID:
+      - caf9e530-1d86-4f58-82ee-095674dc8b9c-00002ce6
+      X-ORACLE-DMS-RID:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1
