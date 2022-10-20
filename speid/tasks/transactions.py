@@ -5,15 +5,11 @@ import pytz
 from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
 from stpmex.business_days import current_cdmx_time_zone
-from stpmex.exc import StpmexException
-from stpmex.types import Estado as STPEstado
 
 from speid.helpers import callback_helper
 from speid.models import Account, Event, Transaction
-from speid.processors import stpmex_client
 from speid.tasks import celery
 from speid.types import Estado, EventType
-from speid.utils import get_next_business_day
 
 CURP_LENGTH = 18
 RFC_LENGTH = 13
@@ -121,26 +117,6 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
         # en 5 segundos
         if not rfc_curp and self.request.retries < GET_RFC_TASK_MAX_RETRIES:
             self.retry(countdown=GET_RFC_TASK_DELAY)
-
-    if Estado(state) == Estado.failed:
-        # checa status en stp
-        stp_order = None
-        try:
-            stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
-                claveRastreo=transaction.clave_rastreo,
-                institucionOperante=transaction.institucion_ordenante,
-                fechaOperacion=get_next_business_day(transaction.created_at),
-            )
-        except StpmexException as ex:
-            if 'No entity found for query' not in str(ex):
-                raise
-        if stp_order and stp_order.estado not in [
-            STPEstado.traspaso_cancelado,
-            STPEstado.cancelada,
-            STPEstado.cancelada_adapter,
-            STPEstado.cancelada_rechazada,
-        ]:
-            return
 
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc, nombre_beneficiario

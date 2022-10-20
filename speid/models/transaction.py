@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 from mongoengine import (
     DateTimeField,
@@ -12,13 +13,16 @@ from mongoengine import (
     StringField,
     signals,
 )
+from stpmex.exc import StpmexException
 from stpmex.resources import Orden
+from stpmex.types import Estado as STPEstado
 
 from speid import STP_EMPRESA
 from speid.exc import MalformedOrderException
 from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType, TipoTransaccion
+from speid.utils import get_next_business_day
 
 from .account import Account
 from .base import BaseModel
@@ -148,6 +152,22 @@ class Transaction(Document, BaseModel):
         except DoesNotExist:
             pass
         return is_valid
+
+    def check_stp_status(self) -> Optional[STPEstado]:
+        # checa status en stp
+        stp_order = None
+        estado = None
+        try:
+            stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
+                claveRastreo=self.clave_rastreo,
+                institucionOperante=self.institucion_ordenante,
+                fechaOperacion=get_next_business_day(self.created_at),
+            )
+            estado = stp_order.estado
+        except StpmexException as ex:
+            if 'No entity found for query' not in str(ex):
+                raise
+        return estado
 
     def create_order(self) -> Orden:
         # Validate account has already been created

@@ -15,6 +15,7 @@ from stpmex.exc import (
     InvalidTrackingKey,
     PldRejected,
 )
+from stpmex.types import Estado as STPEstado
 
 from speid.exc import (
     MalformedOrderException,
@@ -26,6 +27,7 @@ from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import factory
+from speid.utils import get_next_business_day
 
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 IGNORED_EXCEPTIONS = os.getenv('IGNORED_EXCEPTIONS', '').split(',')
@@ -107,6 +109,7 @@ def execute(order_val: dict):
     try:
         # Return transaction after 2 hours of creation
         assert (now - transaction.created_at) < timedelta(hours=2)
+        assert transaction.created_at
         transaction.create_order()
     except (
         AccountDoesNotExist,
@@ -119,5 +122,12 @@ def execute(order_val: dict):
         PldRejected,
         ValidationError,
     ):
-        transaction.set_state(Estado.failed)
-        transaction.save()
+        estado = transaction.check_stp_status()
+        if estado in [
+            STPEstado.traspaso_cancelado,
+            STPEstado.cancelada,
+            STPEstado.cancelada_adapter,
+            STPEstado.cancelada_rechazada,
+        ]:
+            transaction.set_state(Estado.failed)
+            transaction.save()
