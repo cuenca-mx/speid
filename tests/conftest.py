@@ -15,7 +15,7 @@ SEND_STATUS_TRANSACTION_TASK = os.environ['SEND_STATUS_TRANSACTION_TASK']
 
 @pytest.fixture
 def mock_callback_queue():
-    with patch.object(Celery, 'send_task', return_value=None) as queue_mock:
+    with patch.object(Celery, 'send_task', return_value=None):
         yield
 
 
