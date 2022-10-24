@@ -122,7 +122,7 @@ def execute(order_val: dict):
         ValidationError,
     ):
         try:
-            estado = transaction.check_stp_status()
+            estado = transaction.fetch_stp_status()
         except StpmexException as ex:
             capture_exception(ex)
         else:

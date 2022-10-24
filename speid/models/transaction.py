@@ -153,7 +153,7 @@ class Transaction(Document, BaseModel):
             pass
         return is_valid
 
-    def check_stp_status(self) -> Optional[STPEstado]:
+    def fetch_stp_status(self) -> Optional[STPEstado]:
         # checa status en stp
         stp_order = None
         estado = None
