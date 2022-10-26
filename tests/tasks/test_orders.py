@@ -290,6 +290,8 @@ def test_stp_schedule_limit(
     ],
 )
 def test_resend_not_success_order(exc, physical_account, mock_callback_queue):
+    physical_account.cuenta = '646180157082332965'
+    physical_account.save()
     order = dict(
         concepto_pago='PRUEBA Version 2',
         institucion_ordenante='90646',
@@ -298,7 +300,7 @@ def test_resend_not_success_order(exc, physical_account, mock_callback_queue):
         monto=1020,
         nombre_beneficiario='Pablo Sánchez',
         nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
+        cuenta_ordenante=physical_account.cuenta,
         rfc_curp_ordenante='ND',
         speid_id='stp_id_again',
         version=2,

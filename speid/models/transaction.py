@@ -157,17 +157,16 @@ class Transaction(Document, BaseModel):
         # checa status en stp
         stp_order = None
         estado = None
-        if self.clave_rastreo:
-            try:
-                stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
-                    claveRastreo=self.clave_rastreo,
-                    institucionOperante=self.institucion_ordenante,
-                    fechaOperacion=get_next_business_day(self.created_at),
-                )
-                estado = stp_order.estado
-            except StpmexException as ex:
-                if 'No entity found for query' not in str(ex):
-                    raise
+        try:
+            stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
+                claveRastreo=self.clave_rastreo,
+                institucionOperante=self.institucion_ordenante,
+                fechaOperacion=get_next_business_day(self.created_at),
+            )
+            estado = stp_order.estado
+        except StpmexException as ex:
+            if 'No entity found for query' not in str(ex):
+                raise
         return estado
 
     def create_order(self) -> Orden:

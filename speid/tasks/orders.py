@@ -110,17 +110,7 @@ def execute(order_val: dict):
         assert (now - transaction.created_at) < timedelta(hours=2)
         assert get_next_business_day(transaction.created_at) == date.today()
         transaction.create_order()
-    except (
-        AccountDoesNotExist,
-        AssertionError,
-        BankCodeClabeMismatch,
-        InvalidAccountType,
-        InvalidAmount,
-        InvalidInstitution,
-        InvalidTrackingKey,
-        PldRejected,
-        ValidationError,
-    ):
+    except AssertionError:
         try:
             estado = transaction.fetch_stp_status()
         except StpmexException as ex:
@@ -134,3 +124,15 @@ def execute(order_val: dict):
             ]:
                 transaction.set_state(Estado.failed)
                 transaction.save()
+    except (
+        AccountDoesNotExist,
+        BankCodeClabeMismatch,
+        InvalidAccountType,
+        InvalidAmount,
+        InvalidInstitution,
+        InvalidTrackingKey,
+        PldRejected,
+        ValidationError,
+    ):
+        transaction.set_state(Estado.failed)
+        transaction.save()
