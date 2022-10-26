@@ -108,7 +108,10 @@ def execute(order_val: dict):
     try:
         # Return transaction after 2 hours of creation
         assert (now - transaction.created_at) < timedelta(hours=2)
-        assert get_next_business_day(transaction.created_at) == date.today()
+        assert (
+            get_next_business_day(transaction.created_at)
+            == datetime.utcnow().date()
+        )
         transaction.create_order()
     except AssertionError:
         try:
