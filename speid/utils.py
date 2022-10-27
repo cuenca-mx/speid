@@ -1,9 +1,7 @@
-import datetime as dt
 import os
 from functools import wraps
 
 from flask import jsonify, make_response
-from workalendar.america import Mexico
 
 from . import app
 
@@ -32,33 +30,3 @@ def post(rule: str, **options):
         return view
 
     return decorator
-
-
-def get_next_business_day(fecha: dt.date) -> dt.date:
-    """
-    Obtains the next business day in case the current one is not.
-    """
-    mx = Mexico()
-    holidays = [hol[0] for hol in mx.holidays(fecha.year)]
-
-    holy_weeks = []
-    for begin, end in HOLY_WEEK_DATES:
-        begin = dt.date.fromisoformat(begin)
-        end = dt.date.fromisoformat(end)
-        holy_weeks.extend(
-            [
-                begin + dt.timedelta(days=n)
-                for n in range(int((end - begin).days) + 1)
-            ]
-        )
-    bank_holiday = holy_weeks + [
-        dt.date(fecha.year, 11, 2),
-        dt.date(fecha.year, 12, 12),
-    ]
-    holidays += bank_holiday
-
-    business_day = dt.date(fecha.year, fecha.month, fecha.day)
-    while business_day.weekday() in WEEKEND or business_day in holidays:
-        business_day = business_day + dt.timedelta(days=1)
-
-    return business_day

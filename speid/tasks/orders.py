@@ -1,11 +1,12 @@
 import os
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import clabe
 import luhnmod10
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
+from stpmex.business_days import get_next_business_day
 from stpmex.exc import (
     AccountDoesNotExist,
     BankCodeClabeMismatch,
@@ -27,7 +28,6 @@ from speid.helpers.task_helpers import time_in_range
 from speid.models import Event, Transaction
 from speid.tasks import celery
 from speid.types import Estado, EventType
-from speid.utils import get_next_business_day
 from speid.validations import factory
 
 MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))

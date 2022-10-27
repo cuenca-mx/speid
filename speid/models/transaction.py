@@ -13,7 +13,8 @@ from mongoengine import (
     StringField,
     signals,
 )
-from stpmex.exc import StpmexException
+from stpmex.business_days import get_next_business_day
+from stpmex.exc import NoEntityFound
 from stpmex.resources import Orden
 from stpmex.types import Estado as STPEstado
 
@@ -22,7 +23,6 @@ from speid.exc import MalformedOrderException
 from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType, TipoTransaccion
-from speid.utils import get_next_business_day
 
 from .account import Account
 from .base import BaseModel
@@ -164,9 +164,8 @@ class Transaction(Document, BaseModel):
                 fechaOperacion=get_next_business_day(self.created_at),
             )
             estado = stp_order.estado
-        except StpmexException as ex:
-            if 'No entity found for query' not in str(ex):
-                raise
+        except NoEntityFound:
+            ...
         return estado
 
     def create_order(self) -> Orden:
