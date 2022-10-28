@@ -289,6 +289,7 @@ def test_fail_transaction_with_no_stp(order, mock_callback_queue):
     transaction.delete()
 
 
+@pytest.mark.vcr
 def test_unexpected_stp_error(physical_account, mock_callback_queue):
     with patch(
         'speid.models.transaction.stpmex_client.ordenes.consulta_clave_rastreo'
