@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import clabe
 import luhnmod10
+import pytz
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
@@ -108,10 +109,9 @@ def execute(order_val: dict):
     try:
         # Return transaction after 2 hours of creation
         assert (now - transaction.created_at) < timedelta(hours=2)
-        assert (
-            get_next_business_day(transaction.created_at)
-            == datetime.utcnow().date()
-        )
+        local = transaction.created_at.replace(tzinfo=pytz.utc)
+        local = local.astimezone(pytz.timezone('America/Mexico_City'))
+        assert get_next_business_day(local) == datetime.utcnow().date()
         transaction.create_order()
     except AssertionError:
         try:
