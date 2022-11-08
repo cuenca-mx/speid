@@ -284,7 +284,7 @@ def test_fail_transaction_with_no_stp(order, mock_callback_queue):
     order['cuenta_beneficiario'] = '072691004495711499'
     execute(order)
     transaction.reload()
-    # status did not change
+    # status changed to failed because order was not found in stp
     assert transaction.estado is Estado.failed
     transaction.delete()
 

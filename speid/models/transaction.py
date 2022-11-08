@@ -155,7 +155,6 @@ class Transaction(Document, BaseModel):
 
     def fetch_stp_status(self) -> Optional[STPEstado]:
         # checa status en stp
-        stp_order = None
         estado = None
         try:
             stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
