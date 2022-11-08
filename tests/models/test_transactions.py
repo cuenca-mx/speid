@@ -1,4 +1,7 @@
+import random
+import string
 from datetime import datetime
+from typing import Dict
 
 import pytest
 from mongoengine import NotUniqueError
@@ -11,19 +14,43 @@ from speid.types import Estado, EventType
 from speid.validations import SpeidTransaction, StpTransaction
 
 
-def test_transaction():
-    transaction = Transaction(
+@pytest.fixture
+def transaction_data() -> Dict:
+    transaction = dict(
         concepto_pago='PRUEBA',
-        institucion_ordenante='646',
+        institucion_ordenante='90646',
         cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='072',
+        institucion_beneficiaria='40072',
         monto=1020,
         nombre_beneficiario='Ricardo Sánchez',
         nombre_ordenante='BANCO',
         cuenta_ordenante='646180157000000004',
         rfc_curp_ordenante='ND',
         speid_id='speid_id',
+        fecha_operacion=datetime.today(),
+        clave_rastreo='CR'
+        + ''.join(random.choice(string.ascii_letters) for _ in range(15)),
+        tipo_cuenta_beneficiario=40,
     )
+    return transaction
+
+
+@pytest.fixture
+def transaction(transaction_data: Dict) -> Transaction:
+    transaction = Transaction(**transaction_data)
+    transaction.save()
+    yield transaction
+    transaction.delete()
+
+
+@pytest.fixture
+def order(transaction_data: Dict) -> Dict:
+    del transaction_data['fecha_operacion']
+    transaction_data['version'] = 1
+    return transaction_data
+
+
+def test_transaction(transaction: Transaction):
     transaction.events.append(Event(type=EventType.created))
     transaction.events.append(Event(type=EventType.received))
     transaction.events.append(Event(type=EventType.retry))
@@ -48,25 +75,9 @@ def test_transaction():
     assert transaction.rfc_curp_ordenante == trx_saved.rfc_curp_ordenante
     assert transaction.speid_id == trx_saved.speid_id
     assert len(trx_saved.events) == 6
-    transaction.delete()
 
 
-def test_transaction_constraints():
-    transaction_data = dict(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='646',
-        cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Rogelio Lopez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        fecha_operacion=datetime.today(),
-        clave_rastreo='abc123',
-    )
-
+def test_transaction_constraints(transaction_data: Dict):
     transaction = Transaction(**transaction_data)
     transaction.save()
     assert transaction.id is not None
@@ -137,20 +148,7 @@ def test_transaction_stp_input_value_error():
         StpTransaction(**data)
 
 
-def test_transaction_speid_input():
-    order = dict(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='646',
-        cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        version=1,
-    )
+def test_transaction_speid_input(order: Dict):
     input = SpeidTransaction(**order)
     transaction = input.transform()
     transaction.save()
@@ -161,94 +159,31 @@ def test_transaction_speid_input():
     transaction.delete()
 
 
-def test_transaction_speid_input_validation_error():
-    order = dict(
-        concepto_pago=123,
-        institucion_ordenante='646',
-        cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        version=1,
-    )
+def test_transaction_speid_input_validation_error(order: Dict):
+    order['concepto_pago'] = 123
     with pytest.raises(ValidationError):
         SpeidTransaction(**order)
 
 
-def test_transaction_speid_clabe_cuenta_beneficiario():
-    order = dict(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='646',
-        cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        version=1,
-    )
+def test_transaction_speid_clabe_cuenta_beneficiario(order: Dict):
     input = SpeidTransaction(**order)
     assert input.tipo_cuenta_beneficiario is TipoCuenta.clabe.value
 
 
-def test_transaction_speid_card_cuenta_beneficiario():
-    order = dict(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='646',
-        cuenta_beneficiario='5439240312453006',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        version=1,
-    )
+def test_transaction_speid_card_cuenta_beneficiario(order: Dict):
+    order['cuenta_beneficiario'] = '5439240312453006'
     input = SpeidTransaction(**order)
     assert input.tipo_cuenta_beneficiario is TipoCuenta.card.value
 
 
-def test_transaction_speid_non_valid_cuenta_beneficiario():
-    order = dict(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='646',
-        cuenta_beneficiario='12345',
-        institucion_beneficiaria='072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez',
-        nombre_ordenante='BANCO',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        version=1,
-    )
+def test_transaction_speid_non_valid_cuenta_beneficiario(order):
+    order['cuenta_beneficiario'] = '12345'
     with pytest.raises(ValueError):
         SpeidTransaction(**order)
 
 
 @pytest.mark.vcr
-def test_send_order(physical_account):
-    transaction = Transaction(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='90646',
-        cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='40072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez Castillo de la Mancha S.A. de CV',
-        nombre_ordenante='   Ricardo Sánchez Castillo de la Mancha S.A. de CV',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        tipo_cuenta_beneficiario=40,
-    )
-
+def test_send_order(transaction: Transaction, physical_account):
     order = transaction.create_order()
 
     assert order.institucionOperante == transaction.institucion_ordenante
@@ -258,34 +193,17 @@ def test_send_order(physical_account):
     assert transaction.tipo_cuenta_beneficiario == order.tipoCuentaBeneficiario
     assert transaction.rfc_curp_beneficiario == order.rfcCurpBeneficiario
     assert transaction.referencia_numerica == order.referenciaNumerica
-    assert order.nombreBeneficiario == (
-        'Ricardo Sanchez Castillo de la Mancha' ' S'
-    )
-    assert order.nombreOrdenante == 'Ricardo Sanchez Castillo de la Mancha S'
-    assert len(order.nombreBeneficiario) == 39
-    assert len(order.nombreOrdenante) == 39
+    assert order.nombreBeneficiario == 'Ricardo Sanchez'
+    assert order.nombreOrdenante == 'BANCO'
+    assert len(order.nombreBeneficiario) == 15
+    assert len(order.nombreOrdenante) == 5
 
     order = transaction.create_order()
     assert transaction.stp_id == order.id
 
-    transaction.delete()
 
-
-def test_fail_send_order_no_account_registered():
-    transaction = Transaction(
-        concepto_pago='PRUEBA',
-        institucion_ordenante='90646',
-        cuenta_beneficiario='072691004495711499',
-        institucion_beneficiaria='40072',
-        monto=1020,
-        nombre_beneficiario='Ricardo Sánchez Castillo de la Mancha S.A. de CV',
-        nombre_ordenante='   Ricardo Sánchez Castillo de la Mancha S.A. de CV',
-        cuenta_ordenante='646180157000000004',
-        rfc_curp_ordenante='ND',
-        speid_id='speid_id',
-        tipo_cuenta_beneficiario=40,
-    )
-    transaction_id = transaction.save().id
+def test_fail_send_order_no_account_registered(transaction: Transaction):
+    transaction_id = transaction.id
 
     with pytest.raises(MalformedOrderException):
         transaction.create_order()

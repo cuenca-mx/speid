@@ -12,7 +12,6 @@ from stpmex.exc import (
     InvalidInstitution,
     InvalidTrackingKey,
     PldRejected,
-    StpmexException,
 )
 
 from speid.exc import (
@@ -193,7 +192,6 @@ def test_stp_schedule_limit(
     'exc',
     [
         (AccountDoesNotExist),
-        (AssertionError),
         (BankCodeClabeMismatch),
         (InvalidAccountType),
         (InvalidAmount),
@@ -287,39 +285,3 @@ def test_fail_transaction_with_no_stp(order, mock_callback_queue):
     # status changed to failed because order was not found in stp
     assert transaction.estado is Estado.failed
     transaction.delete()
-
-
-@pytest.mark.vcr
-def test_unexpected_stp_error(physical_account, mock_callback_queue):
-    with patch(
-        'speid.models.transaction.stpmex_client.ordenes.consulta_clave_rastreo'
-    ) as consulta_mock, patch(
-        'speid.tasks.orders.capture_exception'
-    ) as capture_mock:
-        consulta_mock.side_effect = StpmexException(
-            msg="Firma invalida Firma invalida"
-        )
-        physical_account.cuenta = '646180157082332965'
-        physical_account.save()
-        order = dict(
-            concepto_pago='PRUEBA 2',
-            institucion_ordenante='90646',
-            cuenta_beneficiario='072691004495711499',
-            institucion_beneficiaria='40072',
-            monto=1030,
-            nombre_beneficiario='Pablo Sánchez',
-            nombre_ordenante='BANCO',
-            cuenta_ordenante=physical_account.cuenta,
-            rfc_curp_ordenante='ND',
-            speid_id='SP21r4f8h4tv',
-            version=2,
-        )
-        execute(order)
-        transaction = Transaction.objects.order_by('-created_at').first()
-        assert transaction.estado is Estado.submitted
-        # changing time so it fails assertion
-        transaction.created_at = datetime.utcnow() - timedelta(hours=4)
-        transaction.save()
-        # executing again so time assert fails
-        execute(order)
-        capture_mock.assert_called_once()
