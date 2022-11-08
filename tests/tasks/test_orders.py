@@ -12,6 +12,7 @@ from stpmex.exc import (
     InvalidInstitution,
     InvalidTrackingKey,
     PldRejected,
+    StpmexException,
 )
 
 from speid.exc import (
@@ -276,6 +277,7 @@ def test_fail_transaction_with_no_stp(order, mock_callback_queue):
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.error
     transaction.clave_rastreo = 'CRINEXISTENTE'
+    transaction.created_at = datetime.utcnow() - timedelta(hours=4)
     transaction.save()
 
     # fixing order so it will pass ths time
@@ -285,3 +287,40 @@ def test_fail_transaction_with_no_stp(order, mock_callback_queue):
     # status changed to failed because order was not found in stp
     assert transaction.estado is Estado.failed
     transaction.delete()
+
+
+@pytest.mark.vcr()
+def test_fail_transaction_not_working_day(order, mock_callback_queue):
+    execute(order)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+    # changing time to 2 days ago so transaction fails in the next step
+    transaction.created_at = datetime.utcnow() - timedelta(days=2)
+    transaction.save()
+    assert not transaction.is_current_working_day()
+    # executing again so time assert fails
+    execute(order)
+    # status didn't change because transaction was succesful in STP
+    assert transaction.estado is Estado.submitted
+    transaction.delete()
+
+
+@pytest.mark.vcr
+def test_unexpected_stp_error(order, mock_callback_queue):
+    with patch(
+        'speid.models.transaction.stpmex_client.ordenes.consulta_clave_rastreo'
+    ) as consulta_mock, patch(
+        'speid.models.transaction.capture_exception'
+    ) as capture_mock:
+        consulta_mock.side_effect = StpmexException(
+            msg="Firma invalida Firma invalida"
+        )
+        execute(order)
+        transaction = Transaction.objects.order_by('-created_at').first()
+        assert transaction.estado is Estado.submitted
+        # changing time so it fails assertion
+        transaction.created_at = datetime.utcnow() - timedelta(hours=4)
+        transaction.save()
+        # executing again so time assert fails
+        execute(order)
+        capture_mock.assert_called_once()
