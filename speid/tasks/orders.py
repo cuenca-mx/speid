@@ -84,7 +84,6 @@ def execute(order_val: dict):
         transaction.save()
         raise MalformedOrderException()
 
-    breakpoint()
     try:
         prev_trx = Transaction.objects.get(speid_id=transaction.speid_id)
         # Si la transacción ya esta como succeeded termina
