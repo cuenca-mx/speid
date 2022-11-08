@@ -3,11 +3,9 @@ from datetime import datetime, timedelta
 
 import clabe
 import luhnmod10
-import pytz
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
-from stpmex.business_days import get_next_business_day
 from stpmex.exc import (
     AccountDoesNotExist,
     BankCodeClabeMismatch,
@@ -16,9 +14,7 @@ from stpmex.exc import (
     InvalidInstitution,
     InvalidTrackingKey,
     PldRejected,
-    StpmexException,
 )
-from stpmex.types import Estado as STPEstado
 
 from speid.exc import (
     MalformedOrderException,
@@ -106,36 +102,21 @@ def execute(order_val: dict):
         raise MalformedOrderException()
 
     now = datetime.utcnow()
-    try:
-        # Return transaction after 2 hours of creation
-        assert (now - transaction.created_at) < timedelta(hours=2)
-        local = transaction.created_at.replace(tzinfo=pytz.utc)
-        local = local.astimezone(pytz.timezone('America/Mexico_City'))
-        assert get_next_business_day(local) == datetime.utcnow().date()
-        transaction.create_order()
-    except AssertionError:
+    # Return transaction after 2 hours of creation
+    if (now - transaction.created_at) > timedelta(hours=2):
+        transaction.fail_if_bad_stp()
+    else:
         try:
-            estado = transaction.fetch_stp_status()
-        except StpmexException as ex:
-            capture_exception(ex)
-        else:
-            if not estado or estado in [
-                STPEstado.traspaso_cancelado,
-                STPEstado.cancelada,
-                STPEstado.cancelada_adapter,
-                STPEstado.cancelada_rechazada,
-            ]:
-                transaction.set_state(Estado.failed)
-                transaction.save()
-    except (
-        AccountDoesNotExist,
-        BankCodeClabeMismatch,
-        InvalidAccountType,
-        InvalidAmount,
-        InvalidInstitution,
-        InvalidTrackingKey,
-        PldRejected,
-        ValidationError,
-    ):
-        transaction.set_state(Estado.failed)
-        transaction.save()
+            transaction.create_order()
+        except (
+            AccountDoesNotExist,
+            BankCodeClabeMismatch,
+            InvalidAccountType,
+            InvalidAmount,
+            InvalidInstitution,
+            InvalidTrackingKey,
+            PldRejected,
+            ValidationError,
+        ):
+            transaction.set_state(Estado.failed)
+            transaction.save()
