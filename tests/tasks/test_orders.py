@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import vcr
+from freezegun import freeze_time
 from stpmex.exc import (
     AccountDoesNotExist,
     BankCodeClabeMismatch,
@@ -23,6 +24,7 @@ from speid.exc import (
 from speid.models import Transaction
 from speid.tasks.orders import execute, retry_timeout, send_order
 from speid.types import Estado, EventType, TipoTransaccion
+from speid.validations import factory
 
 
 @pytest.fixture
@@ -251,6 +253,7 @@ def test_fail_transaction_with_stp_succeeded(order, mock_callback_queue):
 
 
 @pytest.mark.vcr()
+@freeze_time('2022-11-08 10:00:00')
 def test_fail_transaction_with_stp_failed(order, mock_callback_queue):
     execute(order)
     transaction = Transaction.objects.order_by('-created_at').first()
@@ -267,21 +270,16 @@ def test_fail_transaction_with_stp_failed(order, mock_callback_queue):
 
 
 @pytest.mark.vcr()
+@freeze_time('2022-11-08 10:00:00')
 def test_fail_transaction_with_no_stp(order, mock_callback_queue):
-    order['cuenta_beneficiario'] = '123456789012345678'
-    # new transaction with errors so it does not reach stp
-    try:
-        execute(order)
-    except MalformedOrderException:
-        ...
-    transaction = Transaction.objects.order_by('-created_at').first()
-    assert transaction.estado is Estado.error
+    # new transaction
+    input = factory.create(order['version'], **order)
+    transaction = input.transform()
     transaction.clave_rastreo = 'CRINEXISTENTE'
     transaction.created_at = datetime.utcnow() - timedelta(hours=4)
     transaction.save()
 
-    # fixing order so it will pass ths time
-    order['cuenta_beneficiario'] = '072691004495711499'
+    # sending to stp
     execute(order)
     transaction.reload()
     # status changed to failed because order was not found in stp
@@ -306,6 +304,7 @@ def test_fail_transaction_not_working_day(order, mock_callback_queue):
 
 
 @pytest.mark.vcr
+@freeze_time('2022-11-08 10:00:00')
 def test_unexpected_stp_error(order, mock_callback_queue):
     with patch(
         'speid.models.transaction.stpmex_client.ordenes.consulta_clave_rastreo'
