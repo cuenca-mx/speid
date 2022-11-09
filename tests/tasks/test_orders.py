@@ -272,7 +272,8 @@ def test_fail_transaction_with_stp_failed(order, mock_callback_queue):
 @pytest.mark.vcr()
 @freeze_time('2022-11-08 10:00:00')
 def test_fail_transaction_with_no_stp(order, mock_callback_queue):
-    # new transaction
+    # new transaction so next `execute`
+    # finds something to send to STP
     input = factory.create(order['version'], **order)
     transaction = input.transform()
     transaction.clave_rastreo = 'CRINEXISTENTE'
