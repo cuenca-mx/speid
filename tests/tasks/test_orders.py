@@ -238,6 +238,7 @@ def test_resend_success_order(order):
 
 
 @pytest.mark.vcr()
+@freeze_time('2022-11-08 10:00:00')
 def test_fail_transaction_with_stp_succeeded(order, mock_callback_queue):
     execute(order)
     transaction = Transaction.objects.order_by('-created_at').first()
