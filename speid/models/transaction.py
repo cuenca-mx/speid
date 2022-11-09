@@ -182,7 +182,7 @@ class Transaction(Document, BaseModel):
         local = local.astimezone(pytz.timezone('America/Mexico_City'))
         return get_next_business_day(local) == datetime.utcnow().date()
 
-    def fail_if_bad_stp(self) -> None:
+    def fail_if_not_found_stp(self) -> None:
         # if transaction is not found in stp, or has a failed status,
         # return to origin. Only checking for curent working day
         if not self.is_current_working_day():

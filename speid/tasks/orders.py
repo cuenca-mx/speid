@@ -104,7 +104,7 @@ def execute(order_val: dict):
     now = datetime.utcnow()
     # Return transaction after 2 hours of creation
     if (now - transaction.created_at) > timedelta(hours=2):
-        transaction.fail_if_bad_stp()
+        transaction.fail_if_not_found_stp()
     else:
         try:
             transaction.create_order()
