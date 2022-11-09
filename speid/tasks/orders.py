@@ -63,9 +63,7 @@ def send_order(self, order_val: dict):
 
 def execute(order_val: dict):
     # Get version
-    version = 0
-    if "version" in order_val:
-        version = order_val['version']
+    version = order_val.get('version', 0)
     if time_in_range(START_DOWNTIME, STOP_DOWNTIME, datetime.utcnow().time()):
         raise ScheduleError
     transaction = Transaction()
@@ -104,20 +102,21 @@ def execute(order_val: dict):
         raise MalformedOrderException()
 
     now = datetime.utcnow()
-    try:
-        # Return transaction after 2 hours of creation
-        assert (now - transaction.created_at) < timedelta(hours=2)
-        transaction.create_order()
-    except (
-        AccountDoesNotExist,
-        AssertionError,
-        BankCodeClabeMismatch,
-        InvalidAccountType,
-        InvalidAmount,
-        InvalidInstitution,
-        InvalidTrackingKey,
-        PldRejected,
-        ValidationError,
-    ):
-        transaction.set_state(Estado.failed)
-        transaction.save()
+    # Return transaction after 2 hours of creation
+    if (now - transaction.created_at) > timedelta(hours=2):
+        transaction.fail_if_not_found_stp()
+    else:
+        try:
+            transaction.create_order()
+        except (
+            AccountDoesNotExist,
+            BankCodeClabeMismatch,
+            InvalidAccountType,
+            InvalidAmount,
+            InvalidInstitution,
+            InvalidTrackingKey,
+            PldRejected,
+            ValidationError,
+        ):
+            transaction.set_state(Estado.failed)
+            transaction.save()

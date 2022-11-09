@@ -12,3 +12,4 @@ docker-build
 /.dmypy.json
 /.mypy_cache
 coverage.xml
+/.python-version

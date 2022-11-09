@@ -1,7 +1,9 @@
 import os
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
+import pytz
 from mongoengine import (
     DateTimeField,
     Document,
@@ -12,7 +14,11 @@ from mongoengine import (
     StringField,
     signals,
 )
+from sentry_sdk import capture_exception
+from stpmex.business_days import get_next_business_day
+from stpmex.exc import NoEntityFound, StpmexException
 from stpmex.resources import Orden
+from stpmex.types import Estado as STPEstado
 
 from speid import STP_EMPRESA
 from speid.exc import MalformedOrderException
@@ -35,6 +41,13 @@ from .helpers import (
 SKIP_VALIDATION_PRIOR_SEND_ORDER = (
     os.getenv('SKIP_VALIDATION_PRIOR_SEND_ORDER', 'false').lower() == 'true'
 )
+
+STP_FAILED_STATUSES = [
+    STPEstado.traspaso_cancelado,
+    STPEstado.cancelada,
+    STPEstado.cancelada_adapter,
+    STPEstado.cancelada_rechazada,
+]
 
 
 @handler(signals.pre_save)
@@ -148,6 +161,40 @@ class Transaction(Document, BaseModel):
         except DoesNotExist:
             pass
         return is_valid
+
+    def fetch_stp_status(self) -> Optional[STPEstado]:
+        # checa status en stp
+        estado = None
+        try:
+            stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
+                claveRastreo=self.clave_rastreo,
+                institucionOperante=self.institucion_ordenante,
+                fechaOperacion=get_next_business_day(self.created_at),
+            )
+            estado = stp_order.estado
+        except NoEntityFound:
+            ...
+        return estado
+
+    def is_current_working_day(self) -> bool:
+        # checks if transaction was made in the current working day
+        local = self.created_at.replace(tzinfo=pytz.utc)
+        local = local.astimezone(pytz.timezone('America/Mexico_City'))
+        return get_next_business_day(local) == datetime.utcnow().date()
+
+    def fail_if_not_found_stp(self) -> None:
+        # if transaction is not found in stp, or has a failed status,
+        # return to origin. Only checking for curent working day
+        if not self.is_current_working_day():
+            return
+        try:
+            estado = self.fetch_stp_status()
+        except StpmexException as ex:
+            capture_exception(ex)
+        else:
+            if not estado or estado in STP_FAILED_STATUSES:
+                self.set_state(Estado.failed)
+                self.save()
 
     def create_order(self) -> Orden:
         # Validate account has already been created

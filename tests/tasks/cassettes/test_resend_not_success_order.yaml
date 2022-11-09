@@ -1,12 +1,12 @@
 interactions:
 - request:
-    body: '{"monto": 10.2, "conceptoPago": "PRUEBA Version 2", "nombreBeneficiario":
-      "Pablo Sanchez", "cuentaBeneficiario": "072691004495711499", "institucionContraparte":
-      "40072", "tipoCuentaBeneficiario": 40, "nombreOrdenante": "BANCO", "cuentaOrdenante":
-      "646180157000000004", "institucionOperante": "90646", "claveRastreo": "CR1577408400",
-      "referenciaNumerica": 4310058, "rfcCurpBeneficiario": "ND", "rfcCurpOrdenante":
-      "ND", "medioEntrega": 3, "prioridad": 1, "tipoPago": 1, "topologia": "T", "firma":
-      "iHArfNX+XpuNMelQ+YrDj7bQZ1LvclooqokW+PuN5tTr1p/gb0lAyuo2V/y/495ULv3BR+ublu7ndzU1mYOxI3XMeX5048GsNCXNhnntqCVBDYIM3tzdqGNYpgXPKusFHxLZg6ODPIAogS867zRdxgslHy3lpqNYQwjqW/OGjHU=",
+    body: '{"monto": 10.2, "conceptoPago": "PRUEBA Version 2", "cuentaBeneficiario":
+      "072691004495711499", "nombreBeneficiario": "Pablo Sanchez", "institucionContraparte":
+      "40072", "cuentaOrdenante": "646180157082332965", "nombreOrdenante": "BANCO",
+      "institucionOperante": "90646", "tipoCuentaBeneficiario": 40, "tipoCuentaOrdenante":
+      40, "claveRastreo": "CR1666795744", "referenciaNumerica": 8443499, "rfcCurpBeneficiario":
+      "ND", "rfcCurpOrdenante": "ND", "prioridad": 1, "medioEntrega": 3, "tipoPago":
+      1, "topologia": "T", "firma": "EYIAwGFfQ2VsyZhvOObReByzGjgBkYLFqU8n/fhUiaMVhyc0rMAghBf7rHT5zjgYYcIrPpS+jg5PPyQXOy2/fFiL8hJ2WeF7PE05ycZ8u13UYfJI7Pv+omEDD1ilYbMuwZPBiZnp/k2JFgsC+2T1vKGo44YFuHUGM37oW7hWGfc=",
       "empresa": "TAMIZI"}'
     headers:
       Accept:
@@ -16,23 +16,63 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '692'
+      - '719'
       Content-Type:
       - application/json
       User-Agent:
-      - stpmex-python/3.0.0.dev1
+      - stpmex-python/3.9.1
     method: PUT
     uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/registra
   response:
     body:
-      string: '{"resultado":{"id":7564143}}'
+      string: '{"resultado":{"id":3541148}}'
     headers:
       Content-Length:
       - '28'
       Content-Type:
       - application/json
       Date:
-      - Fri, 27 Dec 2019 01:00:00 GMT
+      - Wed, 26 Oct 2022 14:49:05 GMT
+      X-ORACLE-DMS-ECID:
+      - fb0742e4-0ce0-44c1-936c-e43bdd684222-00001d27
+      X-ORACLE-DMS-RID:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "CRINEXISTENTE", "institucionOperante":
+      90646, "fechaOperacion": "20221020", "firma": "InMoA+mGcOV+z5qgKphy0lmjaeCtMpL+ns2cqbvePvJSW9//gC5bxOyUyDMeT1O6ENBCxsr9IBi22gW5p91cDxEnwC3pq1EuOXcez28dPp3pRpB93laOs3ANsaG6Q583QKbriBa1yXcT8iz1gTxqKn6OE2mFeZzFok+oINKiobY="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '299'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.9.1
+    method: POST
+    uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/consOrdEnvRastreo
+  response:
+    body:
+      string: '{"resultado":{"descripcionError":"Firma invalida No entity found for
+        query","id":0}}'
+    headers:
+      Content-Length:
+      - '84'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 20 Oct 2022 16:17:52 GMT
+      X-ORACLE-DMS-ECID:
+      - caf9e530-1d86-4f58-82ee-095674dc8b9c-00002ce6
+      X-ORACLE-DMS-RID:
+      - '0'
     status:
       code: 200
       message: OK

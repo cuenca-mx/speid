@@ -1,0 +1,37 @@
+interactions:
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "NON-EXISTANT", "institucionOperante":
+      90646, "fechaOperacion": "20220407", "firma": "Jl+O7tO/yVxXJ++oWFVwn1VzAXjpKF0k7yEfH0TQRS9jQdpzzZDc0294+dBG6b9x9J8Yny12HjpNof3vWVSicvwL5UAMfMGIL6lQ7g4/ZCPDjT2sRHc0n6cagGDeop6EVhF3BbHHwPVDAwNG97pxV+f7kseo9A2a0CB4rTMVCpc="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '298'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.9.1
+    method: POST
+    uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/consOrdEnvRastreo
+  response:
+    body:
+      string: '{"resultado":{"descripcionError":"Firma invalida Firma Invalida","id":0}}'
+    headers:
+      Content-Length:
+      - '73'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 18 Oct 2022 18:30:19 GMT
+      X-ORACLE-DMS-ECID:
+      - 77499e74-f193-4374-8033-101d42d8c373-00000664
+      X-ORACLE-DMS-RID:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1
