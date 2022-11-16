@@ -26,6 +26,7 @@ from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType, TipoTransaccion
 
+from ..helpers.callback_helper import set_status_transaction
 from .account import Account
 from .base import BaseModel
 from .events import Event
@@ -131,12 +132,9 @@ class Transaction(Document, BaseModel):
     }
 
     def set_state(self, state: Estado):
-        from ..tasks.transactions import send_transaction_status
-
-        send_transaction_status.apply_async((str(self.id), state))
         self.estado = state
-
         self.events.append(Event(type=EventType.completed))
+        set_status_transaction(self.speid_id, state)
 
     def confirm_callback_transaction(self):
         response = ''

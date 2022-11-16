@@ -1,6 +1,5 @@
 import base64
 import os
-from typing import Optional
 
 from celery import Celery
 
@@ -20,18 +19,12 @@ def auth_header(username: str, password: str) -> dict:
 def set_status_transaction(
     speid_id: str,
     state: str,
-    curp: Optional[str] = None,
-    rfc: Optional[str] = None,
-    nombre_beneficiario: Optional[str] = None,
 ) -> None:
     queue.send_task(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
             speid_id=speid_id,
             state=state,
-            rfc=rfc,
-            curp=curp,
-            nombre_beneficiario=nombre_beneficiario,
         ),
     )
 
