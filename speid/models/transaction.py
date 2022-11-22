@@ -59,7 +59,7 @@ def pre_save_transaction(sender, document):
 
 
 # Min amount accepted in restricted accounts
-MIN_AMOUNT = int(os.getenv('MIN_AMOUNT','10000'))
+MIN_AMOUNT = int(os.getenv('MIN_AMOUNT', '10000'))
 
 
 @updated_at.apply
