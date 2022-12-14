@@ -15,7 +15,7 @@ CURP_LENGTH = 18
 RFC_LENGTH = 13
 STP_BANK_CODE = 90646
 GET_RFC_TASK_MAX_RETRIES = 30  # reintentos
-GET_RFC_TASK_DELAY = 5  # Segundos
+GET_RFC_TASK_DELAY = 10  # Segundos
 
 
 @celery.task
@@ -115,7 +115,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
 
         # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
         # en 5 segundos
-        if (not rfc_curp or rfc_curp = 'ND') and self.request.retries < GET_RFC_TASK_MAX_RETRIES:
+        if (not rfc_curp or rfc_curp == 'ND') and self.request.retries < GET_RFC_TASK_MAX_RETRIES:
             self.retry(countdown=GET_RFC_TASK_DELAY * self.request.retries)
 
     callback_helper.set_status_transaction(
