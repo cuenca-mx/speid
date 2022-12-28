@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: tipoCriterio=T&receptorParticipante=0&captcha=c&tipoConsulta=1&fecha=19-04-2022&criterio=CUENCA22026847429&emisor=90646&receptor=40012&cuenta=012180015328558878&monto=0.01
+    body: tipoCriterio=T&receptorParticipante=0&captcha=c&tipoConsulta=1&fecha=19-04-2022&criterio=CUENCA22026847429&emisor=90646&receptor=90646&cuenta=646180015328558878&monto=0.01
     headers:
       Accept:
       - '*/*'
@@ -35,7 +35,7 @@ interactions:
       code: 307
       message: Temporary Redirect
 - request:
-    body: tipoCriterio=T&receptorParticipante=0&captcha=c&tipoConsulta=1&fecha=19-04-2022&criterio=CUENCA22026847429&emisor=90646&receptor=40012&cuenta=646180015328558878&monto=0.01
+    body: tipoCriterio=T&receptorParticipante=0&captcha=c&tipoConsulta=1&fecha=19-04-2022&criterio=CUENCA22026847429&emisor=90646&receptor=90646&cuenta=646180015328558878&monto=0.01
     headers:
       Accept:
       - '*/*'
@@ -153,12 +153,11 @@ interactions:
   response:
     body:
       string: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<SPEI_Tercero FechaOperacion=\"2022-04-20\"
-        Hora=\"21:33:54\" ClaveSPEI=\"40012\" sello=\"JxhDgCMr6q50FhIp1HIY9Pfj4lxYh/QcwNZ38AcTKVAuZgNgXbGyQy7/svSTctLVBnU4ipniXp6Dv89o71EZH14c3xK6AlQtf02npY8Enbgf/AIiFp4ySsrDC2hXnShMIq1SvB77ctNIAwfW1h5a8xp3W97gTV5xr+OBv7T1cjlZdM1EvlC0jEKPypOBwxXjoGwAXb8AOc8DaQTFlgKFG80D8e12wOl6F/0wgilYL2D1bPoK4ya+rbcgOga2TLYYttsyxtZlzuQmv4tqI71/j8N1ob3XtLe/B+BxMOu/iW4fDLyM4sZs0rw47SGr5UFC3ic8L0qNH5MyB/4FTwWodw==\"
-        numeroCertificado=\"00001000000411613442\" cadenaCDA=\"||01|20042022|19042022|213354|40012|STP|ABC123
-        LABS|40|6461801570|ABC123456AB1|BBVA BANCOMER|MIGUEL ACOSTA VENTURA|40|012180015328558878|AOVM910106HCSPRL05|ABC123
+        Hora=\"21:33:54\" ClaveSPEI=\"90646\" sello=\"JxhDgCMr6q50FhIp1HIY9Pfj4lxYh/QcwNZ38AcTKVAuZgNgXbGyQy7/svSTctLVBnU4ipniXp6Dv89o71EZH14c3xK6AlQtf02npY8Enbgf/AIiFp4ySsrDC2hXnShMIq1SvB77ctNIAwfW1h5a8xp3W97gTV5xr+OBv7T1cjlZdM1EvlC0jEKPypOBwxXjoGwAXb8AOc8DaQTFlgKFG80D8e12wOl6F/0wgilYL2D1bPoK4ya+rbcgOga2TLYYttsyxtZlzuQmv4tqI71/j8N1ob3XtLe/B+BxMOu/iW4fDLyM4sZs0rw47SGr5UFC3ic8L0qNH5MyB/4FTwWodw==\"
+        numeroCertificado=\"00001000000411613442\" cadenaCDA=\"||01|20042022|19042022|213354|90646|STP|ABC123
+        LABS|40|6461801570|ABC123456AB1|STP|MIGUEL ACOSTA VENTURA|40|646180015328558878|AOVM910106HCSPRL05|ABC123
         Validation|000000000000000.00|000000000000000.01|NA|NA|0|0|NA|0|000000000000000.00|00001000000411613442||JxhDgCMr6q50FhIp1HIY9Pfj4lxYh/QcwNZ38AcTKVAuZgNgXbGyQy7/svSTctLVBnU4ipniXp6Dv89o71EZH14c3xK6AlQtf02npY8Enbgf/AIiFp4ySsrDC2hXnShMIq1SvB77ctNIAwfW1h5a8xp3W97gTV5xr+OBv7T1cjlZdM1EvlC0jEKPypOBwxXjoGwAXb8AOc8DaQTFlgKFG80D8e12wOl6F/0wgilYL2D1bPoK4ya+rbcgOga2TLYYttsyxtZlzuQmv4tqI71/j8N1ob3XtLe/B+BxMOu/iW4fDLyM4sZs0rw47SGr5UFC3ic8L0qNH5MyB/4FTwWodw==\"
-        claveRastreo=\"CUENCA22026847429\">\r\n    <Beneficiario BancoReceptor=\"BBVA
-        BANCOMER\" Nombre=\"MIGUEL ACOSTA VENTURA\" TipoCuenta=\"40\" Cuenta=\"012180015328558878\"
+        claveRastreo=\"CUENCA22026847429\">\r\n    <Beneficiario BancoReceptor=\"STP\" Nombre=\"MIGUEL ACOSTA VENTURA\" TipoCuenta=\"40\" Cuenta=\"646180015328558878\"
         RFC=\"AOVM910106HCSPRL05\" Concepto=\"ABC123 Validation\" IVA=\"000000000000000.00\"
         MontoPago=\"000000000000000.01\"/>\r\n    <Ordenante BancoEmisor=\"STP\" Nombre=\"ABC123
         LABS\" TipoCuenta=\"40\" Cuenta=\"6461801570\" RFC=\"ABC123456AB1\"/>\r\n</SPEI_Tercero>"
