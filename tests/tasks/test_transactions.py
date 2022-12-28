@@ -251,13 +251,13 @@ def test_send_transaction_restricted_accounts_stp_to_stp(
 ):
 
     outcome_transaction.institucion_beneficiaria = '90646'
-    outcome_transaction.clave_rastreo = 'CUENCA22026847429'
-    outcome_transaction.cuenta_beneficiario = '646180015328558878'
+    outcome_transaction.clave_rastreo = 'CUENCA954881386502'
     outcome_transaction.cuenta_ordenante = '646180157016683211'
-    outcome_transaction.created_at = dt.datetime(2022, 4, 20, 2, 33)
-    outcome_transaction.monto = 1
+    outcome_transaction.cuenta_beneficiario = '646180015328558878'
+    outcome_transaction.created_at = dt.datetime(2022, 4, 12, 20, 31)
     outcome_transaction.save()
 
+    moral_account.cuenta = '646180157016683211'
     moral_account.is_restricted = True
     moral_account.save()
 
