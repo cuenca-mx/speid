@@ -70,7 +70,9 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
     curp = None
     nombre_beneficiario = None
 
-    if account.is_restricted and transaction.institucion_beneficiaria != str(STP_BANK_CODE):
+    if account.is_restricted and transaction.institucion_beneficiaria != str(
+        STP_BANK_CODE
+    ):
         cdmx_tz = current_cdmx_time_zone(transaction.created_at)
 
         created_at_utc = transaction.created_at.replace(tzinfo=pytz.utc)
