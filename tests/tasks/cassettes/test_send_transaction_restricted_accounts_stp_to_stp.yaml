@@ -157,8 +157,7 @@ interactions:
         numeroCertificado=\"00001000000411613442\" cadenaCDA=\"||01|12042022|12042022|153149|90646|STP|Felipe
         Lopez Hernandez|40|646180157016683211|LOHF890619HCSPRL05|BBVA BANCOMER|MANUEL
         AVALOS TOVAR|40|646180015328558878|ND|Manuel Avalos|000000000000000.00|000000000000001.00|NA|NA|0|0|NA|0|000000000000000.00|00001000000411613442||UA27iiw0or54+1bv+qhyW3Wa4XzdZJS7i5/1VAowRUalzUfxoTCFk1raqk3ROah6eqDdxowzb9JXPVahCKOMY2W2UfU995fuEoxtBJzzcSafAOuQ7kPfkyKB1adnDCqyAY3YpRPXLTFh/DYPlOm2iHBuKOzmUhRTpDEiMXDLKVCHWSAnuK1Qdo4wTQBtrCOneX96/Hw/WycVTqlB7QY7Q7PYjXPdF4tnQHBSPbvmaHg9SOYpCDZGB7aXzaJ8hydTwvi4iQFAwfTL0ufMGRmkbr33dipxDqVH2LUONOK2PBB1qZ78KtfrcoYDJIVaqb3SUpKMKJEW34diPyBSygmLYg==\"
-        claveRastreo=\"CUENCA954881386502\">\r\n    <Beneficiario BancoReceptor=\"BBVA
-        BANCOMER\" Nombre=\"MANUEL AVALOS TOVAR\" TipoCuenta=\"40\" Cuenta=\"646180015328558878\"
+        claveRastreo=\"CUENCA954881386502\">\r\n    <Beneficiario BancoReceptor=\"STP\" Nombre=\"MANUEL AVALOS TOVAR\" TipoCuenta=\"40\" Cuenta=\"646180015328558878\"
         RFC=\"ND\" Concepto=\"Manuel Avalos\" IVA=\"000000000000000.00\" MontoPago=\"000000000000001.00\"/>\r\n
         \   <Ordenante BancoEmisor=\"STP\" Nombre=\"Felipe Lopez Hernandez\" TipoCuenta=\"40\"
         Cuenta=\"646180157016683211\" RFC=\"LOHF890619HCSPRL05\"/>\r\n</SPEI_Tercero>"
