@@ -245,6 +245,37 @@ def test_send_transaction_restricted_accounts_curp_from_cep(
 
 
 @patch('celery.Celery.send_task')
+@pytest.mark.vcr
+def test_send_transaction_restricted_accounts_stp_to_stp(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+
+    outcome_transaction.institucion_beneficiaria = '90646'
+    outcome_transaction.clave_rastreo = 'CUENCA22026847429'
+    outcome_transaction.cuenta_beneficiario = '646180015328558878'
+    outcome_transaction.cuenta_ordenante = '646180157016683211'
+    outcome_transaction.created_at = dt.datetime(2022, 4, 20, 2, 33)
+    outcome_transaction.monto = 1
+    outcome_transaction.save()
+
+    moral_account.is_restricted = True
+    moral_account.save()
+
+    send_transaction_status(outcome_transaction.id, Estado.succeeded)
+
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=Estado.succeeded.value,
+            rfc=None,
+            curp=None,
+            nombre_beneficiario=None,
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
 def test_send_transaction_restricted_accounts_retry_task_on_cep_error(
     mock_send_task, outcome_transaction, moral_account
 ):
