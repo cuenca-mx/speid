@@ -2,7 +2,7 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
-from celery.exceptions import Retry
+from celery.exceptions import MaxRetriesExceededError, Retry
 from cep.exc import CepError, MaxRequestError
 
 from speid.models import Transaction
@@ -311,10 +311,6 @@ def test_send_transaction_status_does_not_retry_task_on_max_retries(
     )
 
 
-@patch(
-    'speid.tasks.transactions.send_transaction_status.request.retries',
-    GET_RFC_TASK_MAX_RETRIES,
-)
 @patch('celery.Celery.send_task')
 @pytest.mark.vcr
 def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
@@ -332,7 +328,12 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
     moral_account.is_restricted = True
     moral_account.save()
 
-    send_transaction_status(outcome_transaction.id, Estado.succeeded)
+    with patch(
+        'speid.tasks.transactions.send_transaction_status.request.retries',
+        GET_RFC_TASK_MAX_RETRIES,
+        side_effect=MaxRetriesExceededError,
+    ):
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
