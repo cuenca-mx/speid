@@ -94,9 +94,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
             assert transferencia is not None
         except MaxRequestError:
             rfc_curp = 'max retries'
-        except CepError:
-            pass
-        except AssertionError:
+        except CepError or AssertionError:
             rfc_curp = None
         else:
             rfc_curp = str(transferencia.beneficiario.rfc)
