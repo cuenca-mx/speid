@@ -95,7 +95,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
         except MaxRequestError:
             rfc_curp = 'max retries'
         except CepError:
-            self.retry(countdown=GET_RFC_TASK_DELAY)
+            pass
         except AssertionError:
             rfc_curp = None
         else:
