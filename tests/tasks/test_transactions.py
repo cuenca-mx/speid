@@ -179,11 +179,10 @@ def test_send_transaction_restricted_accounts_retry_task(
     moral_account.is_restricted = True
     moral_account.save()
 
-    with pytest.raises(Retry) as method_mock:
+    with pytest.raises(Retry):
         send_transaction_status(outcome_transaction.id, Estado.rejected)
 
     mock_send_task.assert_not_called()
-    method_mock.assert_called_once()
 
 
 @patch('celery.Celery.send_task')
@@ -284,10 +283,11 @@ def test_send_transaction_restricted_accounts_retry_task_on_cep_error(
     moral_account.save()
 
     with patch('cep.Transferencia.validar', side_effect=CepError):
-        with pytest.raises(Retry):
+        with pytest.raises(Retry) as method_mock:
             send_transaction_status(outcome_transaction.id, Estado.rejected)
 
     mock_send_task.assert_not_called()
+    method_mock.assert_called_once()
 
 
 @patch('celery.Celery.send_task')
