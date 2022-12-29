@@ -7,7 +7,6 @@ from cep.exc import CepError, MaxRequestError
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
-    GET_RFC_TASK_MAX_RETRIES,
     process_outgoing_transactions,
     retry_incoming_transactions,
     send_transaction_status,
@@ -330,7 +329,6 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
 
     with patch(
         'speid.tasks.transactions.send_transaction_status.request.retries',
-        GET_RFC_TASK_MAX_RETRIES,
         side_effect=MaxRetriesExceededError,
     ):
         send_transaction_status(outcome_transaction.id, Estado.succeeded)
