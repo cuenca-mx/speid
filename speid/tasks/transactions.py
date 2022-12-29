@@ -2,7 +2,6 @@ from typing import List
 
 import cep
 import pytz
-from celery.exceptions import MaxRetriesExceededError
 from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
 from stpmex.business_days import current_cdmx_time_zone
@@ -121,10 +120,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
         if (
             not rfc_curp or rfc_curp == 'ND'
         ) and self.request.retries < GET_RFC_TASK_MAX_RETRIES:
-            try:
-                self.retry(countdown=GET_RFC_TASK_DELAY * self.request.retries)
-            except MaxRetriesExceededError:
-                pass
+            self.retry(countdown=GET_RFC_TASK_DELAY * self.request.retries)
 
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc, nombre_beneficiario
