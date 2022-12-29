@@ -238,10 +238,10 @@ def test_create_orden_without_ordenante(client):
 def test_create_incoming_restricted_account(
     client, default_income_transaction, moral_account
 ):
-    '''
+    """
     Validate reject a depoist to restricted account if the
     curp_rfc does not match with ordeenante
-    '''
+    """
     default_income_transaction['CuentaBeneficiario'] = moral_account.cuenta
     moral_account.is_restricted = True
     moral_account.allowed_curp = 'SAAA343333HFF2G3'
@@ -277,9 +277,9 @@ def test_create_incoming_restricted_account(
 def test_create_incoming_not_restricted_account(
     client, default_income_transaction, moral_account
 ):
-    '''
+    """
     Happy path when an account is not restricted, deposit should be accepted
-    '''
+    """
     default_income_transaction['CuentaBeneficiario'] = moral_account.cuenta
     moral_account.save()
     resp = client.post('/ordenes', json=default_income_transaction)

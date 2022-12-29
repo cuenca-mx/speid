@@ -2,12 +2,11 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
-from celery.exceptions import Retry
+from celery.exceptions import MaxRetriesExceededError, Retry
 from cep.exc import CepError, MaxRequestError
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
-    GET_RFC_TASK_MAX_RETRIES,
     process_outgoing_transactions,
     retry_incoming_transactions,
     send_transaction_status,
@@ -245,6 +244,37 @@ def test_send_transaction_restricted_accounts_curp_from_cep(
 
 
 @patch('celery.Celery.send_task')
+@pytest.mark.vcr
+def test_send_transaction_restricted_accounts_stp_to_stp(
+    mock_send_task, outcome_transaction, moral_account, orden_pago
+):
+
+    outcome_transaction.institucion_beneficiaria = '90646'
+    outcome_transaction.clave_rastreo = 'CUENCA954881386502'
+    outcome_transaction.cuenta_ordenante = '646180157016683211'
+    outcome_transaction.cuenta_beneficiario = '646180015328558878'
+    outcome_transaction.created_at = dt.datetime(2022, 4, 12, 20, 31)
+    outcome_transaction.save()
+
+    moral_account.cuenta = '646180157016683211'
+    moral_account.is_restricted = True
+    moral_account.save()
+    with patch('cep.Transferencia.validar') as method_mock:
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
+    method_mock.assert_not_called()
+    mock_send_task.assert_called_with(
+        SEND_STATUS_TRANSACTION_TASK,
+        kwargs=dict(
+            speid_id=outcome_transaction.speid_id,
+            state=Estado.succeeded.value,
+            rfc=None,
+            curp=None,
+            nombre_beneficiario=None,
+        ),
+    )
+
+
+@patch('celery.Celery.send_task')
 def test_send_transaction_restricted_accounts_retry_task_on_cep_error(
     mock_send_task, outcome_transaction, moral_account
 ):
@@ -280,10 +310,6 @@ def test_send_transaction_status_does_not_retry_task_on_max_retries(
     )
 
 
-@patch(
-    'speid.tasks.transactions.send_transaction_status.request.retries',
-    GET_RFC_TASK_MAX_RETRIES,
-)
 @patch('celery.Celery.send_task')
 @pytest.mark.vcr
 def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
@@ -301,7 +327,11 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
     moral_account.is_restricted = True
     moral_account.save()
 
-    send_transaction_status(outcome_transaction.id, Estado.succeeded)
+    with patch(
+        'speid.tasks.transactions.send_transaction_status.retry',
+        side_effect=MaxRetriesExceededError,
+    ):
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
 
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,

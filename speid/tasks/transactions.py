@@ -2,6 +2,7 @@ from typing import List
 
 import cep
 import pytz
+from celery.exceptions import MaxRetriesExceededError
 from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
 from stpmex.business_days import current_cdmx_time_zone
@@ -70,7 +71,9 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
     curp = None
     nombre_beneficiario = None
 
-    if account.is_restricted:
+    if account.is_restricted and transaction.institucion_beneficiaria != str(
+        STP_BANK_CODE
+    ):
         cdmx_tz = current_cdmx_time_zone(transaction.created_at)
 
         created_at_utc = transaction.created_at.replace(tzinfo=pytz.utc)
@@ -92,10 +95,8 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
             assert transferencia is not None
         except MaxRequestError:
             rfc_curp = 'max retries'
-        except CepError:
-            self.retry(countdown=GET_RFC_TASK_DELAY)
-        except AssertionError:
-            rfc_curp = None
+        except (CepError, AssertionError):
+            ...
         else:
             rfc_curp = str(transferencia.beneficiario.rfc)
             nombre_beneficiario = transferencia.beneficiario.nombre
@@ -115,10 +116,11 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
 
         # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
         # en 5 segundos
-        if (
-            not rfc_curp or rfc_curp == 'ND'
-        ) and self.request.retries < GET_RFC_TASK_MAX_RETRIES:
-            self.retry(countdown=GET_RFC_TASK_DELAY * self.request.retries)
+        if not rfc_curp or rfc_curp == 'ND':
+            try:
+                self.retry(countdown=GET_RFC_TASK_DELAY * self.request.retries)
+            except MaxRetriesExceededError:
+                ...
 
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc, nombre_beneficiario
