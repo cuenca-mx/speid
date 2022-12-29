@@ -260,9 +260,9 @@ def test_send_transaction_restricted_accounts_stp_to_stp(
     moral_account.cuenta = '646180157016683211'
     moral_account.is_restricted = True
     moral_account.save()
-
-    send_transaction_status(outcome_transaction.id, Estado.succeeded)
-
+    with patch('cep.Transferencia.validar') as method_mock:
+        send_transaction_status(outcome_transaction.id, Estado.succeeded)
+    method_mock.assert_not_called()
     mock_send_task.assert_called_with(
         SEND_STATUS_TRANSACTION_TASK,
         kwargs=dict(
