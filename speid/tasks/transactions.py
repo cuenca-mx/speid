@@ -124,8 +124,6 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
                 self.retry(countdown=GET_RFC_TASK_DELAY * self.request.retries)
             except MaxRetriesExceededError:
                 print('Except MaxRetriesExceededError')
-            except AssertionError:
-                print('Other except')
 
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc, nombre_beneficiario

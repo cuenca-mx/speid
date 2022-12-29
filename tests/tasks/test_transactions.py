@@ -328,7 +328,7 @@ def test_send_transaction_restricted_accounts_send_status_on_last_retry_task(
     moral_account.save()
 
     with patch(
-        'speid.tasks.transactions.send_transaction_status.request.retries',
+        'speid.tasks.transactions.send_transaction_status.retry',
         side_effect=MaxRetriesExceededError,
     ):
         send_transaction_status(outcome_transaction.id, Estado.succeeded)
