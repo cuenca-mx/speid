@@ -61,7 +61,6 @@ def process_outgoing_transactions(self, transactions: list):
 
 @celery.task(bind=True, max_retries=GET_RFC_TASK_MAX_RETRIES)
 def send_transaction_status(self, transaction_id: str, state: str) -> None:
-    print('\n\n\nEntra al send_transaction_status')
     try:
         transaction = Transaction.objects.get(id=transaction_id)
     except DoesNotExist:
@@ -97,7 +96,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
         except MaxRequestError:
             rfc_curp = 'max retries'
         except (CepError, AssertionError):
-            pass
+            ...
         else:
             rfc_curp = str(transferencia.beneficiario.rfc)
             nombre_beneficiario = transferencia.beneficiario.nombre
@@ -117,13 +116,11 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
 
         # Si no se pudo obtener el RFC o CURP de ninguna fuente se reintenta
         # en 5 segundos
-        print('LLega al if')
         if not rfc_curp or rfc_curp == 'ND':
             try:
-                print('Al try')
                 self.retry(countdown=GET_RFC_TASK_DELAY * self.request.retries)
             except MaxRetriesExceededError:
-                print('Except MaxRetriesExceededError')
+                ...
 
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc, nombre_beneficiario
