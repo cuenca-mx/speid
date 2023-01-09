@@ -1,7 +1,7 @@
+import datetime as dt
 from datetime import datetime, timedelta
 from random import randint
 from unittest.mock import MagicMock, patch
-import datetime as dt
 
 import pytest
 import vcr
