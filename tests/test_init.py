@@ -12,6 +12,7 @@ from speid import CJSONEncoder, configure_environment
 
 DOWNLOAD_PATH = os.environ['STP_PRIVATE_LOCATION']
 KEY_NAME = os.environ['STP_PRIVATE_KEY']
+STP_VERIFY_CERT = os.environ['STP_VERIFY_CERT']
 STP_BUCKET_S3 = os.environ['STP_BUCKET_S3']
 
 
@@ -20,6 +21,7 @@ def test_download_key_from_s3():
     client = boto3.client('s3', region_name='us-east-1')
     client.create_bucket(Bucket=STP_BUCKET_S3)
     client.upload_file(DOWNLOAD_PATH, STP_BUCKET_S3, KEY_NAME)
+    client.upload_file(DOWNLOAD_PATH, STP_BUCKET_S3, STP_VERIFY_CERT)
 
     with open(DOWNLOAD_PATH) as file:
         file_content = file.read()

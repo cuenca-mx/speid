@@ -33,6 +33,7 @@ def configure_environment():
     if 'AWS_ACCESS_KEY_ID' in os.environ:
         s3 = boto3.client('s3')
         s3.download_file(STP_BUCKET_S3, STP_PRIVATE_KEY, STP_PRIVATE_LOCATION)
+        s3.download_file(STP_BUCKET_S3, STP_VERIFY_CERT, STP_VERIFY_CERT)
 
     # Edita archivo hosts si es necesario
     if os.environ['EDIT_HOSTS'] == 'true':
@@ -56,6 +57,7 @@ sentry_sdk.init(
 STP_PRIVATE_LOCATION = os.environ['STP_PRIVATE_LOCATION']
 STP_BUCKET_S3 = os.environ['STP_BUCKET_S3']
 STP_PRIVATE_KEY = os.environ['STP_PRIVATE_KEY']
+STP_VERIFY_CERT = os.environ['STP_VERIFY_CERT']
 STP_WSDL = os.environ['STP_WSDL']
 STP_EMPRESA = os.environ['STP_EMPRESA']
 STP_PREFIJO = os.environ['STP_PREFIJO']
