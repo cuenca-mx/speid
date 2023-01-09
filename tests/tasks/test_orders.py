@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from random import randint
 from unittest.mock import MagicMock, patch
+import datetime as dt
 
 import pytest
 import vcr
@@ -295,7 +296,7 @@ def test_fail_transaction_not_working_day(order, mock_callback_queue):
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.submitted
     # changing time to 2 days ago so transaction fails in the next step
-    transaction.created_at = datetime.utcnow() - timedelta(days=2)
+    transaction.created_at = dt.datetime(2023, 1, 1)
     transaction.save()
     assert not transaction.is_current_working_day()
     # executing again so time assert fails
