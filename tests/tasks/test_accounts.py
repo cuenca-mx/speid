@@ -8,6 +8,7 @@ from stpmex.exc import InvalidRfcOrCurp
 from speid.models import PhysicalAccount
 from speid.models.account import MoralAccount
 from speid.tasks.accounts import (
+    block_account,
     create_account,
     deactivate_account,
     execute_create_account,
@@ -339,4 +340,23 @@ def test_deactivate_account_doesnot_exist(
     mock_retry: MagicMock,
 ):
     deactivate_account('646180157000011122')
+    mock_retry.assert_not_called()
+
+
+@patch('speid.tasks.accounts.block_account.retry')
+def test_block_account(
+    mock_retry: MagicMock, moral_account: MoralAccount,
+):
+    assert moral_account.estado == Estado.succeeded
+    block_account(moral_account.cuenta)
+    moral_account.reload()
+    assert moral_account.estado == Estado.pld_blocked
+    mock_retry.assert_not_called()
+
+
+@patch('speid.tasks.accounts.block_account.retry')
+def test_block_account_doesnot_exist(
+    mock_retry: MagicMock,
+):
+    block_account('646180157000011122')
     mock_retry.assert_not_called()

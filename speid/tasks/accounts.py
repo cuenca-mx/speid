@@ -4,7 +4,7 @@ from sentry_sdk import capture_exception
 from stpmex.exc import InvalidRfcOrCurp, StpmexException
 from stpmex.resources.cuentas import Cuenta
 
-from speid.models import Event, PhysicalAccount
+from speid.models import Event, PhysicalAccount, MoralAccount
 from speid.models.account import Account
 from speid.tasks import celery
 from speid.types import Estado, EventType
@@ -82,4 +82,15 @@ def deactivate_account(self, cuenta: str) -> None:
         self.retry(countdown=COUNTDOWN, exc=exc)
     else:
         account.estado = Estado.deactivated
+        account.save()
+
+
+@celery.task(bind=True, max_retries=5)
+def block_account(self, cuenta: str) -> None:
+    try:
+        account = MoralAccount.objects.get(cuenta=cuenta)
+    except DoesNotExist:
+        ...
+    else:
+        account.estado = Estado.pld_blocked
         account.save()

@@ -22,6 +22,7 @@ class Estado(str, Enum):
     rejected = 'rejected'
     error = 'error'  # Malformed order
     deactivated = 'deactivated'
+    pld_blocked = 'pld_blocked'  # Blocked but not deactivated
 
     @classmethod
     def get_state_from_stp(cls, stp_state: str) -> Enum:
