@@ -345,7 +345,8 @@ def test_deactivate_account_doesnot_exist(
 
 @patch('speid.tasks.accounts.block_account.retry')
 def test_block_account(
-    mock_retry: MagicMock, moral_account: MoralAccount,
+    mock_retry: MagicMock,
+    moral_account: MoralAccount,
 ):
     assert moral_account.estado == Estado.succeeded
     block_account(moral_account.cuenta)

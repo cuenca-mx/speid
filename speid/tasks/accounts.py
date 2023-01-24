@@ -4,7 +4,7 @@ from sentry_sdk import capture_exception
 from stpmex.exc import InvalidRfcOrCurp, StpmexException
 from stpmex.resources.cuentas import Cuenta
 
-from speid.models import Event, PhysicalAccount, MoralAccount
+from speid.models import Event, MoralAccount, PhysicalAccount
 from speid.models.account import Account
 from speid.tasks import celery
 from speid.types import Estado, EventType

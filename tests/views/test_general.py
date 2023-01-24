@@ -265,7 +265,7 @@ def test_create_incoming_restricted_account(
     assert resp.json['estado'] == 'DEVOLUCION'
     transaction.delete()
 
-    # Curp Match and Monto match but account is blocked. 
+    # Curp Match and Monto match but account is blocked.
     # The transaction is rejected
     default_income_transaction['Monto'] = 100.00
     default_income_transaction['RFCCurpOrdenante'] = moral_account.allowed_curp
