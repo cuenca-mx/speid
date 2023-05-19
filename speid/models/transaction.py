@@ -259,6 +259,7 @@ class Transaction(Document, BaseModel):
             self.save()
             raise e
         else:
+            breakpoint()
             self.clave_rastreo = self.clave_rastreo or order.claveRastreo
             self.rfc_curp_beneficiario = (
                 self.rfc_curp_beneficiario or order.rfcCurpBeneficiario

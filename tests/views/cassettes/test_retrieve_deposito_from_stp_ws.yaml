@@ -1,0 +1,42 @@
+interactions:
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "APZ450057199641", "tipoOrden": "R",
+      "fechaOperacion": "20230517", "firma": "j3pQgtWsPPnQKpv1sxhBKKUrGeBP4PY+FJfi8dMVkpPvx4NknR2Qgu0s+fzig2Luuwx479pvGYS+cRRWMtFJpvkbqb96AAgoEFr2lJHQsaZoNTCkHxSimkf0Q1gV6gBTT5vjq12EIW43gukkS5UUZofX9WbE8pwrlPV1nq7gocI="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '289'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.10.0.dev15
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":7717041,"claveRastreo":"APZ450057199641","conceptoPago":"Renta","cuentaBeneficiario":"646180157093203384","cuentaOrdenante":"646180110400000007","empresa":"TAMIZI","estado":"TLQ","fechaOperacion":20230517,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":0.10,"nombreBeneficiario":"Martin
+        Ramirez Sanchez","nombreOrdenante":"null","nombreCep":null,"rfcCep":"LOHF890619HCSPRL05","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"SUE130619J23","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1684361938869,"tsLiquidacion":1684361944177,"causaDevolucion":null,"urlCEP":"https://www.banxico.org.mx/cep/go?i=90646&s=20210302&d=bPhwv9nzWRImXsAiw7m63XLwv8OKXMh3BXtYpVGU6FRo5nPrkbfPd7TKYlKqIdupBA9Q%2Fsg0ghsTfnJKoLVvSQ%3D%3D"}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Fri, 19 May 2023 21:26:13 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+version: 1

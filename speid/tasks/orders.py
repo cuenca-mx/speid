@@ -75,7 +75,7 @@ def execute(order_val: dict):
             not luhnmod10.valid(transaction.cuenta_beneficiario)
         ):
             raise MalformedOrderException()
-    except (MalformedOrderException, TypeError, ValueError):
+    except (MalformedOrderException, TypeError, ValueError) as ec:
         transaction.set_state(Estado.error)
         transaction.save()
         raise MalformedOrderException()

@@ -1,10 +1,16 @@
+import string
+import random
+from typing import Dict
 from unittest.mock import patch
 
 import pytest
 from celery import Celery
 
 from speid.models import Transaction
+from speid.tasks import orders
 from speid.types import Estado, TipoTransaccion
+from stpmex.exc import StpmexException
+import datetime as dt
 
 
 def test_ping(client):
@@ -288,3 +294,68 @@ def test_create_incoming_not_restricted_account(
     assert resp.status_code == 201
     assert resp.json['estado'] == 'LIQUIDACION'
     transaction.delete()
+
+
+@pytest.fixture
+def order(physical_account):
+    yield dict(
+        concepto_pago=f'PRUEBA {random.randint(0, 9999)}',
+        institucion_ordenante='90646',
+        cuenta_beneficiario='072691004495711499',
+        institucion_beneficiaria='40072',
+        monto=1000,
+        nombre_beneficiario='Pablo Sánchez',
+        nombre_ordenante='BANCO',
+        cuenta_ordenante=physical_account.cuenta,
+        rfc_curp_ordenante='ND',
+        speid_id=f'SP{random.randint(11111111, 99999999)}',
+        version=2,
+        clave_rastreo='CUENCA048O7372622'
+    )
+
+
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_return_error_transfers(client, order, physical_account):
+    # Excepciones nuevas no son controladas por default por lo que este caso
+    # simula una excepción con código de STP no controlada por el task
+    with patch('speid.models.transaction.stpmex_client.ordenes.registra', side_effect=StpmexException):
+        with pytest.raises(StpmexException):
+            orders.execute(order)
+
+    transaction = Transaction.objects.get(speid_id=order['speid_id'])
+    assert transaction.estado is Estado.error
+    assert transaction.stp_id is None
+
+    req = dict(clave_rastreo=transaction.clave_rastreo)
+    resp = client.post('/transactions_status', json=req)
+    transaction.reload()
+
+    assert resp.status_code == 200
+    assert resp.json['estado'] == Estado.failed.value
+    assert transaction.estado is Estado.failed
+
+
+@pytest.mark.usefixtures('mock_callback_queue')
+def test_send_deposits_to_core(client, default_income_transaction):
+    resp = client.post('/ordenes', json=default_income_transaction)
+    assert resp.status_code == 201
+    transaction = Transaction.objects.order_by('-created_at').first()
+    req = dict(clave_rastreo=default_income_transaction['ClaveRastreo'])
+    resp = client.post('/transactions_status', json=req)
+    assert resp.status_code == 200
+    assert resp.json['clave_rastreo'] == transaction.clave_rastreo
+
+
+@pytest.mark.usefixtures('mock_callback_queue')
+@pytest.mark.vcr(record_mode='once')
+def test_retrieve_deposito_from_stp_ws(client, physical_account):
+    physical_account.cuenta = '646180157093203384'
+    physical_account.save()
+    req = dict(clave_rastreo='APZ450057199641', fecha_operacion='2023-05-17')
+    resp = client.post('/transactions_status', json=req)
+
+    transaction = Transaction.objects.get(clave_rastreo='APZ450057199641')
+    assert resp.status_code == 201
+    assert transaction.cuenta_beneficiario == '646180157093203384'
+    assert transaction.monto == 10  # en centavos
+    assert transaction.stp_id
