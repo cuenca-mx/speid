@@ -3,14 +3,16 @@ import logging
 
 from flask import request
 from sentry_sdk import capture_exception
-import datetime as dt
+from stpmex.exc import ResultsNotFound
+from stpmex.types import Estado as EstadoStp
 
 from speid import app
 from speid.helpers.callback_helper import set_status_transaction
 from speid.helpers.transaction_helper import process_incoming_transaction
 from speid.models import Transaction, Event
-from speid.processors import stpmex_client_efwd
+from speid.processors import stpmex_client
 from speid.types import Estado, TipoTransaccion, EventType
+
 from speid.utils import post
 from mongoengine import DoesNotExist
 
@@ -65,28 +67,35 @@ def transactions_status():
         if transaction.estado is Estado.error:
             assert not transaction.stp_id
             transaction.estado = Estado.failed
-            set_status_transaction(transaction.speid_id, transaction.estado.value)
+            set_status_transaction(transaction.speid_id, transaction.estado)
             transaction.events.append(Event(type=EventType.error, metadata=str('Reversed by User request')))
             transaction.save()
             resp = 200, transaction.to_dict()
-        # elif transaction.estado is Estado.created:
-        #     assert not transaction.stp_id
-        #     transaction.create_order()
         elif transaction.estado is Estado.submitted:
             assert transaction.stp_id
+            try:
+                orden = stpmex_client.ordenes_v2.consulta_clave_rastreo_enviada(
+                    req.clave_rastreo, req.fecha_operacion
+                )
+            except ResultsNotFound:
+                resp = 200, dict(message=f'No se encontró {req.clave_rastreo}')
+            else:
+                if
+
 
     elif transaction and transaction.tipo is TipoTransaccion.deposito:
         # Cuando existe el depósito en speid pero no está en el core
         transaction.confirm_callback_transaction()
         resp = 200, transaction.to_dict()
     else:
-        orden = stpmex_client_efwd.ordenes.consulta_clave_rastreo_recibida(
-            req.clave_rastreo, req.fecha_operacion
-        )
-
-        if not orden:
-            return 200, dict(message=f'No se encontró {req.fecha_operacion}')
+        try:
+            orden = stpmex_client.ordenes_v2.consulta_clave_rastreo_recibida(
+                req.clave_rastreo, req.fecha_operacion
+            )
+        except ResultsNotFound:
+            resp = 200, dict(message=f'No se encontró {req.clave_rastreo}')
         else:
+            assert orden.estado in [EstadoStp.confirmada, EstadoStp.traspaso_liquidado]
             deposit_request = dict(
                 FechaOperacion=orden.fechaOperacion.strftime('%Y%m%d'),
                 InstitucionOrdenante=orden.institucionContraparte,

@@ -359,3 +359,14 @@ def test_retrieve_deposito_from_stp_ws(client, physical_account):
     assert transaction.cuenta_beneficiario == '646180157093203384'
     assert transaction.monto == 10  # en centavos
     assert transaction.stp_id
+
+
+@pytest.mark.usefixtures('mock_callback_queue')
+@pytest.mark.vcr(record_mode='once')
+def test_retrieve_deposito_not_found_from_stp_ws(client, physical_account):
+    physical_account.cuenta = '646180157093203384'
+    physical_account.save()
+    req = dict(clave_rastreo='APZ111111111111', fecha_operacion='2023-05-17')
+    resp = client.post('/transactions_status', json=req)
+    assert resp.status_code == 200
+    assert resp.json['message'] == 'No se encontró APZ111111111111'
