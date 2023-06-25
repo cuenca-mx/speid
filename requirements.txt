@@ -12,4 +12,3 @@ python-hosts==1.0.1
 sentry-sdk==0.19.5
 stpmex==3.11.1
 importlib-metadata==4.13.0
-wheel==0.40.0
