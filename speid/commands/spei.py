@@ -5,6 +5,7 @@ from speid.helpers.callback_helper import set_status_transaction
 from speid.models import Event, Transaction
 from speid.types import Estado, EventType
 
+
 @click.group('speid')
 def speid_group():
     """Perform speid actions."""
