@@ -6,7 +6,7 @@ from speid.helpers.callback_helper import set_status_transaction
 from speid.models import Event, Transaction
 from speid.types import Estado, EventType
 
-
+#@click.group('speid')
 @app.cli.group('speid')
 def speid_group():
     """Perform speid actions."""
@@ -35,7 +35,7 @@ def callback_spei_transaction(transaction_id, transaction_status):
     transaction.save()
 
 
-@speid_group.command()
+@speid_group.command('re-execute-transactions')
 @click.argument('speid_id', type=str)
 def re_execute_transactions(speid_id):
     """Retry send a transaction to STP, it takes the values

@@ -97,7 +97,6 @@ def test_re_execute_transaction_not_found(
     result = runner.invoke(
         speid_group, ['re-execute-transactions', 'invalid_speid_id']
     )
-
     transaction = Transaction.objects.get(id=id_trx)
 
     assert transaction.estado is Estado.created
