@@ -2,7 +2,7 @@ blinker==1.4
 boto3==1.16.*
 celery==5.2.3
 cepmex==0.2.0
-Flask==2.0.3
+Flask==2.2.5
 flask-mongoengine==1.0.0
 luhnmod10==1.0.2
 mongoengine==0.23.1
@@ -12,4 +12,3 @@ python-hosts==1.0.1
 sentry-sdk==1.14.0
 stpmex==3.11.1
 importlib-metadata==4.13.0
-wheel==0.40.0
