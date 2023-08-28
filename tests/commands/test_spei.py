@@ -5,7 +5,6 @@ import pytest
 import requests_mock
 from freezegun import freeze_time
 
-
 from speid.commands.spei import (
     ESTADOS_DEPOSITOS_VALIDOS,
     TIPOS_PAGO_DEVOLUCION,
