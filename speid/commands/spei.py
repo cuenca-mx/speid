@@ -1,5 +1,6 @@
 import click
 from mongoengine import DoesNotExist
+
 from speid import app
 from speid.helpers.callback_helper import set_status_transaction
 from speid.models import Event, Transaction
@@ -11,7 +12,7 @@ def speid_group():
     """Perform speid actions."""
 
 
-@speid_group.command()
+@speid_group.command('callback-spei-transaction')
 @click.argument('transaction_id', type=str)
 @click.argument('transaction_status', type=str)
 def callback_spei_transaction(transaction_id, transaction_status):
@@ -33,7 +34,7 @@ def callback_spei_transaction(transaction_id, transaction_status):
     transaction.save()
 
 
-@speid_group.command()
+@speid_group.command('re-execute-transactions')
 @click.argument('speid_id', type=str)
 def re_execute_transactions(speid_id):
     """Retry send a transaction to STP, it takes the values
