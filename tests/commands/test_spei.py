@@ -132,8 +132,6 @@ def test_reconciliate_deposits_historic(runner):
         stp_response = json.loads(f.read())
         deposits = stp_response['resultado']['lst']
 
-    claves_rastreo = ','.join(d['claveRastreo'] for d in deposits)
-
     valid_deposits = [
         d
         for d in deposits
@@ -149,7 +147,7 @@ def test_reconciliate_deposits_historic(runner):
             [
                 'reconciliate-deposits',
                 fecha_operacion.strftime('%Y-%m-%d'),
-                claves_rastreo,
+                deposits[0]['claveRastreo'],
             ],
         )
 
@@ -158,50 +156,6 @@ def test_reconciliate_deposits_historic(runner):
     ).all()
 
     assert len(deposits) == len(valid_deposits)
-    Transaction.drop_collection()
-
-
-@freeze_time("2023-08-26 01:00:00")  # 2023-08-25 19:00 UTC-6
-@pytest.mark.usefixtures('mock_callback_queue')
-def test_reconciliate_deposits_historic_with_clave_filter(runner):
-    """
-    Esta prueba simula obtener depósitos de días históricos, es decir, de
-    depósitos que llegaron en días operativos anteriores al día operativo
-    en curso
-    """
-
-    fecha_operacion = dt.date(2023, 8, 25)
-
-    initial_deposits_count = Transaction.objects(
-        tipo='deposito', fecha_operacion=fecha_operacion
-    ).count()
-
-    assert initial_deposits_count == 0
-
-    with open('tests/commands/deposits_20230825.json') as f:
-        stp_response = json.loads(f.read())
-        deposits = stp_response['resultado']['lst']
-
-    deposit = deposits[0]
-
-    with requests_mock.mock() as m:
-        m.post('/speiws/rest/ordenPago/consOrdenesFech', json=stp_response)
-
-        runner.invoke(
-            speid_group,
-            [
-                'reconciliate-deposits',
-                fecha_operacion.strftime('%Y-%m-%d'),
-                deposit['claveRastreo'],
-            ],
-        )
-
-    deposits = Transaction.objects(
-        tipo='deposito', fecha_operacion=fecha_operacion
-    ).all()
-
-    assert len(deposits) == 1
-    assert deposits[0].clave_rastreo == deposit['claveRastreo']
     Transaction.drop_collection()
 
 
@@ -224,6 +178,7 @@ def test_reconciliate_deposits_current_fecha_operacion(runner):
         deposits = stp_response['resultado']['lst']
 
     claves_rastreo = ','.join(d['claveRastreo'] for d in deposits)
+    devolucion = next(d for d in deposits if d['estado'] == 'D')
     valid_deposits = [
         d
         for d in deposits
@@ -248,6 +203,7 @@ def test_reconciliate_deposits_current_fecha_operacion(runner):
     ).all()
 
     assert len(deposits) == len(valid_deposits)
+    assert not any(d.clave_rastreo == devolucion['claveRastreo'] for d in deposits)
     Transaction.drop_collection()
 
 

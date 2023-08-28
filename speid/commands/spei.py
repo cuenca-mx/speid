@@ -80,16 +80,20 @@ def reconciliate_deposits(
     else:
         recibidas = stpmex_client.ordenes.consulta_recibidas()
 
+    no_procesadas = []
     for recibida in recibidas:
         if recibida.claveRastreo not in claves_rastreo_filter:
+            no_procesadas.append(recibida.claveRastreo)
             continue
         # Se ignora los tipos pago devolución debido a que
         # el estado de estas operaciones se envían
         # al webhook `POST /orden_events`
         if recibida.tipoPago in TIPOS_PAGO_DEVOLUCION:
+            no_procesadas.append(recibida.claveRastreo)
             continue
 
         if recibida.estado not in ESTADOS_DEPOSITOS_VALIDOS:
+            no_procesadas.append(recibida.claveRastreo)
             continue
 
         try:
@@ -123,7 +127,12 @@ def reconciliate_deposits(
                 ReferenciaNumerica=recibida.referenciaNumerica,
                 Empresa=recibida.empresa,
             )
+            click.echo(f'Depósito procesado: {recibida.claveRastreo}')
             process_incoming_transaction(stp_request)
+        else:
+            no_procesadas.append(recibida.claveRastreo)
+
+    click.echo(f'No procesadas: {no_procesadas}')
 
 
 if __name__ == "__main__":
