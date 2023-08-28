@@ -1,7 +1,7 @@
 blinker==1.4
 boto3==1.16.*
 celery==5.2.3
-cepmex==0.2.0
+cepmex==0.2.2
 Flask==2.2.5
 flask-mongoengine==1.0.0
 luhnmod10==1.0.2
