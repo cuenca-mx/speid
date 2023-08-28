@@ -9,10 +9,9 @@ from speid.types import Estado, EventType
 @click.group('speid')
 def speid_group():
     """Perform speid actions."""
-    pass
 
 
-@speid_group.command('callback-spei-transaction')
+@speid_group.command()
 @click.argument('transaction_id', type=str)
 @click.argument('transaction_status', type=str)
 def callback_spei_transaction(transaction_id, transaction_status):
@@ -34,7 +33,7 @@ def callback_spei_transaction(transaction_id, transaction_status):
     transaction.save()
 
 
-@speid_group.command('re-execute-transactions')
+@speid_group.command()
 @click.argument('speid_id', type=str)
 def re_execute_transactions(speid_id):
     """Retry send a transaction to STP, it takes the values
