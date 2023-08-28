@@ -203,7 +203,9 @@ def test_reconciliate_deposits_current_fecha_operacion(runner):
     ).all()
 
     assert len(deposits) == len(valid_deposits)
-    assert not any(d.clave_rastreo == devolucion['claveRastreo'] for d in deposits)
+    assert not any(
+        d.clave_rastreo == devolucion['claveRastreo'] for d in deposits
+    )
     Transaction.drop_collection()
 
 
