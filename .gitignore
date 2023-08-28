@@ -13,3 +13,5 @@ docker-build
 /.mypy_cache
 coverage.xml
 /.python-version
+
+prueba-cert.pem
