@@ -132,13 +132,6 @@ def test_reconciliate_deposits_historic(runner):
         stp_response = json.loads(f.read())
         deposits = stp_response['resultado']['lst']
 
-    valid_deposits = [
-        d
-        for d in deposits
-        if d['estado'] in ESTADOS_DEPOSITOS_VALIDOS
-        and d['tipoPago'] not in TIPOS_PAGO_DEVOLUCION
-    ]
-
     with requests_mock.mock() as m:
         m.post('/speiws/rest/ordenPago/consOrdenesFech', json=stp_response)
 
@@ -155,7 +148,7 @@ def test_reconciliate_deposits_historic(runner):
         tipo='deposito', fecha_operacion=fecha_operacion
     ).all()
 
-    assert len(deposits) == len(valid_deposits)
+    assert len(deposits) == 1
     Transaction.drop_collection()
 
 
