@@ -83,7 +83,6 @@ def reconciliate_deposits(
     no_procesadas = []
     for recibida in recibidas:
         if recibida.claveRastreo not in claves_rastreo_filter:
-            no_procesadas.append(recibida.claveRastreo)
             continue
         # Se ignora los tipos pago devolución debido a que
         # el estado de estas operaciones se envían
