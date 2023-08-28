@@ -1,5 +1,4 @@
 import pytest
-from click.testing import CliRunner
 
 from speid.commands.spei import speid_group
 from speid.models import Transaction
