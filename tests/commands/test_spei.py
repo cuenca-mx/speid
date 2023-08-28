@@ -144,11 +144,11 @@ def test_reconciliate_deposits_historic(runner):
             ],
         )
 
-    deposits = Transaction.objects(
+    deposits_db = Transaction.objects(
         tipo='deposito', fecha_operacion=fecha_operacion
     ).all()
 
-    assert len(deposits) == 1
+    assert len(deposits_db) == 1
     Transaction.drop_collection()
 
 
@@ -191,13 +191,13 @@ def test_reconciliate_deposits_current_fecha_operacion(runner):
             ],
         )
 
-    deposits = Transaction.objects(
+    deposits_db = Transaction.objects(
         tipo='deposito', fecha_operacion=fecha_operacion
     ).all()
 
-    assert len(deposits) == len(valid_deposits)
+    assert len(deposits_db) == len(valid_deposits)
     assert not any(
-        d.clave_rastreo == devolucion['claveRastreo'] for d in deposits
+        d.clave_rastreo == devolucion['claveRastreo'] for d in deposits_db
     )
     Transaction.drop_collection()
 
@@ -265,9 +265,9 @@ def test_reconciliate_deposits_ignores_duplicated(runner):
             ],
         )
 
-    deposits = Transaction.objects(
+    deposits_db = Transaction.objects(
         tipo='deposito', fecha_operacion=fecha_operacion
     ).all()
 
-    assert len(deposits) == len(valid_deposits)
+    assert len(deposits_db) == len(valid_deposits)
     Transaction.drop_collection()
