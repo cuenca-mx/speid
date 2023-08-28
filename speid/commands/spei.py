@@ -1,15 +1,15 @@
 import click
 from mongoengine import DoesNotExist
 
+from speid import app
 from speid.helpers.callback_helper import set_status_transaction
 from speid.models import Event, Transaction
 from speid.types import Estado, EventType
 
 
-@click.group('speid')
+@app.cli.group('speid')
 def speid_group():
     """Perform speid actions."""
-    pass
 
 
 @speid_group.command('callback-spei-transaction')

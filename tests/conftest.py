@@ -5,12 +5,20 @@ from unittest.mock import patch
 
 import pytest
 from celery import Celery
+from flask.testing import FlaskCliRunner
 
+from speid import app
 from speid.models import Transaction
 from speid.types import TipoTransaccion
 
 SEND_TRANSACTION_TASK = os.environ['SEND_TRANSACTION_TASK']
 SEND_STATUS_TRANSACTION_TASK = os.environ['SEND_STATUS_TRANSACTION_TASK']
+
+
+@pytest.fixture
+def runner():
+    runner = FlaskCliRunner(app)
+    return runner
 
 
 @pytest.fixture

@@ -1,5 +1,4 @@
 import pytest
-from click.testing import CliRunner
 
 from speid.commands.spei import speid_group
 from speid.models import Transaction
@@ -27,11 +26,10 @@ def transaction():
     transaction.delete()
 
 
-def test_callback_spei_transaction(mock_callback_queue, transaction):
+def test_callback_spei_transaction(runner, mock_callback_queue, transaction):
     id_trx = transaction.id
     assert transaction.estado is Estado.created
 
-    runner = CliRunner()
     runner.invoke(
         speid_group, ['callback-spei-transaction', str(id_trx), 'succeeded']
     )
@@ -42,11 +40,12 @@ def test_callback_spei_transaction(mock_callback_queue, transaction):
     assert transaction.events[-1].metadata == 'Reversed by SPEID command'
 
 
-def test_callback_spei_failed_transaction(mock_callback_queue, transaction):
+def test_callback_spei_failed_transaction(
+    runner, mock_callback_queue, transaction
+):
     id_trx = transaction.id
     assert transaction.estado is Estado.created
 
-    runner = CliRunner()
     runner.invoke(
         speid_group, ['callback-spei-transaction', str(id_trx), 'failed']
     )
@@ -57,11 +56,12 @@ def test_callback_spei_failed_transaction(mock_callback_queue, transaction):
     assert transaction.events[-1].metadata == 'Reversed by SPEID command'
 
 
-def test_callback_spei_invalid_transaction(mock_callback_queue, transaction):
+def test_callback_spei_invalid_transaction(
+    runner, mock_callback_queue, transaction
+):
     id_trx = transaction.id
     assert transaction.estado is Estado.created
 
-    runner = CliRunner()
     result = runner.invoke(
         speid_group, ['callback-spei-transaction', str(id_trx), 'invalid']
     )
@@ -76,7 +76,6 @@ def test_re_execute_transactions(runner, transaction, physical_account):
     id_trx = transaction.id
     assert transaction.estado is Estado.created
 
-    runner = CliRunner()
     runner.invoke(
         speid_group, ['re-execute-transactions', transaction.speid_id]
     )
@@ -93,7 +92,6 @@ def test_re_execute_transaction_not_found(
     id_trx = transaction.id
     assert transaction.estado is Estado.created
 
-    runner = CliRunner()
     result = runner.invoke(
         speid_group, ['re-execute-transactions', 'invalid_speid_id']
     )
