@@ -15,11 +15,13 @@ from stpmex.exc import (
     InvalidTrackingKey,
     PldRejected,
 )
+from stpmex.types import Estado as EstadoStp
 
 from speid.exc import (
     MalformedOrderException,
     ResendSuccessOrderException,
     ScheduleError,
+    TransactionNeedManualReviewError,
 )
 from speid.helpers.task_helpers import time_in_range
 from speid.models import Event, Transaction
@@ -56,6 +58,8 @@ def send_order(self, order_val: dict):
         capture_exception(exc)
     except ScheduleError:
         self.retry(countdown=STP_COUNTDOWN)
+    except TransactionNeedManualReviewError as exc:
+        capture_exception(exc)
     except Exception as exc:
         capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries))
@@ -93,30 +97,43 @@ def execute(order_val: dict):
         transaction.save()
         pass
     except AssertionError:
+        # Se hace un reenvío del estado de la transferencia
+        # transaction.set_state(Estado.succeeded)
         # Para evitar que se vuelva a mandar o regresar se manda la excepción
         raise ResendSuccessOrderException()
 
+    # Estas validaciones aplican para transferencias existentes que
+    # pudieron haber fallado o han sido enviadas a STP
+    if transaction.estado in [Estado.failed, Estado.error]:
+        transaction.set_state(Estado.failed)
+        return
+
+    now = datetime.utcnow()
+    # Revisa el estado de una transferencia si ya tiene asignado stp_id o ha
+    # pasado más de 2 hrs.
+    if transaction.stp_id or (now - transaction.created_at) > timedelta(
+        hours=2
+    ):
+        transaction.update_stp_status()
+        return
+
+    # A partir de aquí son validaciones para transferencias nuevas
     if transaction.monto > MAX_AMOUNT:
         transaction.events.append(Event(type=EventType.error))
         transaction.save()
         raise MalformedOrderException()
 
-    now = datetime.utcnow()
-    # Return transaction after 2 hours of creation
-    if (now - transaction.created_at) > timedelta(hours=2):
-        transaction.fail_if_not_found_stp()
-    else:
-        try:
-            transaction.create_order()
-        except (
-            AccountDoesNotExist,
-            BankCodeClabeMismatch,
-            InvalidAccountType,
-            InvalidAmount,
-            InvalidInstitution,
-            InvalidTrackingKey,
-            PldRejected,
-            ValidationError,
-        ):
-            transaction.set_state(Estado.failed)
-            transaction.save()
+    try:
+        transaction.create_order()
+    except (
+        AccountDoesNotExist,
+        BankCodeClabeMismatch,
+        InvalidAccountType,
+        InvalidAmount,
+        InvalidInstitution,
+        InvalidTrackingKey,
+        PldRejected,
+        ValidationError,
+    ):
+        transaction.set_state(Estado.failed)
+        transaction.save()

@@ -1,0 +1,84 @@
+interactions:
+- request:
+    body: '{"monto": 10.0, "conceptoPago": "PRUEBA 9032", "cuentaBeneficiario": "072691004495711499",
+      "nombreBeneficiario": "Pablo Sanchez", "institucionContraparte": "40072", "cuentaOrdenante":
+      "646180157018613700", "nombreOrdenante": "BANCO", "institucionOperante": "90646",
+      "tipoCuentaBeneficiario": 40, "tipoCuentaOrdenante": 40, "claveRastreo": "CR1698261906",
+      "referenciaNumerica": 4188700, "rfcCurpBeneficiario": "ND", "rfcCurpOrdenante":
+      "ND", "prioridad": 1, "medioEntrega": 3, "tipoPago": 1, "topologia": "T", "firma":
+      "hOhmHGKSp3daMLWm3bjachIeeNiMsLKSHZqOxaYAbAq4aeOUvNPHZ/qA/fzaVbUULdqHVHsmJeo0viwtPLlHmjosLZIGXwyCI1hmMjLpK/cBQstqEVVJcemUsebp7NURqYSjs1xkKPdtlRbGfDDir1fzWGZPpu3QNdsGT6sR2pE=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '714'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.12.0
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/registra
+  response:
+    body:
+      string: '{"resultado":{"id":21784919}}'
+    headers:
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 25 Oct 2023 19:25:07 GMT
+      X-ORACLE-DMS-ECID:
+      - bc722c26-d789-4f18-88dc-059072b5d031-00003569
+      X-ORACLE-DMS-RID:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "CR1698261906", "tipoOrden": "E",
+      "firma": "tjVc2F6HTsEd4FR75nxDeXvfo7dZ9m029JdDEAr2doU9th1o2ljJMsZ83jHmyAHU1SD9LQuiFRGpLRHxxbeS8HQjqP6K+4q6py0Ez9l4lu4gQjn7xUfzMDX9SvJxGNgeMW/93kr/yCoB1ymj9pD1S5kTDdrHALO90+aw3+d3tjE="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '256'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.12.0
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":21784919,"claveRastreo":"CR1698261906","conceptoPago":"PRUEBA
+        9032","cuentaBeneficiario":"072691004495711499","cuentaOrdenante":"646180157018613700","empresa":"TAMIZI","estado":"LQ","fechaOperacion":20231025,"institucionContraparte":40072,"institucionOperante":90646,"medioEntrega":3,"monto":10.00,"nombreBeneficiario":"Pablo
+        Sanchez","nombreOrdenante":"JUAN PEREZ PEREZ","nombreCep":null,"rfcCep":null,"sello":"w8jt79r1A3xyToW1XTDXhgo6hWnHzjo96PI+kDOg0KkLuIX2AB69kDXMoJK+Bpahr9WCu8zmJdyQAWRP5ZV3jg==","rfcCurpBeneficiario":"ND","referenciaNumerica":4188700,"rfcCurpOrdenante":"PEPJ800101HCSPRL02","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1698261907433,"tsLiquidacion":null,"causaDevolucion":null,"urlCEP":null}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 25 Oct 2023 19:25:08 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+version: 1

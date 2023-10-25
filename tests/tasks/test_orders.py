@@ -191,7 +191,6 @@ def test_stp_schedule_limit(
         mock_capture_exception.assert_called_once()
 
 
-@vcr.use_cassette('tests/tasks/cassettes/test_resend_not_success_order.yaml')
 @pytest.mark.parametrize(
     'exc',
     [
@@ -214,14 +213,6 @@ def test_resend_not_success_order(exc, order, mock_callback_queue):
 
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.failed
-
-    # Ejecuta nuevamente la misma orden
-    execute(order)
-
-    transaction.reload()
-    assert transaction.events[-2].type is EventType.retry
-    assert transaction.estado is Estado.submitted
-
     transaction.delete()
 
 
@@ -262,6 +253,8 @@ def test_fail_transaction_with_stp_failed(order, mock_callback_queue):
     assert transaction.estado is Estado.submitted
     # changing time to 4 hours ago so transaction fails in the next step
     transaction.created_at = datetime.utcnow() - timedelta(hours=4)
+    # simula que por algún motivo no tiene stp_id
+    transaction.stp_id = None
     transaction.save()
     # executing again so time assert fails
     execute(order)
@@ -297,6 +290,7 @@ def test_fail_transaction_not_working_day(order, mock_callback_queue):
     assert transaction.estado is Estado.submitted
     # changing time to 2 days ago so transaction fails in the next step
     transaction.created_at = dt.datetime(2023, 1, 1)
+    transaction.stp_id = None
     transaction.save()
     assert not transaction.is_current_working_day()
     # executing again so time assert fails
@@ -322,7 +316,86 @@ def test_unexpected_stp_error(order, mock_callback_queue):
         assert transaction.estado is Estado.submitted
         # changing time so it fails assertion
         transaction.created_at = datetime.utcnow() - timedelta(hours=4)
+        transaction.stp_id = None
         transaction.save()
         # executing again so time assert fails
         execute(order)
         capture_mock.assert_called_once()
+
+
+@pytest.mark.vcr
+def test_retry_transfers_with_stp_id_succeeded(order, physical_account):
+    order['cuenta_ordenante'] = '646180157018613700'
+    physical_account.cuenta = '646180157018613700'
+    physical_account.save()
+    execute(order)
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+
+    execute(order)
+
+    transaction.reload()
+    assert transaction.estado is Estado.submitted
+
+
+@pytest.mark.vcr
+def test_retry_transfers_with_stp_id_succeeded(order, second_physical_account):
+    order['cuenta_ordenante'] = second_physical_account.cuenta
+    execute(order)
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+
+    execute(order)
+
+    transaction.reload()
+    assert transaction.estado is Estado.succeeded
+
+
+@pytest.mark.vcr
+def test_retry_transfers_submitted(order, second_physical_account):
+    order['cuenta_ordenante'] = second_physical_account.cuenta
+    execute(order)
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+
+    execute(order)
+
+    transaction.reload()
+    assert transaction.estado is Estado.submitted
+
+
+@pytest.mark.parametrize(
+    'clave_rastreo,speid_estado',
+    [
+        ('CR1698096580', Estado.failed),  # STP status = Estado.devuelta
+        ('CR1698101998', Estado.failed),  # STP status = Estado.cancelada
+    ],
+)
+@pytest.mark.vcr
+def test_retrieve_transfer_status_when_stp_id_is_not_none(
+    outcome_transaction,
+    second_physical_account,
+    order,
+    clave_rastreo,
+    speid_estado,
+):
+    # Transfers that we are passing in the parameter `clave_rastreo`
+    # were created on 2023-10-23 23:41 UTC time (fecha_operacion=2023-10-23).
+    # STP WS changes the status to `cancelada` or `devuelta` after
+    # a few minutes. That's why we cannot create the transfer and then
+    # retrieve the status in the same cassette.
+
+    outcome_transaction.created_at = dt.datetime(2023, 10, 23, 23, 41)
+    outcome_transaction.cuenta_ordenante = second_physical_account.cuenta
+    outcome_transaction.clave_rastreo = clave_rastreo
+    outcome_transaction.save()
+
+    order['cuenta_ordenante'] = second_physical_account.cuenta
+    order['speid_id'] = outcome_transaction.speid_id
+
+    execute(order)
+    transfer = Transaction.objects.get(clave_rastreo=clave_rastreo)
+    assert transfer.estado is speid_estado

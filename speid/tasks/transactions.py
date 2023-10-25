@@ -10,7 +10,7 @@ from stpmex.business_days import current_cdmx_time_zone
 from speid.helpers import callback_helper
 from speid.models import Account, Event, Transaction
 from speid.tasks import celery
-from speid.types import Estado, EventType
+from speid.types import Estado, EventType, TipoTransaccion
 
 CURP_LENGTH = 18
 RFC_LENGTH = 13
@@ -125,3 +125,27 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc, nombre_beneficiario
     )
+
+
+@celery.task(max_retries=GET_RFC_TASK_MAX_RETRIES)
+def check_transfer_status(cuenta_ordenante: str, clave_rastreo: str) -> None:
+    try:
+        transaction = Transaction.objects.get(
+            clave_rastreo=clave_rastreo, cuenta_ordenante=cuenta_ordenante
+        )
+    except DoesNotExist:
+        return
+
+    if transaction.tipo is not TipoTransaccion.retiro:
+        return
+
+    if transaction.estado in [Estado.succeeded, Estado.failed]:
+        send_transaction_status.apply_async(
+            [transaction.id, transaction.estado]
+        )
+    elif transaction.estado is Estado.error:
+        send_transaction_status.apply_async([transaction.id, Estado.failed])
+    elif transaction.estado is Estado.created:
+        ...
+    elif transaction.estado is Estado.submitted:
+        ...

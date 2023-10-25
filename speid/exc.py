@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+
+
 class OrderNotFoundException(ReferenceError):
     pass
 
@@ -16,3 +19,12 @@ class ScheduleError(Exception):
     """
 
     pass
+
+
+@dataclass
+class TransactionNeedManualReviewError(Exception):
+    """
+    when a person should review the transaction status manually
+    """
+
+    speid_id: str

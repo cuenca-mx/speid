@@ -83,6 +83,29 @@ def physical_account():
 
 
 @pytest.fixture
+def second_physical_account():
+    from speid.models import PhysicalAccount
+    from speid.types import Estado
+
+    account = PhysicalAccount(
+        estado=Estado.succeeded,
+        nombre='Juan',
+        apellido_paterno='Perez',
+        apellido_materno='Perez',
+        cuenta='646180157018613700',
+        rfc_curp='PEPJ800101HCSPRL02',
+        telefono='5544332211',
+        fecha_nacimiento=dt.date(1980, 1, 1),
+        pais_nacimiento='MX',
+    )
+    account.save()
+
+    yield account
+
+    account.delete()
+
+
+@pytest.fixture
 def moral_account():
     # Pongo los import aquí porque de otra forma no puedo hacer tests del
     # __init__ sin que se haya importado ya. Y así no repito el mismo fixture

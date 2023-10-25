@@ -1,0 +1,43 @@
+interactions:
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "CR1698101998", "tipoOrden": "E",
+      "fechaOperacion": "20231023", "firma": "lpbvPqSsR8DTnILaN2yiB3pe3PSZtahyRtMoSQ2h0PzKRiEvxwaUxEijJf/orNy4WZ5JEcYtNZrurk5MHAHDYZkU/NTDg8kw7odn7uDiUFeO+7HnhlgB9aJj/BkdZ0SUZSVwWxYLdRFwelMK3iuoRn1zmcYAgiTDprvQlwAavps="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '286'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.12.0
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":21776654,"claveRastreo":"CR1698101998","conceptoPago":"PRUEBA
+        5409","cuentaBeneficiario":"072691004495711499","cuentaOrdenante":"646180157018613700","empresa":"TAMIZI","estado":"CN","fechaOperacion":20231023,"institucionContraparte":40072,"institucionOperante":90646,"medioEntrega":3,"monto":10.00,"nombreBeneficiario":"Pablo
+        Sanchez","nombreOrdenante":"JUAN PEREZ PEREZ","nombreCep":null,"rfcCep":null,"sello":"611Aw1PJw9A1XN10jVUsh8RgSmfcUX5OPpM+0JGe/DJY7BraV+1zoEUIjhoqY/mIrdLcF7S6+ZEpUMRekDnJnQ==","rfcCurpBeneficiario":"ND","referenciaNumerica":2403350,"rfcCurpOrdenante":"PEPJ800101HCSPRL02","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1698101999159,"tsLiquidacion":null,"causaDevolucion":null,"urlCEP":null}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 25 Oct 2023 19:29:40 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+version: 1
