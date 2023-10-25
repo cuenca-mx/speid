@@ -4,7 +4,6 @@ from random import randint
 from unittest.mock import MagicMock, patch
 
 import pytest
-import vcr
 from freezegun import freeze_time
 from stpmex.exc import (
     AccountDoesNotExist,
@@ -62,7 +61,6 @@ def test_worker_with_incorrect_version(
 
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.error
-    transaction.delete()
 
 
 def test_worker_without_version(default_internal_request, mock_callback_queue):
@@ -73,7 +71,6 @@ def test_worker_without_version(default_internal_request, mock_callback_queue):
 
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.error
-    transaction.delete()
 
 
 def test_malformed_order_worker(order, mock_callback_queue):
@@ -83,7 +80,6 @@ def test_malformed_order_worker(order, mock_callback_queue):
 
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.error
-    transaction.delete()
 
 
 @pytest.mark.vcr
@@ -95,7 +91,6 @@ def test_create_order_debit_card(order, physical_account):
     assert transaction.estado is Estado.submitted
     assert transaction.events[-1].type is EventType.completed
     assert transaction.tipo is TipoTransaccion.retiro
-    transaction.delete()
 
 
 @pytest.mark.vcr
@@ -107,7 +102,6 @@ def test_worker_with_version_2(order, physical_account):
     assert transaction.estado is Estado.submitted
     assert transaction.events[-1].type is EventType.completed
     assert transaction.tipo is TipoTransaccion.retiro
-    transaction.delete()
 
 
 @pytest.mark.vcr
@@ -123,8 +117,6 @@ def test_ignore_invalid_account_type(
     send_order(order)
     mock_retry.assert_not_called()
     mock_capture_exception.assert_not_called()
-    transaction = Transaction.objects.order_by('-created_at').first()
-    transaction.delete()
 
 
 @patch('speid.tasks.orders.capture_exception')
@@ -141,8 +133,6 @@ def test_ignore_transfers_to_blocked_banks(
     send_order(order)
     mock_retry.assert_not_called()
     mock_capture_exception.assert_not_called()
-    transaction = Transaction.objects.order_by('-created_at').first()
-    transaction.delete()
 
 
 @patch('speid.tasks.orders.capture_exception')
@@ -153,9 +143,6 @@ def test_malformed_order_exception(
     send_order(order)
 
     mock_capture_exception.assert_called_once()
-
-    transaction = Transaction.objects.order_by('-created_at').first()
-    transaction.delete()
 
 
 @patch('speid.tasks.orders.execute', side_effect=Exception())
@@ -173,9 +160,6 @@ def test_hold_max_amount(order):
     order['monto'] = 102000000
     with pytest.raises(MalformedOrderException):
         execute(order)
-
-    transaction = Transaction.objects.order_by('-created_at').first()
-    transaction.delete()
 
 
 @patch('speid.tasks.orders.capture_exception')
@@ -213,7 +197,6 @@ def test_resend_not_success_order(exc, order, mock_callback_queue):
 
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.failed
-    transaction.delete()
 
 
 @pytest.mark.vcr
@@ -226,42 +209,26 @@ def test_resend_success_order(order):
     # Ejecuta nuevamente la misma orden
     with pytest.raises(ResendSuccessOrderException):
         execute(order)
-    transaction.delete()
 
 
 @pytest.mark.vcr()
-@freeze_time('2022-11-08 10:00:00')
-def test_fail_transaction_with_stp_succeeded(order, mock_callback_queue):
+@freeze_time('2023-10-25 14:00:00')
+def test_fail_transaction_with_stp_succeeded(
+    order, second_physical_account, mock_callback_queue
+):
+    order['cuenta_ordenante'] = second_physical_account.cuenta
     execute(order)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.submitted
     # changing time to 4 hours ago so transaction fails in the next step
     transaction.created_at = datetime.utcnow() - timedelta(hours=4)
-    transaction.save()
-    # executing again so time assert fails
-    execute(order)
-    # status didn't change because transaction was succesful in STP
-    assert transaction.estado is Estado.submitted
-    transaction.delete()
-
-
-@pytest.mark.vcr()
-@freeze_time('2022-11-08 10:00:00')
-def test_fail_transaction_with_stp_failed(order, mock_callback_queue):
-    execute(order)
-    transaction = Transaction.objects.order_by('-created_at').first()
-    assert transaction.estado is Estado.submitted
-    # changing time to 4 hours ago so transaction fails in the next step
-    transaction.created_at = datetime.utcnow() - timedelta(hours=4)
-    # simula que por algún motivo no tiene stp_id
+    # Simulate that we lost `stp_id` for any reason
     transaction.stp_id = None
     transaction.save()
     # executing again so time assert fails
     execute(order)
-    # status changed because transaction was failed in STP
-    transaction.reload()
-    assert transaction.estado is Estado.failed
-    transaction.delete()
+    # status didn't change because transaction was 'Autorizada' in STP
+    assert transaction.estado is Estado.submitted
 
 
 @pytest.mark.vcr()
@@ -280,31 +247,14 @@ def test_fail_transaction_with_no_stp(order, mock_callback_queue):
     transaction.reload()
     # status changed to failed because order was not found in stp
     assert transaction.estado is Estado.failed
-    transaction.delete()
-
-
-@pytest.mark.vcr()
-def test_fail_transaction_not_working_day(order, mock_callback_queue):
-    execute(order)
-    transaction = Transaction.objects.order_by('-created_at').first()
-    assert transaction.estado is Estado.submitted
-    # changing time to 2 days ago so transaction fails in the next step
-    transaction.created_at = dt.datetime(2023, 1, 1)
-    transaction.stp_id = None
-    transaction.save()
-    assert not transaction.is_current_working_day()
-    # executing again so time assert fails
-    execute(order)
-    # status didn't change because transaction was succesful in STP
-    assert transaction.estado is Estado.submitted
-    transaction.delete()
 
 
 @pytest.mark.vcr
 @freeze_time('2022-11-08 10:00:00')
 def test_unexpected_stp_error(order, mock_callback_queue):
     with patch(
-        'speid.models.transaction.stpmex_client.ordenes.consulta_clave_rastreo'
+        'speid.models.transaction.stpmex_client.ordenes_v2.'
+        'consulta_clave_rastreo_enviada'
     ) as consulta_mock, patch(
         'speid.models.transaction.capture_exception'
     ) as capture_mock:
@@ -324,22 +274,6 @@ def test_unexpected_stp_error(order, mock_callback_queue):
 
 
 @pytest.mark.vcr
-def test_retry_transfers_with_stp_id_succeeded(order, physical_account):
-    order['cuenta_ordenante'] = '646180157018613700'
-    physical_account.cuenta = '646180157018613700'
-    physical_account.save()
-    execute(order)
-
-    transaction = Transaction.objects.order_by('-created_at').first()
-    assert transaction.estado is Estado.submitted
-
-    execute(order)
-
-    transaction.reload()
-    assert transaction.estado is Estado.submitted
-
-
-@pytest.mark.vcr
 def test_retry_transfers_with_stp_id_succeeded(order, second_physical_account):
     order['cuenta_ordenante'] = second_physical_account.cuenta
     execute(order)
@@ -347,10 +281,14 @@ def test_retry_transfers_with_stp_id_succeeded(order, second_physical_account):
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.submitted
 
-    execute(order)
+    with patch(
+        'speid.models.transaction.stpmex_client.ordenes.registra'
+    ) as mock_registra:
+        execute(order)
 
     transaction.reload()
     assert transaction.estado is Estado.succeeded
+    mock_registra.assert_not_called()
 
 
 @pytest.mark.vcr
@@ -361,10 +299,15 @@ def test_retry_transfers_submitted(order, second_physical_account):
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.submitted
 
-    execute(order)
+    with patch(
+        'speid.models.transaction.stpmex_client.ordenes.registra'
+    ) as mock_registra:
+
+        execute(order)
 
     transaction.reload()
     assert transaction.estado is Estado.submitted
+    mock_registra.assert_not_called()
 
 
 @pytest.mark.parametrize(
@@ -396,6 +339,11 @@ def test_retrieve_transfer_status_when_stp_id_is_not_none(
     order['cuenta_ordenante'] = second_physical_account.cuenta
     order['speid_id'] = outcome_transaction.speid_id
 
-    execute(order)
+    with patch(
+        'speid.models.transaction.stpmex_client.ordenes.registra'
+    ) as mock_registra:
+        execute(order)
+
     transfer = Transaction.objects.get(clave_rastreo=clave_rastreo)
     assert transfer.estado is speid_estado
+    mock_registra.assert_not_called()

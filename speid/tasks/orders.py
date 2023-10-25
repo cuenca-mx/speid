@@ -15,7 +15,6 @@ from stpmex.exc import (
     InvalidTrackingKey,
     PldRejected,
 )
-from stpmex.types import Estado as EstadoStp
 
 from speid.exc import (
     MalformedOrderException,
@@ -108,9 +107,9 @@ def execute(order_val: dict):
         transaction.set_state(Estado.failed)
         return
 
-    now = datetime.utcnow()
     # Revisa el estado de una transferencia si ya tiene asignado stp_id o ha
     # pasado más de 2 hrs.
+    now = datetime.utcnow()
     if transaction.stp_id or (now - transaction.created_at) > timedelta(
         hours=2
     ):

@@ -171,3 +171,9 @@ def orden_pago(outcome_transaction):
             usuario='foo',
         )
     )
+
+
+@pytest.fixture(autouse=True)
+def cleanup_transfers():
+    yield
+    Transaction.drop_collection()

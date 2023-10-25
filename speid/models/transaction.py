@@ -1,7 +1,6 @@
 import datetime as dt
 import os
 from enum import Enum
-from typing import Optional
 
 import pytz
 from mongoengine import (
@@ -16,7 +15,7 @@ from mongoengine import (
 )
 from sentry_sdk import capture_exception
 from stpmex.business_days import get_next_business_day
-from stpmex.exc import EmptyResultsError, NoEntityFound, StpmexException
+from stpmex.exc import EmptyResultsError, StpmexException
 from stpmex.resources import Orden
 from stpmex.types import Estado as STPEstado
 
@@ -205,7 +204,10 @@ class Transaction(Document, BaseModel):
 
         if self.stp_id and not status:
             raise TransactionNeedManualReviewError(self.speid_id)
-        if status in STP_FAILED_STATUSES:
+        elif not self.stp_id and not status:
+            self.set_state(Estado.failed)
+            self.save()
+        elif status in STP_FAILED_STATUSES:
             self.set_state(Estado.failed)
             self.save()
         elif status in STP_SUCCEDED_STATUSES:
