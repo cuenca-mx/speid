@@ -4,9 +4,11 @@ from unittest.mock import patch
 import pytest
 from celery.exceptions import MaxRetriesExceededError, Retry
 from cep.exc import CepError, MaxRequestError
+from mongoengine import DoesNotExist
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
+    check_deposits_status,
     process_outgoing_transactions,
     retry_incoming_transactions,
     send_transaction_status,
@@ -410,3 +412,44 @@ def test_send_transaction_not_restricted_accounts_persona_fisica(
             nombre_beneficiario=None,
         ),
     )
+
+
+@pytest.mark.vcr
+def test_check_existing_deposit() -> None:
+    req = dict(
+        clave_rastreo='Test162467872',
+        cuenta_beneficiario='646180157018877012',
+        fecha_deposito='2023-08-28',
+    )
+    check_deposits_status(req)
+    transaction = Transaction.objects.get(clave_rastreo=req['clave_rastreo'])
+    assert transaction
+    assert transaction.cuenta_beneficiario == req['cuenta_beneficiario']
+    assert transaction.fecha_operacion.date() == dt.date.fromisoformat(
+        req['fecha_deposito']
+    )
+    assert transaction.estado is Estado.succeeded
+
+
+@pytest.mark.vcr
+def test_check_not_existing_deposit() -> None:
+    req = dict(
+        clave_rastreo='FOOBARBAZ',
+        cuenta_beneficiario='646180157018877012',
+        fecha_deposito='2023-08-28',
+    )
+    check_deposits_status(req)
+    with pytest.raises(DoesNotExist):
+        Transaction.objects.get(clave_rastreo=req['clave_rastreo'])
+
+
+@pytest.mark.vcr
+def test_check_refunded_deposit():
+    req = dict(
+        clave_rastreo='Test162467872',
+        cuenta_beneficiario='646180157018877012',
+        fecha_deposito='2023-08-28',
+    )
+    check_deposits_status(req)
+    with pytest.raises(DoesNotExist):
+        Transaction.objects.get(clave_rastreo=req['clave_rastreo'])

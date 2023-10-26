@@ -1,6 +1,7 @@
 import datetime as dt
 import os
 from enum import Enum
+from typing import Optional
 
 import pytz
 from mongoengine import (
@@ -41,7 +42,7 @@ SKIP_VALIDATION_PRIOR_SEND_ORDER = (
     os.getenv('SKIP_VALIDATION_PRIOR_SEND_ORDER', 'false').lower() == 'true'
 )
 
-STP_FAILED_STATUSES = {
+STP_FAILED_TRANSFERS_STATUSES = {
     STPEstado.traspaso_cancelado,
     STPEstado.cancelada,
     STPEstado.cancelada_adapter,
@@ -49,10 +50,19 @@ STP_FAILED_STATUSES = {
     STPEstado.devuelta,
 }
 
-STP_SUCCEDED_STATUSES = {
+STP_SUCCEDED_TRANSFERS_STATUSES = {
     STPEstado.liquidada,
     STPEstado.traspaso_liquidado,
 }
+
+
+STP_VALID_DEPOSITS_STATUSES = {
+    STPEstado.confirmada,
+    STPEstado.liquidada,
+    STPEstado.traspaso_liquidado,
+}
+
+REFUNDS_PAYMENTS_TYPES = {0, 16, 17, 18, 23, 24}
 
 
 @handler(signals.pre_save)
@@ -180,22 +190,25 @@ class Transaction(Document, BaseModel):
         return is_valid
 
     def fetch_stp_status(self) -> STPEstado:
-        fecha_operacion = None
-        if (
-            self.created_at_fecha_operacion
-            < Transaction.current_fecha_operacion()
-        ):
-            fecha_operacion = self.created_at_fecha_operacion
+        # fecha_operacion = None
+        # if (
+        #     self.created_at_fecha_operacion
+        #     < Transaction.current_fecha_operacion()
+        # ):
+        #     fecha_operacion = self.created_at_fecha_operacion
 
         stp_order = stpmex_client.ordenes_v2.consulta_clave_rastreo_enviada(
             clave_rastreo=self.clave_rastreo,
-            fecha_operacion=fecha_operacion,
+            fecha_operacion=self.created_at_fecha_operacion
+            if self.created_at_fecha_operacion
+            < Transaction.current_fecha_operacion()
+            else None,
         )
         return stp_order.estado
 
     def update_stp_status(self) -> None:
         try:
-            status = self.fetch_stp_status()
+            status: Optional[STPEstado] = self.fetch_stp_status()
         except EmptyResultsError:
             status = None
         except StpmexException as ex:
@@ -207,10 +220,10 @@ class Transaction(Document, BaseModel):
         elif not self.stp_id and not status:
             self.set_state(Estado.failed)
             self.save()
-        elif status in STP_FAILED_STATUSES:
+        elif status in STP_FAILED_TRANSFERS_STATUSES:
             self.set_state(Estado.failed)
             self.save()
-        elif status in STP_SUCCEDED_STATUSES:
+        elif status in STP_SUCCEDED_TRANSFERS_STATUSES:
             self.set_state(Estado.succeeded)
             self.save()
         elif status is STPEstado.autorizada:

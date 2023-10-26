@@ -4,22 +4,20 @@ import click
 import pytz
 from mongoengine import DoesNotExist
 from stpmex.business_days import get_next_business_day
-from stpmex.types import Estado as StpEstado
 
 from speid import app
 from speid.helpers.callback_helper import set_status_transaction
-from speid.helpers.transaction_helper import process_incoming_transaction
+from speid.helpers.transaction_helper import (
+    process_incoming_transaction,
+    stp_model_to_dict,
+)
 from speid.models import Event, Transaction
+from speid.models.transaction import (
+    REFUNDS_PAYMENTS_TYPES,
+    STP_VALID_DEPOSITS_STATUSES,
+)
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType
-
-ESTADOS_DEPOSITOS_VALIDOS = {
-    StpEstado.confirmada,
-    StpEstado.liquidada,
-    StpEstado.traspaso_liquidado,
-}
-
-TIPOS_PAGO_DEVOLUCION = {0, 16, 17, 18, 23, 24}
 
 
 @app.cli.group('speid')
@@ -87,11 +85,11 @@ def reconciliate_deposits(
         # Se ignora los tipos pago devolución debido a que
         # el estado de estas operaciones se envían
         # al webhook `POST /orden_events`
-        if recibida.tipoPago in TIPOS_PAGO_DEVOLUCION:
+        if recibida.tipoPago in REFUNDS_PAYMENTS_TYPES:
             no_procesadas.append(recibida.claveRastreo)
             continue
 
-        if recibida.estado not in ESTADOS_DEPOSITOS_VALIDOS:
+        if recibida.estado not in STP_VALID_DEPOSITS_STATUSES:
             no_procesadas.append(recibida.claveRastreo)
             continue
 
@@ -105,27 +103,7 @@ def reconciliate_deposits(
             # hace una conversión del modelo de respuesta de
             # la función `consulta_recibidas` al modelo del evento que envía
             # STP por el webhook en `POST /ordenes`
-            stp_request = dict(
-                Clave=recibida.idEF,
-                FechaOperacion=recibida.fechaOperacion.strftime('%Y%m%d'),
-                InstitucionOrdenante=recibida.institucionContraparte,
-                InstitucionBeneficiaria=recibida.institucionOperante,
-                ClaveRastreo=recibida.claveRastreo,
-                Monto=recibida.monto,
-                NombreOrdenante=recibida.nombreOrdenante,
-                TipoCuentaOrdenante=recibida.tipoCuentaOrdenante,
-                CuentaOrdenante=recibida.cuentaOrdenante,
-                RFCCurpOrdenante=recibida.rfcCurpOrdenante,
-                NombreBeneficiario=recibida.nombreBeneficiario,
-                TipoCuentaBeneficiario=recibida.tipoCuentaBeneficiario,
-                CuentaBeneficiario=recibida.cuentaBeneficiario,
-                RFCCurpBeneficiario=getattr(
-                    recibida, 'rfcCurpBeneficiario', 'NA'
-                ),
-                ConceptoPago=recibida.conceptoPago,
-                ReferenciaNumerica=recibida.referenciaNumerica,
-                Empresa=recibida.empresa,
-            )
+            stp_request = stp_model_to_dict(recibida)
             click.echo(f'Depósito procesado: {recibida.claveRastreo}')
             process_incoming_transaction(stp_request)
         else:

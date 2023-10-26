@@ -5,12 +5,12 @@ import pytest
 import requests_mock
 from freezegun import freeze_time
 
-from speid.commands.spei import (
-    ESTADOS_DEPOSITOS_VALIDOS,
-    TIPOS_PAGO_DEVOLUCION,
-    speid_group,
-)
+from speid.commands.spei import speid_group
 from speid.models import Transaction
+from speid.models.transaction import (
+    REFUNDS_PAYMENTS_TYPES,
+    STP_VALID_DEPOSITS_STATUSES,
+)
 from speid.types import Estado, EventType
 from speid.validations import StpTransaction
 
@@ -149,7 +149,6 @@ def test_reconciliate_deposits_historic(runner):
     ).all()
 
     assert len(deposits_db) == 1
-    Transaction.drop_collection()
 
 
 @freeze_time("2023-08-27")  # 2023-08-26 18:00 UTC-6
@@ -175,8 +174,8 @@ def test_reconciliate_deposits_current_fecha_operacion(runner):
     valid_deposits = [
         d
         for d in deposits
-        if d['estado'] in ESTADOS_DEPOSITOS_VALIDOS
-        and d['tipoPago'] not in TIPOS_PAGO_DEVOLUCION
+        if d['estado'] in STP_VALID_DEPOSITS_STATUSES
+        and d['tipoPago'] not in REFUNDS_PAYMENTS_TYPES
     ]
 
     with requests_mock.mock() as m:
@@ -199,7 +198,6 @@ def test_reconciliate_deposits_current_fecha_operacion(runner):
     assert not any(
         d.clave_rastreo == devolucion['claveRastreo'] for d in deposits_db
     )
-    Transaction.drop_collection()
 
 
 @freeze_time("2023-08-26 01:00:00")  # 2023-08-25 19:00 UTC-6
@@ -249,8 +247,8 @@ def test_reconciliate_deposits_ignores_duplicated(runner):
     valid_deposits = [
         d
         for d in deposits
-        if d['estado'] in ESTADOS_DEPOSITOS_VALIDOS
-        and d['tipoPago'] not in TIPOS_PAGO_DEVOLUCION
+        if d['estado'] in STP_VALID_DEPOSITS_STATUSES
+        and d['tipoPago'] not in REFUNDS_PAYMENTS_TYPES
     ]
 
     with requests_mock.mock() as m:
@@ -270,4 +268,3 @@ def test_reconciliate_deposits_ignores_duplicated(runner):
     ).all()
 
     assert len(deposits_db) == len(valid_deposits)
-    Transaction.drop_collection()

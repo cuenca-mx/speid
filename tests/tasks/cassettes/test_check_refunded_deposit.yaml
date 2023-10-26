@@ -1,0 +1,42 @@
+interactions:
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "Test162467872", "tipoOrden": "R",
+      "fechaOperacion": "20230828", "firma": "SgmhFe+ySNKghFsLscumsJmjME2Fd+grVr1qaS+q9z2Av1RF2QV88WJ51vArFI/nTWBjtmuEvfgQfU2oIY6kv2JS16M85EPLbIJPMZnKYktWBl4hMjJIxlf8OogUI8uuZsQ8PHbwPlZLayjFeOmJnP6PLxI0c9re+HF5ieRVpFQ="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '287'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.12.0
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":13864373,"claveRastreo":"Test162467872","conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157018877012","cuentaOrdenante":"646580103500000006","empresa":"TAMIZI","estado":"TCL","fechaOperacion":20230828,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":0.01,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"CONESA","nombreCep":null,"rfcCep":"TCU200828RX8","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"ACO841030SU7","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1693246820537,"tsLiquidacion":1693246825244,"causaDevolucion":null,"urlCEP":"https://www.banxico.org.mx/cep/go?i=90646&s=20210302&d=Htx%2FNVOdUKgiu8uqML7PX3qzuFfKM8i71Qzhdi3vcyy64uMK96Sw3UAVErWMcTMIfsBqHMPiYv5%2FpWbscHEU3w%3D%3D"}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 26 Oct 2023 17:49:37 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+version: 1

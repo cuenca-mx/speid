@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 from mongoengine import NotUniqueError
 from sentry_sdk import capture_exception, capture_message
@@ -40,3 +41,25 @@ def process_incoming_transaction(incoming_transaction: dict) -> dict:
         transaction.save()
         capture_exception(e)
     return r
+
+
+def stp_model_to_dict(model) -> Dict:
+    return dict(
+        Clave=model.idEF,
+        FechaOperacion=model.fechaOperacion.strftime('%Y%m%d'),
+        InstitucionOrdenante=model.institucionContraparte,
+        InstitucionBeneficiaria=model.institucionOperante,
+        ClaveRastreo=model.claveRastreo,
+        Monto=model.monto,
+        NombreOrdenante=model.nombreOrdenante,
+        TipoCuentaOrdenante=model.tipoCuentaOrdenante,
+        CuentaOrdenante=model.cuentaOrdenante,
+        RFCCurpOrdenante=model.rfcCurpOrdenante,
+        NombreBeneficiario=model.nombreBeneficiario,
+        TipoCuentaBeneficiario=model.tipoCuentaBeneficiario,
+        CuentaBeneficiario=model.cuentaBeneficiario,
+        RFCCurpBeneficiario=getattr(model, 'rfcCurpBeneficiario', 'NA'),
+        ConceptoPago=model.conceptoPago,
+        ReferenciaNumerica=model.referenciaNumerica,
+        Empresa=model.empresa,
+    )

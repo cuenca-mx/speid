@@ -1,16 +1,33 @@
-from typing import List
+import datetime as dt
+from typing import Dict, List
 
 import cep
 import pytz
 from celery.exceptions import MaxRetriesExceededError
 from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
-from stpmex.business_days import current_cdmx_time_zone
+from pydantic import ValidationError
+from stpmex.business_days import (
+    current_cdmx_time_zone,
+    get_next_business_day,
+    get_prior_business_day,
+)
+from stpmex.exc import EmptyResultsError
 
 from speid.helpers import callback_helper
+from speid.helpers.transaction_helper import (
+    process_incoming_transaction,
+    stp_model_to_dict,
+)
 from speid.models import Account, Event, Transaction
+from speid.models.transaction import (
+    REFUNDS_PAYMENTS_TYPES,
+    STP_VALID_DEPOSITS_STATUSES,
+)
+from speid.processors import stpmex_client
 from speid.tasks import celery
 from speid.types import Estado, EventType, TipoTransaccion
+from speid.validations.queries import DepositStatusQuery
 
 CURP_LENGTH = 18
 RFC_LENGTH = 13
@@ -127,25 +144,51 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
     )
 
 
-@celery.task(max_retries=GET_RFC_TASK_MAX_RETRIES)
-def check_transfer_status(cuenta_ordenante: str, clave_rastreo: str) -> None:
+@celery.task
+def check_deposits_status(deposit: Dict) -> None:
+    try:
+        req = DepositStatusQuery(**deposit)
+    except ValidationError:
+        return
+
     try:
         transaction = Transaction.objects.get(
-            clave_rastreo=clave_rastreo, cuenta_ordenante=cuenta_ordenante
+            clave_rastreo=req.clave_rastreo,
+            cuenta_beneficiario=req.cuenta_beneficiario,
+            tipo=TipoTransaccion.deposito,
         )
     except DoesNotExist:
-        return
-
-    if transaction.tipo is not TipoTransaccion.retiro:
-        return
-
-    if transaction.estado in [Estado.succeeded, Estado.failed]:
-        send_transaction_status.apply_async(
-            [transaction.id, transaction.estado]
-        )
-    elif transaction.estado is Estado.error:
-        send_transaction_status.apply_async([transaction.id, Estado.failed])
-    elif transaction.estado is Estado.created:
         ...
-    elif transaction.estado is Estado.submitted:
-        ...
+    else:
+        retry_incoming_transactions.apply_async(([transaction.speid_id],))
+
+    # Si no existe en los registros se obtiene de STP y se intenta con 3 fechas
+    # operativas próximas a la fecha que el cliente nos proporcionó
+    fechas_operacion = [
+        get_next_business_day(req.fecha_deposito),
+        get_prior_business_day(req.fecha_deposito),
+        get_next_business_day(req.fecha_deposito + dt.timedelta(days=1)),
+    ]
+
+    for fecha_operacion in fechas_operacion:
+        try:
+            recibida = (
+                stpmex_client.ordenes_v2.consulta_clave_rastreo_recibida(
+                    clave_rastreo=req.clave_rastreo,
+                    fecha_operacion=fecha_operacion
+                    if Transaction.current_fecha_operacion() > fecha_operacion
+                    else None,
+                )
+            )
+        except EmptyResultsError:
+            ...
+        else:
+            if (
+                recibida.tipoPago in REFUNDS_PAYMENTS_TYPES
+                or recibida.estado not in STP_VALID_DEPOSITS_STATUSES
+            ):
+                return
+
+            stp_request = stp_model_to_dict(recibida)
+            process_incoming_transaction(stp_request)
+            return

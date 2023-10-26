@@ -174,6 +174,6 @@ def orden_pago(outcome_transaction):
 
 
 @pytest.fixture(autouse=True)
-def cleanup_transfers():
+def cleanup_transactions():
     yield
     Transaction.drop_collection()
