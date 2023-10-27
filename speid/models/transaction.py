@@ -190,19 +190,9 @@ class Transaction(Document, BaseModel):
         return is_valid
 
     def fetch_stp_status(self) -> STPEstado:
-        # fecha_operacion = None
-        # if (
-        #     self.created_at_fecha_operacion
-        #     < Transaction.current_fecha_operacion()
-        # ):
-        #     fecha_operacion = self.created_at_fecha_operacion
-
         stp_order = stpmex_client.ordenes_v2.consulta_clave_rastreo_enviada(
             clave_rastreo=self.clave_rastreo,
-            fecha_operacion=self.created_at_fecha_operacion
-            if self.created_at_fecha_operacion
-            < Transaction.current_fecha_operacion()
-            else None,
+            fecha_operacion=self.created_at_fecha_operacion,
         )
         return stp_order.estado
 
@@ -216,7 +206,10 @@ class Transaction(Document, BaseModel):
             return
 
         if self.stp_id and not status:
-            raise TransactionNeedManualReviewError(self.speid_id)
+            raise TransactionNeedManualReviewError(
+                self.speid_id,
+                f'Can not retrieve transaction stp_id: {self.stp_id}',
+            )
         elif not self.stp_id and not status:
             self.set_state(Estado.failed)
             self.save()
@@ -227,11 +220,13 @@ class Transaction(Document, BaseModel):
             self.set_state(Estado.succeeded)
             self.save()
         elif status is STPEstado.autorizada:
-            pass
+            return
         else:
             # Cualquier otro caso se debe revisar manualmente y aplicar
             # el fix correspondiente
-            raise TransactionNeedManualReviewError(self.speid_id)
+            raise TransactionNeedManualReviewError(
+                self.speid_id, f'Unhandled stp status: {status}'
+            )
 
     def create_order(self) -> Orden:
         # Validate account has already been created
@@ -312,9 +307,3 @@ class Transaction(Document, BaseModel):
             self.estado = Estado.submitted
             self.save()
             return order
-
-    @staticmethod
-    def current_fecha_operacion() -> dt.date:
-        utcnow = dt.datetime.utcnow().replace(tzinfo=pytz.utc)
-        cdmx_time = utcnow.astimezone(pytz.timezone('America/Mexico_City'))
-        return get_next_business_day(cdmx_time)

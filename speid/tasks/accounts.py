@@ -1,7 +1,7 @@
 from mongoengine import DoesNotExist
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
-from stpmex.exc import DuplicatedAccount, InvalidRfcOrCurp, StpmexException
+from stpmex.exc import InvalidRfcOrCurp, StpmexException
 from stpmex.resources.cuentas import Cuenta
 
 from speid.models import Event, PhysicalAccount
@@ -45,10 +45,7 @@ def execute_create_account(account_dict: dict):
     if account.estado is Estado.succeeded:
         return
 
-    try:
-        account.create_account()
-    except DuplicatedAccount:
-        ...
+    account.create_account()
 
 
 @celery.task(bind=True, max_retries=0)

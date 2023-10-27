@@ -6,13 +6,12 @@ import pytz
 from celery.exceptions import MaxRetriesExceededError
 from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
-from pydantic import ValidationError
 from stpmex.business_days import (
     current_cdmx_time_zone,
     get_next_business_day,
     get_prior_business_day,
 )
-from stpmex.exc import EmptyResultsError
+from stpmex.exc import EmptyResultsError, InvalidFutureDateError
 
 from speid.helpers import callback_helper
 from speid.helpers.transaction_helper import (
@@ -146,11 +145,7 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
 
 @celery.task
 def check_deposits_status(deposit: Dict) -> None:
-    try:
-        req = DepositStatusQuery(**deposit)
-    except ValidationError:
-        return
-
+    req = DepositStatusQuery(**deposit)
     try:
         transaction = Transaction.objects.get(
             clave_rastreo=req.clave_rastreo,
@@ -175,13 +170,11 @@ def check_deposits_status(deposit: Dict) -> None:
             recibida = (
                 stpmex_client.ordenes_v2.consulta_clave_rastreo_recibida(
                     clave_rastreo=req.clave_rastreo,
-                    fecha_operacion=fecha_operacion
-                    if Transaction.current_fecha_operacion() > fecha_operacion
-                    else None,
+                    fecha_operacion=fecha_operacion,
                 )
             )
-        except EmptyResultsError:
-            ...
+        except (InvalidFutureDateError, EmptyResultsError):
+            continue
         else:
             if (
                 recibida.tipoPago in REFUNDS_PAYMENTS_TYPES

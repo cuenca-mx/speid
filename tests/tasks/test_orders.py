@@ -20,6 +20,7 @@ from speid.exc import (
     MalformedOrderException,
     ResendSuccessOrderException,
     ScheduleError,
+    TransactionNeedManualReviewError,
 )
 from speid.models import Transaction
 from speid.tasks.orders import execute, retry_timeout, send_order
@@ -274,8 +275,11 @@ def test_unexpected_stp_error(order, mock_callback_queue):
 
 
 @pytest.mark.vcr
-def test_retry_transfers_with_stp_id_succeeded(order, second_physical_account):
+def test_retry_transfers_with_stp_id_succeeded(
+    order, second_physical_account, mock_callback_queue
+):
     order['cuenta_ordenante'] = second_physical_account.cuenta
+
     execute(order)
 
     transaction = Transaction.objects.order_by('-created_at').first()
@@ -292,7 +296,9 @@ def test_retry_transfers_with_stp_id_succeeded(order, second_physical_account):
 
 
 @pytest.mark.vcr
-def test_retry_transfers_submitted(order, second_physical_account):
+def test_retry_transfers_submitted(
+    order, second_physical_account, mock_callback_queue
+):
     order['cuenta_ordenante'] = second_physical_account.cuenta
     execute(order)
 
@@ -324,6 +330,7 @@ def test_retrieve_transfer_status_when_stp_id_is_not_none(
     order,
     clave_rastreo,
     speid_estado,
+    mock_callback_queue,
 ):
     # Transfers that we are passing in the parameter `clave_rastreo`
     # were created on 2023-10-23 23:41 UTC time (fecha_operacion=2023-10-23).
@@ -346,4 +353,49 @@ def test_retrieve_transfer_status_when_stp_id_is_not_none(
 
     transfer = Transaction.objects.get(clave_rastreo=clave_rastreo)
     assert transfer.estado is speid_estado
+    mock_registra.assert_not_called()
+
+
+@pytest.mark.vcr
+def test_retry_transfers_with_stp_id_but_not_found_in_api(
+    order, second_physical_account, mock_callback_queue
+):
+    order['cuenta_ordenante'] = second_physical_account.cuenta
+    execute(order)
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+
+    with patch(
+        'speid.models.transaction.Transaction.fetch_stp_status',
+        return_value=None,
+    ), patch(
+        'speid.models.transaction.stpmex_client.ordenes.registra'
+    ) as mock_registra:
+        with pytest.raises(TransactionNeedManualReviewError):
+            execute(order)
+
+    transaction.reload()
+    assert transaction.estado is Estado.submitted
+    mock_registra.assert_not_called()
+
+
+@pytest.mark.vcr
+def test_retry_transfers_with_stp_id_but_unhandled_status(
+    order, second_physical_account, mock_callback_queue
+):
+    order['cuenta_ordenante'] = second_physical_account.cuenta
+    execute(order)
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+
+    with patch(
+        'speid.models.transaction.stpmex_client.ordenes.registra'
+    ) as mock_registra:
+        with pytest.raises(TransactionNeedManualReviewError):
+            execute(order)
+
+    transaction.reload()
+    assert transaction.estado is Estado.submitted
     mock_registra.assert_not_called()

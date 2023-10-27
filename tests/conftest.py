@@ -16,6 +16,13 @@ SEND_STATUS_TRANSACTION_TASK = os.environ['SEND_STATUS_TRANSACTION_TASK']
 
 
 @pytest.fixture
+def client():
+    app.testing = True
+    client = app.test_client()
+    return client
+
+
+@pytest.fixture
 def runner():
     runner = FlaskCliRunner(app)
     return runner
@@ -55,6 +62,29 @@ def outcome_transaction() -> Generator[Transaction, None, None]:
     transaction.save()
     yield transaction
     transaction.delete()
+
+
+@pytest.fixture
+def default_income_transaction():
+    return dict(
+        Clave=2456303,
+        FechaOperacion=20210618,
+        InstitucionOrdenante=40012,
+        InstitucionBeneficiaria=90646,
+        ClaveRastreo="PRUEBATAMIZI1",
+        Monto=100.0,
+        NombreOrdenante="BANCO",
+        TipoCuentaOrdenante=40,
+        CuentaOrdenante="846180000500000008",
+        RFCCurpOrdenante="ND",
+        NombreBeneficiario="TAMIZI",
+        TipoCuentaBeneficiario=40,
+        CuentaBeneficiario="646180157000000004",
+        RFCCurpBeneficiario="ND",
+        ConceptoPago="PRUEBA",
+        ReferenciaNumerica=2423,
+        Empresa="TAMIZI",
+    )
 
 
 @pytest.fixture
