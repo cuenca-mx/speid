@@ -30,8 +30,8 @@ def runner():
 
 @pytest.fixture
 def mock_callback_queue():
-    with patch.object(Celery, 'send_task', return_value=None):
-        yield
+    with patch.object(Celery, 'send_task', return_value=None) as mock:
+        yield mock
 
 
 @pytest.fixture(scope='module')

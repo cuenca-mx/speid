@@ -157,6 +157,18 @@ def test_retry_on_unexpected_exception(
     mock_capture_exception.assert_called_once()
 
 
+@patch(
+    'speid.tasks.orders.execute',
+    side_effect=TransactionNeedManualReviewError('sp1', 'error'),
+)
+@patch('speid.tasks.orders.capture_exception')
+def test_doesnt_retry_on_manual_review_exception(
+    mock_capture_exception: MagicMock, _, order
+):
+    send_order(order)
+    mock_capture_exception.assert_called_once()
+
+
 def test_hold_max_amount(order):
     order['monto'] = 102000000
     with pytest.raises(MalformedOrderException):
@@ -398,4 +410,23 @@ def test_retry_transfers_with_stp_id_but_unhandled_status(
 
     transaction.reload()
     assert transaction.estado is Estado.submitted
+    mock_registra.assert_not_called()
+
+
+@pytest.mark.vcr
+def test_retry_transfer_already_failed(
+    order, second_physical_account, mock_callback_queue
+):
+    order['cuenta_ordenante'] = second_physical_account.cuenta
+    execute(order)
+
+    transaction = Transaction.objects.order_by('-created_at').first()
+    # Changing to error state so we can simulate a failed trx
+    transaction.estado = Estado.error
+    transaction.save()
+    with patch(
+        'speid.models.transaction.stpmex_client.ordenes.registra'
+    ) as mock_registra:
+        execute(order)
+
     mock_registra.assert_not_called()

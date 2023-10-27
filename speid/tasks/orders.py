@@ -53,12 +53,14 @@ def retry_timeout(attempts: int) -> int:
 def send_order(self, order_val: dict):
     try:
         execute(order_val)
-    except (MalformedOrderException, ResendSuccessOrderException) as exc:
+    except (
+        MalformedOrderException,
+        ResendSuccessOrderException,
+        TransactionNeedManualReviewError,
+    ) as exc:
         capture_exception(exc)
     except ScheduleError:
         self.retry(countdown=STP_COUNTDOWN)
-    except TransactionNeedManualReviewError as exc:
-        capture_exception(exc)
     except Exception as exc:
         capture_exception(exc)
         self.retry(countdown=retry_timeout(self.request.retries))
