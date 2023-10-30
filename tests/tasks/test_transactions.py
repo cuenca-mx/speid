@@ -420,14 +420,14 @@ def test_check_existing_deposit(mock_send_task) -> None:
     req = dict(
         clave_rastreo='Test162467872',
         cuenta_beneficiario='646180157018877012',
-        fecha_deposito='2023-08-28',
+        fecha_operacion='2023-08-28',
     )
     check_deposits_status(req)
     transaction = Transaction.objects.get(clave_rastreo=req['clave_rastreo'])
     assert transaction
     assert transaction.cuenta_beneficiario == req['cuenta_beneficiario']
     assert transaction.fecha_operacion.date() == dt.date.fromisoformat(
-        req['fecha_deposito']
+        req['fecha_operacion']
     )
     assert transaction.estado is Estado.succeeded
     mock_send_task.assert_called_once()
@@ -439,7 +439,7 @@ def test_check_not_existing_deposit(mock_send_task) -> None:
     req = dict(
         clave_rastreo='FOOBARBAZ',
         cuenta_beneficiario='646180157018877012',
-        fecha_deposito='2023-08-28',
+        fecha_operacion='2023-08-28',
     )
     check_deposits_status(req)
     with pytest.raises(DoesNotExist):
@@ -453,7 +453,7 @@ def test_check_refunded_deposit(mock_send_task):
     req = dict(
         clave_rastreo='Test162467872',
         cuenta_beneficiario='646180157018877012',
-        fecha_deposito='2023-08-28',
+        fecha_operacion='2023-08-28',
     )
     check_deposits_status(req)
     with pytest.raises(DoesNotExist):
@@ -476,7 +476,7 @@ def test_retry_incoming_transaction(
     req = dict(
         clave_rastreo=default_income_transaction['ClaveRastreo'],
         cuenta_beneficiario=default_income_transaction['CuentaBeneficiario'],
-        fecha_deposito=(
+        fecha_operacion=(
             f'{fecha_operacion[0:4]}-'
             f'{fecha_operacion[4:6]}-{fecha_operacion[6:]}'
         ),

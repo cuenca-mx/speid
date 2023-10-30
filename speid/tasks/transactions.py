@@ -160,9 +160,9 @@ def check_deposits_status(deposit: Dict) -> None:
     # Si no existe en los registros se obtiene de STP y se intenta con 3 fechas
     # operativas próximas a la fecha que el cliente nos proporcionó
     fechas_operacion = [
-        get_next_business_day(req.fecha_deposito),
-        get_prior_business_day(req.fecha_deposito),
-        get_next_business_day(req.fecha_deposito + dt.timedelta(days=1)),
+        get_next_business_day(req.fecha_operacion),
+        get_prior_business_day(req.fecha_operacion),
+        get_next_business_day(req.fecha_operacion + dt.timedelta(days=1)),
     ]
 
     for fecha_operacion in fechas_operacion:

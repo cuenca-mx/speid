@@ -7,4 +7,4 @@ from pydantic import BaseModel
 class DepositStatusQuery(BaseModel):
     clave_rastreo: str
     cuenta_beneficiario: Clabe
-    fecha_deposito: dt.date
+    fecha_operacion: dt.date
