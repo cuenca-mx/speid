@@ -146,16 +146,17 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
 @celery.task
 def check_deposits_status(deposit: Dict) -> None:
     req = DepositStatusQuery(**deposit)
-    try:
-        transaction = Transaction.objects.get(
-            clave_rastreo=req.clave_rastreo,
-            cuenta_beneficiario=req.cuenta_beneficiario,
-            tipo=TipoTransaccion.deposito,
+    transactions = Transaction.objects(
+        clave_rastreo=req.clave_rastreo,
+        cuenta_beneficiario=req.cuenta_beneficiario,
+        tipo=TipoTransaccion.deposito,
+    ).all()
+
+    if transactions:
+        retry_incoming_transactions.apply_async(
+            ([t.speid_id for t in transactions],)
         )
-    except DoesNotExist:
-        ...
-    else:
-        retry_incoming_transactions.apply_async(([transaction.speid_id],))
+        return
 
     # Si no existe en los registros se obtiene de STP y se intenta con 3 fechas
     # operativas próximas a la fecha que el cliente nos proporcionó
