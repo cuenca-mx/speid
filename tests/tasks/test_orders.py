@@ -243,6 +243,26 @@ def test_fail_transaction_with_stp_succeeded(
     assert transaction.estado is Estado.submitted
 
 
+@pytest.mark.vcr()
+@freeze_time('2023-10-31 14:00:00')
+def test_transaction_submitted_but_not_found_in_stp(
+    order, second_physical_account, mock_callback_queue
+):
+    order['cuenta_ordenante'] = second_physical_account.cuenta
+    execute(order)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.submitted
+    # simulate that we cannot retrieve transfer data just by changing
+    # created_at so the original fecha_operacion changes
+    transaction.created_at = transaction.created_at - dt.timedelta(days=1)
+    transaction.save()
+    with pytest.raises(TransactionNeedManualReviewError):
+        execute(order)
+    # status didn't change because transaction was 'Autorizada' in STP
+    transaction.reload()
+    assert transaction.estado is Estado.submitted
+
+
 @pytest.mark.vcr
 @freeze_time('2022-11-08 10:00:00')
 def test_unexpected_stp_error(order, mock_callback_queue):
