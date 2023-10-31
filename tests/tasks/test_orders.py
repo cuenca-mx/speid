@@ -25,7 +25,6 @@ from speid.exc import (
 from speid.models import Transaction
 from speid.tasks.orders import execute, retry_timeout, send_order
 from speid.types import Estado, EventType, TipoTransaccion
-from speid.validations import factory
 
 
 @pytest.fixture
@@ -242,24 +241,6 @@ def test_fail_transaction_with_stp_succeeded(
     execute(order)
     # status didn't change because transaction was 'Autorizada' in STP
     assert transaction.estado is Estado.submitted
-
-
-@pytest.mark.vcr()
-@freeze_time('2022-11-08 10:00:00')
-def test_fail_transaction_with_no_stp(order, mock_callback_queue):
-    # new transaction so next `execute`
-    # finds something to send to STP
-    input = factory.create(order['version'], **order)
-    transaction = input.transform()
-    transaction.clave_rastreo = 'CRINEXISTENTE'
-    transaction.created_at = datetime.utcnow() - timedelta(hours=4)
-    transaction.save()
-
-    # sending to stp
-    execute(order)
-    transaction.reload()
-    # status changed to failed because order was not found in stp
-    assert transaction.estado is Estado.failed
 
 
 @pytest.mark.vcr

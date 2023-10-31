@@ -205,14 +205,11 @@ class Transaction(Document, BaseModel):
             capture_exception(ex)
             return
 
-        if self.stp_id and not status:
+        if not status:
             raise TransactionNeedManualReviewError(
                 self.speid_id,
                 f'Can not retrieve transaction stp_id: {self.stp_id}',
             )
-        elif not self.stp_id and not status:
-            self.set_state(Estado.failed)
-            self.save()
         elif status in STP_FAILED_TRANSFERS_STATUSES:
             self.set_state(Estado.failed)
             self.save()
