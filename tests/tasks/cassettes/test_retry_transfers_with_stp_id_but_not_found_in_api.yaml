@@ -1,0 +1,43 @@
+interactions:
+- request:
+    body: '{"monto": 10.0, "conceptoPago": "PRUEBA 8060", "cuentaBeneficiario": "072691004495711499",
+      "nombreBeneficiario": "Pablo Sanchez", "institucionContraparte": "40072", "cuentaOrdenante":
+      "646180157018613700", "nombreOrdenante": "BANCO", "institucionOperante": "90646",
+      "tipoCuentaBeneficiario": 40, "tipoCuentaOrdenante": 40, "claveRastreo": "CR1698363753",
+      "referenciaNumerica": 8409977, "rfcCurpBeneficiario": "ND", "rfcCurpOrdenante":
+      "ND", "prioridad": 1, "medioEntrega": 3, "tipoPago": 1, "topologia": "T", "firma":
+      "WQ10pllVAc1vE7SK/yKJx9CFfOOPVzlcPfepVO998T69wDI+qNo4uWjd8CuxbF74zFd2F3oH5G6MgDKbdVNGgUifVZSSUNS8IeSQ5edymahP6b+NmBX0idmdJpVzrhWpxf1+9FqUgrBK8gYYEqjeIf+sYntj+4q5TspjuUnebgk=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '714'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.13.0
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/registra
+  response:
+    body:
+      string: '{"resultado":{"id":21787172}}'
+    headers:
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 26 Oct 2023 23:42:34 GMT
+      X-ORACLE-DMS-ECID:
+      - bc722c26-d789-4f18-88dc-059072b5d031-00016096
+      X-ORACLE-DMS-RID:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,5 +1,5 @@
+import datetime as dt
 import os
-from datetime import datetime
 from enum import Enum
 from typing import Optional
 
@@ -16,12 +16,12 @@ from mongoengine import (
 )
 from sentry_sdk import capture_exception
 from stpmex.business_days import get_next_business_day
-from stpmex.exc import NoEntityFound, StpmexException
+from stpmex.exc import EmptyResultsError, StpmexException
 from stpmex.resources import Orden
 from stpmex.types import Estado as STPEstado
 
 from speid import STP_EMPRESA
-from speid.exc import MalformedOrderException
+from speid.exc import MalformedOrderException, TransactionNeedManualReviewError
 from speid.helpers import callback_helper
 from speid.processors import stpmex_client
 from speid.types import Estado, EventType, TipoTransaccion
@@ -42,17 +42,32 @@ SKIP_VALIDATION_PRIOR_SEND_ORDER = (
     os.getenv('SKIP_VALIDATION_PRIOR_SEND_ORDER', 'false').lower() == 'true'
 )
 
-STP_FAILED_STATUSES = [
+STP_FAILED_TRANSFERS_STATUSES = {
     STPEstado.traspaso_cancelado,
     STPEstado.cancelada,
     STPEstado.cancelada_adapter,
     STPEstado.cancelada_rechazada,
-]
+    STPEstado.devuelta,
+}
+
+STP_SUCCEDED_TRANSFERS_STATUSES = {
+    STPEstado.liquidada,
+    STPEstado.traspaso_liquidado,
+}
+
+
+STP_VALID_DEPOSITS_STATUSES = {
+    STPEstado.confirmada,
+    STPEstado.liquidada,
+    STPEstado.traspaso_liquidado,
+}
+
+REFUNDS_PAYMENTS_TYPES = {0, 16, 17, 18, 23, 24}
 
 
 @handler(signals.pre_save)
 def pre_save_transaction(sender, document):
-    date = document.fecha_operacion or datetime.today()
+    date = document.fecha_operacion or dt.datetime.today()
     document.compound_key = (
         f'{document.clave_rastreo}:{date.strftime("%Y%m%d")}'
     )
@@ -130,6 +145,18 @@ class Transaction(Document, BaseModel):
         ]
     }
 
+    @property
+    def created_at_cdmx(self) -> dt.datetime:
+        utc_created_at = self.created_at.replace(tzinfo=pytz.utc)
+        return utc_created_at.astimezone(pytz.timezone('America/Mexico_City'))
+
+    @property
+    def created_at_fecha_operacion(self) -> dt.date:
+        # STP doesn't return `fecha_operacion` on withdrawal creation, but we
+        # can calculate it.
+        assert self.tipo is TipoTransaccion.retiro
+        return get_next_business_day(self.created_at_cdmx)
+
     def set_state(self, state: Estado):
         from ..tasks.transactions import send_transaction_status
 
@@ -162,39 +189,41 @@ class Transaction(Document, BaseModel):
             pass
         return is_valid
 
-    def fetch_stp_status(self) -> Optional[STPEstado]:
-        # checa status en stp
-        estado = None
-        try:
-            stp_order = stpmex_client.ordenes.consulta_clave_rastreo(
-                claveRastreo=self.clave_rastreo,
-                institucionOperante=self.institucion_ordenante,
-                fechaOperacion=get_next_business_day(self.created_at),
-            )
-            estado = stp_order.estado
-        except NoEntityFound:
-            ...
-        return estado
+    def fetch_stp_status(self) -> STPEstado:
+        stp_order = stpmex_client.ordenes_v2.consulta_clave_rastreo_enviada(
+            clave_rastreo=self.clave_rastreo,
+            fecha_operacion=self.created_at_fecha_operacion,
+        )
+        return stp_order.estado
 
-    def is_current_working_day(self) -> bool:
-        # checks if transaction was made in the current working day
-        local = self.created_at.replace(tzinfo=pytz.utc)
-        local = local.astimezone(pytz.timezone('America/Mexico_City'))
-        return get_next_business_day(local) == datetime.utcnow().date()
-
-    def fail_if_not_found_stp(self) -> None:
-        # if transaction is not found in stp, or has a failed status,
-        # return to origin. Only checking for curent working day
-        if not self.is_current_working_day():
-            return
+    def update_stp_status(self) -> None:
         try:
-            estado = self.fetch_stp_status()
+            status: Optional[STPEstado] = self.fetch_stp_status()
+        except EmptyResultsError:
+            status = None
         except StpmexException as ex:
             capture_exception(ex)
+            return
+
+        if not status:
+            raise TransactionNeedManualReviewError(
+                self.speid_id,
+                f'Can not retrieve transaction stp_id: {self.stp_id}',
+            )
+        elif status in STP_FAILED_TRANSFERS_STATUSES:
+            self.set_state(Estado.failed)
+            self.save()
+        elif status in STP_SUCCEDED_TRANSFERS_STATUSES:
+            self.set_state(Estado.succeeded)
+            self.save()
+        elif status is STPEstado.autorizada:
+            return
         else:
-            if not estado or estado in STP_FAILED_STATUSES:
-                self.set_state(Estado.failed)
-                self.save()
+            # Cualquier otro caso se debe revisar manualmente y aplicar
+            # el fix correspondiente
+            raise TransactionNeedManualReviewError(
+                self.speid_id, f'Unhandled stp status: {status}'
+            )
 
     def create_order(self) -> Orden:
         # Validate account has already been created

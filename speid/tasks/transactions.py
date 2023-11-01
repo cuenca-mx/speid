@@ -1,16 +1,32 @@
-from typing import List
+import datetime as dt
+from typing import Dict, List
 
 import cep
 import pytz
 from celery.exceptions import MaxRetriesExceededError
 from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
-from stpmex.business_days import current_cdmx_time_zone
+from stpmex.business_days import (
+    current_cdmx_time_zone,
+    get_next_business_day,
+    get_prior_business_day,
+)
+from stpmex.exc import EmptyResultsError, InvalidFutureDateError
 
 from speid.helpers import callback_helper
+from speid.helpers.transaction_helper import (
+    process_incoming_transaction,
+    stp_model_to_dict,
+)
 from speid.models import Account, Event, Transaction
+from speid.models.transaction import (
+    REFUNDS_PAYMENTS_TYPES,
+    STP_VALID_DEPOSITS_STATUSES,
+)
+from speid.processors import stpmex_client
 from speid.tasks import celery
-from speid.types import Estado, EventType
+from speid.types import Estado, EventType, TipoTransaccion
+from speid.validations.queries import DepositStatusQuery
 
 CURP_LENGTH = 18
 RFC_LENGTH = 13
@@ -125,3 +141,48 @@ def send_transaction_status(self, transaction_id: str, state: str) -> None:
     callback_helper.set_status_transaction(
         transaction.speid_id, state, curp, rfc, nombre_beneficiario
     )
+
+
+@celery.task
+def check_deposits_status(deposit: Dict) -> None:
+    req = DepositStatusQuery(**deposit)
+    transactions = Transaction.objects(
+        clave_rastreo=req.clave_rastreo,
+        cuenta_beneficiario=req.cuenta_beneficiario,
+        tipo=TipoTransaccion.deposito,
+    ).all()
+
+    if transactions:
+        retry_incoming_transactions.apply_async(
+            ([t.speid_id for t in transactions],)
+        )
+        return
+
+    # Si no existe en los registros se obtiene de STP y se intenta con 3 fechas
+    # operativas próximas a la fecha que el cliente nos proporcionó
+    fechas_operacion = [
+        get_next_business_day(req.fecha_operacion),
+        get_prior_business_day(req.fecha_operacion),
+        get_next_business_day(req.fecha_operacion + dt.timedelta(days=1)),
+    ]
+
+    for fecha_operacion in fechas_operacion:
+        try:
+            recibida = (
+                stpmex_client.ordenes_v2.consulta_clave_rastreo_recibida(
+                    clave_rastreo=req.clave_rastreo,
+                    fecha_operacion=fecha_operacion,
+                )
+            )
+        except (InvalidFutureDateError, EmptyResultsError):
+            continue
+        else:
+            if (
+                recibida.tipoPago in REFUNDS_PAYMENTS_TYPES
+                or recibida.estado not in STP_VALID_DEPOSITS_STATUSES
+            ):
+                return
+
+            stp_request = stp_model_to_dict(recibida)
+            process_incoming_transaction(stp_request)
+            return

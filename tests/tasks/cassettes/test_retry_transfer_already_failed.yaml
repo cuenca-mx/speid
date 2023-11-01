@@ -1,12 +1,12 @@
 interactions:
 - request:
-    body: '{"monto": 10.0, "conceptoPago": "PRUEBA 9524", "cuentaBeneficiario": "072691004495711499",
+    body: '{"monto": 10.0, "conceptoPago": "PRUEBA 8070", "cuentaBeneficiario": "072691004495711499",
       "nombreBeneficiario": "Pablo Sanchez", "institucionContraparte": "40072", "cuentaOrdenante":
-      "646180157082332965", "nombreOrdenante": "BANCO", "institucionOperante": "90646",
-      "tipoCuentaBeneficiario": 40, "tipoCuentaOrdenante": 40, "claveRastreo": "CR1667947295",
-      "referenciaNumerica": 9813989, "rfcCurpBeneficiario": "ND", "rfcCurpOrdenante":
+      "646180157018613700", "nombreOrdenante": "BANCO", "institucionOperante": "90646",
+      "tipoCuentaBeneficiario": 40, "tipoCuentaOrdenante": 40, "claveRastreo": "CR1698366540",
+      "referenciaNumerica": 9486455, "rfcCurpBeneficiario": "ND", "rfcCurpOrdenante":
       "ND", "prioridad": 1, "medioEntrega": 3, "tipoPago": 1, "topologia": "T", "firma":
-      "Ycjv5bE2NWQ6jJAtcddaKGRmZJBAk2EICyBLDO5we9YFYcj5ymjIB2RMUcxgPe5g2MPs5UhOBVAGHf223Eu/P4IJsaMg7GwKdv0e6hJsXKvlfEJgljuwgYKzoDjDtjTmfOw9yiKUgm1h0xnvvd/OXkdMJ9AM+a/zJpTxxAPfM+E=",
+      "dEzSpoMpp+WvzgoYtXcruMMdK0Q/qqsUkwnh8vwOFXaph5e8BitET8Y/HWDa9xfODsNA4u7ChxA19fYhEZVF2FNtDlMb7hv7HgOKda/vHWwWcYtKo9/oUIndnCZecb0+BGgLOqCgOOdp4y9qndDj2bMs/jK27kLYtPrt7nmCt4U=",
       "empresa": "TAMIZI"}'
     headers:
       Accept:
@@ -20,21 +20,21 @@ interactions:
       Content-Type:
       - application/json
       User-Agent:
-      - stpmex-python/3.9.3.dev0
+      - stpmex-python/3.13.0
     method: PUT
     uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/registra
   response:
     body:
-      string: '{"resultado":{"id":4476052}}'
+      string: '{"resultado":{"id":21787417}}'
     headers:
       Content-Length:
-      - '28'
+      - '29'
       Content-Type:
       - application/json
       Date:
-      - Tue, 08 Nov 2022 22:41:36 GMT
+      - Fri, 27 Oct 2023 00:29:01 GMT
       X-ORACLE-DMS-ECID:
-      - d26d7b05-0759-4d96-b1fc-1060b5c5f50e-00002692
+      - bc722c26-d789-4f18-88dc-059072b5d031-0001617e
       X-ORACLE-DMS-RID:
       - '0'
     status:

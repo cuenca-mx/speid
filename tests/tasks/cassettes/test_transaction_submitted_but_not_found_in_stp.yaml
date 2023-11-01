@@ -1,0 +1,82 @@
+interactions:
+- request:
+    body: '{"monto": 10.0, "conceptoPago": "PRUEBA 67", "cuentaBeneficiario": "072691004495711499",
+      "nombreBeneficiario": "Pablo Sanchez", "institucionContraparte": "40072", "cuentaOrdenante":
+      "646180157018613700", "nombreOrdenante": "BANCO", "institucionOperante": "90646",
+      "tipoCuentaBeneficiario": 40, "tipoCuentaOrdenante": 40, "claveRastreo": "CR1698792478",
+      "referenciaNumerica": 5055033, "rfcCurpBeneficiario": "ND", "rfcCurpOrdenante":
+      "ND", "prioridad": 1, "medioEntrega": 3, "tipoPago": 1, "topologia": "T", "firma":
+      "zsZmhH6RPQak/cSuWajEFW/pFOp675+9dfdokxQC9FaVRe2AZvEdlUhhLzdxhGoLJ9GM6J34qWYI12Qphk94PAYIGb60wFSyBqBaYEw2iKlMk1p+V4uXVFyx5kjBufXdkztTovIW5xRc8ZFC4qNsBCpCrxgu74O4tO0TGhvpU0g=",
+      "empresa": "TAMIZI"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '712'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.13.1
+    method: PUT
+    uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/registra
+  response:
+    body:
+      string: '{"resultado":{"id":21803106}}'
+    headers:
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 31 Oct 2023 22:47:58 GMT
+      X-ORACLE-DMS-ECID:
+      - b7682f19-20a2-42e8-b319-67c390954dd5-0000136f
+      X-ORACLE-DMS-RID:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "CR1698792478", "tipoOrden": "E",
+      "fechaOperacion": "20231030", "firma": "R/lQ3YqRG7AGkNNE7CMt6oHHyD0/FvrUvB8byv29oXiJv+K7oXgaiMuMMHpyALfH5wcf09h+Y5C1YwU98FdumWWaTod0nx/kzoRCe76QQkrNFZ/DEADdxZ4laB6b8e8IGkmYWnVo+nPn5bCrEEPi1Wr0412ouBFJTnyjPmG8ps0="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '286'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.13.1
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":6,"mensaje":"No se encontraron datos relacionados"}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 31 Oct 2023 22:48:00 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 400
+      message: Bad Request
+version: 1

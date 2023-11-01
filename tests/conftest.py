@@ -16,6 +16,13 @@ SEND_STATUS_TRANSACTION_TASK = os.environ['SEND_STATUS_TRANSACTION_TASK']
 
 
 @pytest.fixture
+def client():
+    app.testing = True
+    client = app.test_client()
+    return client
+
+
+@pytest.fixture
 def runner():
     runner = FlaskCliRunner(app)
     return runner
@@ -23,8 +30,8 @@ def runner():
 
 @pytest.fixture
 def mock_callback_queue():
-    with patch.object(Celery, 'send_task', return_value=None):
-        yield
+    with patch.object(Celery, 'send_task', return_value=None) as mock:
+        yield mock
 
 
 @pytest.fixture(scope='module')
@@ -58,6 +65,29 @@ def outcome_transaction() -> Generator[Transaction, None, None]:
 
 
 @pytest.fixture
+def default_income_transaction():
+    return dict(
+        Clave=2456303,
+        FechaOperacion=20210618,
+        InstitucionOrdenante=40012,
+        InstitucionBeneficiaria=90646,
+        ClaveRastreo="PRUEBATAMIZI1",
+        Monto=100.0,
+        NombreOrdenante="BANCO",
+        TipoCuentaOrdenante=40,
+        CuentaOrdenante="846180000500000008",
+        RFCCurpOrdenante="ND",
+        NombreBeneficiario="TAMIZI",
+        TipoCuentaBeneficiario=40,
+        CuentaBeneficiario="646180157000000004",
+        RFCCurpBeneficiario="ND",
+        ConceptoPago="PRUEBA",
+        ReferenciaNumerica=2423,
+        Empresa="TAMIZI",
+    )
+
+
+@pytest.fixture
 def physical_account():
     # Pongo los import aquí porque de otra forma no puedo hacer tests del
     # __init__ sin que se haya importado ya. Y así no repito el mismo fixture
@@ -73,6 +103,29 @@ def physical_account():
         rfc_curp='SACR891125HDFABC01',
         telefono='5567890123',
         fecha_nacimiento=dt.date(1989, 11, 25),
+        pais_nacimiento='MX',
+    )
+    account.save()
+
+    yield account
+
+    account.delete()
+
+
+@pytest.fixture
+def second_physical_account():
+    from speid.models import PhysicalAccount
+    from speid.types import Estado
+
+    account = PhysicalAccount(
+        estado=Estado.succeeded,
+        nombre='Juan',
+        apellido_paterno='Perez',
+        apellido_materno='Perez',
+        cuenta='646180157018613700',
+        rfc_curp='PEPJ800101HCSPRL02',
+        telefono='5544332211',
+        fecha_nacimiento=dt.date(1980, 1, 1),
         pais_nacimiento='MX',
     )
     account.save()
@@ -148,3 +201,9 @@ def orden_pago(outcome_transaction):
             usuario='foo',
         )
     )
+
+
+@pytest.fixture(autouse=True)
+def cleanup_transactions():
+    yield
+    Transaction.drop_collection()

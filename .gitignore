@@ -15,3 +15,5 @@ coverage.xml
 /.python-version
 
 prueba-cert.pem
+
+htmlcov/

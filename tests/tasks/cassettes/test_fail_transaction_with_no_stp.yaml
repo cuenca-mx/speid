@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"empresa": "TAMIZI", "claveRastreo": "CRINEXISTENTE", "institucionOperante":
-      90646, "fechaOperacion": "20221020", "firma": "InMoA+mGcOV+z5qgKphy0lmjaeCtMpL+ns2cqbvePvJSW9//gC5bxOyUyDMeT1O6ENBCxsr9IBi22gW5p91cDxEnwC3pq1EuOXcez28dPp3pRpB93laOs3ANsaG6Q583QKbriBa1yXcT8iz1gTxqKn6OE2mFeZzFok+oINKiobY="}'
+    body: '{"empresa": "TAMIZI", "claveRastreo": "CRINEXISTENTE", "tipoOrden": "E",
+      "firma": "stqK+F6CMAImkTymhpJ2bd0JuKmjrTN6e3oSOul5us03DojeS86Eg05+jlOzfOm9xHn8sk3oqQ1kRS2Utj79pjp+BcldOCx+8yqapUIkTeTH4D2UB3e1sCc0RmJhpi4FDHVUScjAJzckZ0tX/+kHuChykxHVWWtybbxc8ihW/ic="}'
     headers:
       Accept:
       - '*/*'
@@ -10,29 +10,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '299'
+      - '257'
       Content-Type:
       - application/json
       User-Agent:
-      - stpmex-python/3.9.1
+      - stpmex-python/3.12.0
     method: POST
-    uri: https://demo.stpmex.com:7024/speiws/rest/ordenPago/consOrdEnvRastreo
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
   response:
     body:
-      string: '{"resultado":{"descripcionError":"Firma invalida No entity found for
-        query","id":0}}'
+      string: '{"estado":6,"mensaje":"No se encontraron datos relacionados"}'
     headers:
-      Content-Length:
-      - '84'
+      Connection:
+      - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Thu, 20 Oct 2022 16:17:52 GMT
-      X-ORACLE-DMS-ECID:
-      - caf9e530-1d86-4f58-82ee-095674dc8b9c-00002ce6
-      X-ORACLE-DMS-RID:
-      - '0'
+      - Wed, 25 Oct 2023 20:19:26 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
     status:
-      code: 200
-      message: OK
+      code: 400
+      message: Bad Request
 version: 1

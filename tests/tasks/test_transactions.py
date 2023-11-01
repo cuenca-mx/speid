@@ -4,9 +4,11 @@ from unittest.mock import patch
 import pytest
 from celery.exceptions import MaxRetriesExceededError, Retry
 from cep.exc import CepError, MaxRequestError
+from mongoengine import DoesNotExist
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
+    check_deposits_status,
     process_outgoing_transactions,
     retry_incoming_transactions,
     send_transaction_status,
@@ -410,3 +412,75 @@ def test_send_transaction_not_restricted_accounts_persona_fisica(
             nombre_beneficiario=None,
         ),
     )
+
+
+@patch('celery.Celery.send_task')
+@pytest.mark.vcr
+def test_check_existing_deposit(mock_send_task) -> None:
+    req = dict(
+        clave_rastreo='Test162467872',
+        cuenta_beneficiario='646180157018877012',
+        fecha_operacion='2023-08-28',
+    )
+    check_deposits_status(req)
+    transaction = Transaction.objects.get(clave_rastreo=req['clave_rastreo'])
+    assert transaction
+    assert transaction.cuenta_beneficiario == req['cuenta_beneficiario']
+    assert transaction.fecha_operacion.date() == dt.date.fromisoformat(
+        req['fecha_operacion']
+    )
+    assert transaction.estado is Estado.succeeded
+    mock_send_task.assert_called_once()
+
+
+@patch('celery.Celery.send_task')
+@pytest.mark.vcr
+def test_check_not_existing_deposit(mock_send_task) -> None:
+    req = dict(
+        clave_rastreo='FOOBARBAZ',
+        cuenta_beneficiario='646180157018877012',
+        fecha_operacion='2023-08-28',
+    )
+    check_deposits_status(req)
+    with pytest.raises(DoesNotExist):
+        Transaction.objects.get(clave_rastreo=req['clave_rastreo'])
+    mock_send_task.assert_not_called()
+
+
+@patch('celery.Celery.send_task')
+@pytest.mark.vcr
+def test_check_refunded_deposit(mock_send_task):
+    req = dict(
+        clave_rastreo='Test162467872',
+        cuenta_beneficiario='646180157018877012',
+        fecha_operacion='2023-08-28',
+    )
+    check_deposits_status(req)
+    with pytest.raises(DoesNotExist):
+        Transaction.objects.get(clave_rastreo=req['clave_rastreo'])
+    mock_send_task.assert_not_called()
+
+
+@patch('celery.Celery.send_task')
+@patch('speid.tasks.transactions.process_incoming_transaction')
+def test_retry_incoming_transaction(
+    mock_process_incoming_transaction,
+    mock_send_task,
+    default_income_transaction,
+    client,
+):
+    resp = client.post('/ordenes', json=default_income_transaction)
+    assert resp.status_code == 201
+    fecha_operacion = str(default_income_transaction['FechaOperacion'])
+
+    req = dict(
+        clave_rastreo=default_income_transaction['ClaveRastreo'],
+        cuenta_beneficiario=default_income_transaction['CuentaBeneficiario'],
+        fecha_operacion=(
+            f'{fecha_operacion[0:4]}-'
+            f'{fecha_operacion[4:6]}-{fecha_operacion[6:]}'
+        ),
+    )
+    check_deposits_status(req)
+    mock_process_incoming_transaction.assert_not_called()
+    mock_send_task.assert_called()

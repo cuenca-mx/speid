@@ -1,0 +1,119 @@
+interactions:
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "FOOBARBAZ", "tipoOrden": "R", "fechaOperacion":
+      "20230828", "firma": "qQI8DzXf3W4s6zkEiQMZ0sZRbncyjgBih4T6qZ6rE2I5LKh7RWcRZsjPtW2DcwZBQRfZA5Z3jcg/mbL7hmA6n6UQvCwQR7pPoOBEoC7y1A1V+NV2nfGYq5oqIfdvI+HqzG61qeyu/HplTinZZJ3pYZPWn6HDbKhlNy+spb82EmY="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '283'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.12.0
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":6,"mensaje":"No se encontraron datos relacionados"}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 26 Oct 2023 17:13:34 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "FOOBARBAZ", "tipoOrden": "R", "fechaOperacion":
+      "20230825", "firma": "oGkIkyhYHi9SQ/84ebQOp04EWkA3snpWlVVncKlFNgJp8xBnuYv8LsOM+nRVkcMxe0Zpi9Cx6h/QiZnHbTWesCg2Z2zGez6S8+EsT982B78Ens4ofyBoITx9CWcqpMkvH7dDFCy4fW9FbHQB5/nnume0EipXOheK6x4QUMFpn1M="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '283'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.12.0
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":6,"mensaje":"No se encontraron datos relacionados"}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 26 Oct 2023 17:13:35 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "FOOBARBAZ", "tipoOrden": "R", "fechaOperacion":
+      "20230829", "firma": "QcQNbps5QRotUTOANg6Sqg0n3vh8bv7dTZP9ViQCK6zax9myXbAVuc8fKWgAlR96gIZtW2IM9OrXCdciamGGS96WkA4xOb7TPKasWctAtWIW8hdO57BTlQW5Iy/q0sGeVxGPHLbVriHNyE6DXRB08Za8HD8neot2xIZi2puJq2k="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '283'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.12.0
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":6,"mensaje":"No se encontraron datos relacionados"}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 26 Oct 2023 17:13:36 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 400
+      message: Bad Request
+version: 1
