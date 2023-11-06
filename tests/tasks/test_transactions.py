@@ -493,13 +493,17 @@ def test_retry_incoming_transaction(
 @pytest.mark.vcr
 def test_task_apply_missing_deposits(mock_send_task):
     fecha_operacion = get_current_working_day()
-    existing_deposits = Transaction.objects(
-        tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
-    ).all()
+    existing_deposits = list(
+        Transaction.objects(
+            tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
+        ).all()
+    )
     apply_missing_deposits_task()
-    deposits = Transaction.objects(
-        tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
-    ).all()
+    deposits = list(
+        Transaction.objects(
+            tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
+        ).all()
+    )
     assert len(deposits) - len(existing_deposits) == 3
     assert mock_send_task.call_count == 3
     assert all(d.estado is Estado.succeeded for d in deposits)
