@@ -198,12 +198,15 @@ def get_deposits(fecha_operacion) -> List[Orden]:
 @celery.task
 def apply_missing_deposits() -> List[str]:
     """Consulta los depositos de un día y aplica los no abonados"""
-    fecha_operacion = dt.date.today()  # Todo: Usar la correcta
+    utc_now = dt.datetime.now(pytz.timezone('UTC'))
+    cdmx_now = utc_now.astimezone(pytz.timezone('America/Mexico_City'))
+    fecha_operacion = get_next_business_day(cdmx_now)
+
     stp_deposits = get_deposits(fecha_operacion)
     transactions = Transaction.objects(
         tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
     )
-    claves = [t.clave_rastreo for t in transactions]
+    claves = {t.clave_rastreo for t in transactions}
     missing = [d for d in stp_deposits if d.claveRastreo not in claves]
     for orden in missing:
         apply_stp_deposit(orden.claveRastreo, fecha_operacion)
