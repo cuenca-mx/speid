@@ -12,7 +12,6 @@ from stpmex.business_days import (
     get_prior_business_day,
 )
 from stpmex.exc import EmptyResultsError, InvalidFutureDateError
-from stpmex.resources import Orden
 
 from speid.helpers import callback_helper
 from speid.helpers.transaction_helper import (
