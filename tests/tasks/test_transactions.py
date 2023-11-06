@@ -2,18 +2,21 @@ import datetime as dt
 from unittest.mock import patch
 
 import pytest
+import pytz
 from celery.exceptions import MaxRetriesExceededError, Retry
 from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
+from stpmex.business_days import get_current_working_day, get_next_business_day
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
+    apply_missing_deposits,
     check_deposits_status,
     process_outgoing_transactions,
     retry_incoming_transactions,
     send_transaction_status,
 )
-from speid.types import Estado, EventType
+from speid.types import Estado, EventType, TipoTransaccion
 from speid.validations import SpeidTransaction
 from tests.conftest import SEND_STATUS_TRANSACTION_TASK
 
@@ -484,3 +487,18 @@ def test_retry_incoming_transaction(
     check_deposits_status(req)
     mock_process_incoming_transaction.assert_not_called()
     mock_send_task.assert_called()
+
+
+@patch('celery.Celery.send_task')
+@pytest.mark.vcr
+def test_task_apply_missing_deposits(mock_send_task):
+    fecha_operacion = get_current_working_day()
+    deposits_count = Transaction.objects(
+        tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
+    ).count()
+    apply_missing_deposits()
+    new_deposits_count = Transaction.objects(
+        tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
+    ).count()
+    assert new_deposits_count - deposits_count == 3
+    mock_send_task.call_count == 3

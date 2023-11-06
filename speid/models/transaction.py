@@ -131,6 +131,7 @@ class Transaction(Document, BaseModel):
     events = ListField(ReferenceField(Event))
 
     meta = {
+        'index_background': True,
         'indexes': [
             '+stp_id',
             '+speid_id',
@@ -142,11 +143,8 @@ class Transaction(Document, BaseModel):
                 'fields': ['+stp_id', '+tipo'],
                 'partialFilterExpression': {'tipo': TipoTransaccion.retiro},
             },
-            {
-                'fields': ['+fecha_operacion', '+tipo'],
-                'background': True
-            }
-        ]
+            {'fields': ['+fecha_operacion', '+tipo']},
+        ],
     }
 
     @property

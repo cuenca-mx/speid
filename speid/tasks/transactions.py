@@ -190,11 +190,6 @@ def apply_stp_deposit(clave_rastreo, fecha_operacion) -> None:
     process_incoming_transaction(stp_request)
 
 
-def get_deposits(fecha_operacion) -> List[Orden]:
-    # Todo: leer de stp la lista de depositos de hoy
-    ...
-
-
 @celery.task
 def apply_missing_deposits() -> List[str]:
     """Consulta los depositos de un día y aplica los no abonados"""
@@ -202,7 +197,13 @@ def apply_missing_deposits() -> List[str]:
     cdmx_now = utc_now.astimezone(pytz.timezone('America/Mexico_City'))
     fecha_operacion = get_next_business_day(cdmx_now)
 
-    stp_deposits = get_deposits(fecha_operacion)
+    try:
+        stp_deposits = stpmex_client.conciliacion.consulta_recibidas(
+            fecha_operacion
+        )
+    except EmptyResultsError:
+        return []
+
     transactions = Transaction.objects(
         tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
     )
