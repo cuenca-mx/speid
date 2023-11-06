@@ -1,0 +1,41 @@
+interactions:
+- request:
+    body: '{"empresa": "TAMIZI", "tipoOrden": "R", "fechaOperacion": "20231107", "page":
+      0, "firma": "ZnOrPEMoSPeWMQZQnSMCbpnm+nvqGzrbp2PqWVjgl4NJSmiu31Sf/2iWWxjF5IidOv3VKdYqmUAyPOgA4k8K19fxi1VkIFYNYEvElPt+wivsURAVw0iJFkkQLvBM2loqurZNHXlkFzCuKCASRi5m7gVUdz6Xjzu2f39+OUSrxRU="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '265'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.14.0.dev3
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/V2/conciliacion
+  response:
+    body:
+      string: '{"estado":8,"mensaje":"La fecha no puede ser mayor a la fecha actual","total":0}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 06 Nov 2023 22:10:36 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+version: 1
