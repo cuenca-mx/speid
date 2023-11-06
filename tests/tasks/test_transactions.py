@@ -496,7 +496,6 @@ def test_task_apply_missing_deposits(mock_send_task):
     existing_deposits = Transaction.objects(
         tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
     ).all()
-    breakpoint()
     apply_missing_deposits()
     deposits = Transaction.objects(
         tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
