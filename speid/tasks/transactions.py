@@ -8,6 +8,7 @@ from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
 from stpmex.business_days import (
     current_cdmx_time_zone,
+    get_current_working_day,
     get_next_business_day,
     get_prior_business_day,
 )
@@ -190,12 +191,20 @@ def apply_stp_deposit(clave_rastreo, fecha_operacion) -> None:
 
 
 @celery.task
-def apply_missing_deposits() -> List[str]:
+def apply_missing_deposits_task() -> None:
     """Consulta los depositos de un día y aplica los no abonados"""
-    utc_now = dt.datetime.now(pytz.timezone('UTC'))
-    cdmx_now = utc_now.astimezone(pytz.timezone('America/Mexico_City'))
-    fecha_operacion = get_next_business_day(cdmx_now)
+    fecha_operacion = get_current_working_day()
+    apply_missing_deposits(fecha_operacion)
 
+    now = dt.datetime.utcnow()
+
+    if 0 < now.hour < 1:
+        fecha_operacion = get_prior_business_day(fecha_operacion)
+        apply_missing_deposits(fecha_operacion)
+
+
+def apply_missing_deposits(fecha_operacion: dt.date) -> List[str]:
+    """Consulta los depositos de un día y aplica los no abonados"""
     try:
         stp_deposits = stpmex_client.conciliacion.consulta_recibidas(
             fecha_operacion
