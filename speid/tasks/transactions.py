@@ -197,8 +197,7 @@ def apply_missing_deposits_task() -> None:
     apply_missing_deposits(fecha_operacion)
 
     now = dt.datetime.utcnow()
-
-    if 0 < now.hour < 1:
+    if 0 <= now.hour < 1:
         fecha_operacion = get_prior_business_day(fecha_operacion)
         apply_missing_deposits(fecha_operacion)
 
