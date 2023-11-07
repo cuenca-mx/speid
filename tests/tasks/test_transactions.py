@@ -508,6 +508,7 @@ def test_task_apply_missing_deposits(mock_send_task):
     assert len(deposits) - len(existing_deposits) == 3
     assert mock_send_task.call_count == 3
     assert all(d.estado is Estado.succeeded for d in deposits)
+    assert all(d.events[0].type is EventType.reconciled for d in deposits)
 
 
 @patch('celery.Celery.send_task')

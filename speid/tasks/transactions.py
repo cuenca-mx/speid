@@ -187,7 +187,7 @@ def apply_stp_deposit(clave_rastreo, fecha_operacion) -> None:
     ):
         return
     stp_request = stp_model_to_dict(recibida)
-    process_incoming_transaction(stp_request)
+    process_incoming_transaction(stp_request, event_type=EventType.reconciled)
 
 
 @celery.task

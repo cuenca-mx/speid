@@ -12,6 +12,7 @@ class EventType(Enum):
     completed = 'COMPLETE'  # The request was processed with no errors
     error = 'ERROR'  # Something happened when the response was obtained
     received = 'RECEIVED'  # When we get the response from a transaction
+    reconciled = 'RECONCILED'  # When we use recon process to obtain the trx
 
 
 class Estado(str, Enum):
