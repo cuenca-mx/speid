@@ -28,7 +28,6 @@ from speid.tasks import celery
 from speid.types import Estado, EventType
 from speid.validations import factory
 
-MAX_AMOUNT = int(os.getenv('MAX_AMOUNT', '9999999999999999'))
 IGNORED_EXCEPTIONS = os.getenv('IGNORED_EXCEPTIONS', '').split(',')
 START_DOWNTIME = datetime.strptime(
     os.getenv('START_DOWNTIME', '11:55PM'), "%I:%M%p"
@@ -117,12 +116,6 @@ def execute(order_val: dict):
     ):
         transaction.update_stp_status()
         return
-
-    # A partir de aquí son validaciones para transferencias nuevas
-    if transaction.monto > MAX_AMOUNT:
-        transaction.events.append(Event(type=EventType.error))
-        transaction.save()
-        raise MalformedOrderException()
 
     try:
         transaction.create_order()
