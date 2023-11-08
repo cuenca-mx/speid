@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, Optional
 
 from mongoengine import NotUniqueError
 from sentry_sdk import capture_exception, capture_message
@@ -12,7 +12,9 @@ from speid.validations import StpTransaction
 CLABES_BLOCKED = os.getenv('CLABES_BLOCKED', '')
 
 
-def process_incoming_transaction(incoming_transaction: dict) -> dict:
+def process_incoming_transaction(
+    incoming_transaction: dict, event_type: Optional[EventType] = None
+) -> dict:
     transaction = Transaction()
     try:
         external_tx = StpTransaction(**incoming_transaction)  # type: ignore
@@ -27,6 +29,8 @@ def process_incoming_transaction(incoming_transaction: dict) -> dict:
         transaction.estado = Estado.succeeded
         if not transaction.is_valid_account():
             transaction.estado = Estado.rejected
+        if event_type:
+            transaction.events.append(Event(type=event_type))
         transaction.confirm_callback_transaction()
         transaction.save()
         r = incoming_transaction

@@ -105,7 +105,9 @@ def reconciliate_deposits(
             # STP por el webhook en `POST /ordenes`
             stp_request = stp_model_to_dict(recibida)
             click.echo(f'Depósito procesado: {recibida.claveRastreo}')
-            process_incoming_transaction(stp_request)
+            process_incoming_transaction(
+                stp_request, event_type=EventType.reconciled
+            )
         else:
             no_procesadas.append(recibida.claveRastreo)
 

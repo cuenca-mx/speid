@@ -4,16 +4,19 @@ from unittest.mock import patch
 import pytest
 from celery.exceptions import MaxRetriesExceededError, Retry
 from cep.exc import CepError, MaxRequestError
+from freezegun import freeze_time
 from mongoengine import DoesNotExist
+from stpmex.business_days import get_current_working_day
 
 from speid.models import Transaction
 from speid.tasks.transactions import (
+    apply_missing_deposits_task,
     check_deposits_status,
     process_outgoing_transactions,
     retry_incoming_transactions,
     send_transaction_status,
 )
-from speid.types import Estado, EventType
+from speid.types import Estado, EventType, TipoTransaccion
 from speid.validations import SpeidTransaction
 from tests.conftest import SEND_STATUS_TRANSACTION_TASK
 
@@ -484,3 +487,52 @@ def test_retry_incoming_transaction(
     check_deposits_status(req)
     mock_process_incoming_transaction.assert_not_called()
     mock_send_task.assert_called()
+
+
+@patch('celery.Celery.send_task')
+@freeze_time('2023-11-06 23:00:00')
+@pytest.mark.vcr
+def test_task_apply_missing_deposits(mock_send_task):
+    fecha_operacion = get_current_working_day()
+    existing_deposits = list(
+        Transaction.objects(
+            tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
+        ).all()
+    )
+    apply_missing_deposits_task()
+    deposits = list(
+        Transaction.objects(
+            tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
+        ).all()
+    )
+    assert len(deposits) - len(existing_deposits) == 3
+    assert mock_send_task.call_count == 3
+    assert all(d.estado is Estado.succeeded for d in deposits)
+    assert all(d.events[0].type is EventType.reconciled for d in deposits)
+
+
+@patch('celery.Celery.send_task')
+@freeze_time('2023-11-07 00:30:00')
+@pytest.mark.vcr
+def test_task_apply_missing_deposits_from_the_day_before(mock_send_task):
+    existing_deposits = list(
+        Transaction.objects(
+            tipo=TipoTransaccion.deposito, fecha_operacion=dt.date(2023, 11, 7)
+        ).all()
+    )
+    apply_missing_deposits_task()
+    deposits = list(
+        Transaction.objects(
+            tipo=TipoTransaccion.deposito, fecha_operacion=dt.date(2023, 11, 7)
+        ).all()
+    )
+    deposits_day_before = list(
+        Transaction.objects(
+            tipo=TipoTransaccion.deposito, fecha_operacion=dt.date(2023, 11, 6)
+        ).all()
+    )
+    assert len(existing_deposits) == 0
+    assert len(deposits) == 0
+    assert len(deposits_day_before) == 3
+    assert mock_send_task.call_count == 3
+    assert all(d.estado is Estado.succeeded for d in deposits_day_before)

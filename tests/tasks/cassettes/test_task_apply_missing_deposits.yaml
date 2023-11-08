@@ -1,0 +1,256 @@
+interactions:
+- request:
+    body: '{"empresa": "TAMIZI", "tipoOrden": "R", "fechaOperacion": "20231106", "page":
+      0, "firma": "ul4LIFvxiANuh+rPjoQ6oUB1bpkJ6bWtLUheHxL+Zs1adDSQXO2mSsnAsAEDRZ7zno7D+GVuV98VP6w+7ebyZxC8IcQWL+57eTiRDj4c24O4fkqd9jnM+8Ba9FtsYSSVyP9YDUhWuxe1hpgWxqqzm9F/Pvro40vcyC7S3meknOQ="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '265'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.14.0.dev3
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/V2/conciliacion
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","datos":[{"idEF":14643667,"claveRastreo":"PruebaDevolucion1","claveRastreoDevolucion":null,"conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157018877012","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TCL","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":0.01,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":"ARTERIA LABS","rfcCep":"TCU200828RX8","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305268142,"tsLiquidacion":1699305273297,"causaDevolucion":16,"urlCEP":null},{"idEF":14643668,"claveRastreo":"PruebaDevolucion2","claveRastreoDevolucion":null,"conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157018877012","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TCL","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":10.00,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":"ARTERIA LABS","rfcCep":"TCU200828RX8","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305322440,"tsLiquidacion":1699305329288,"causaDevolucion":16,"urlCEP":null},{"idEF":14643669,"claveRastreo":"PruebaLiquidacion","claveRastreoDevolucion":null,"conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157093203384","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TLQ","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":10.00,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":"FELIPE LOPEZ HERNANDEZ","rfcCep":"LOHF890619HCSPRL05","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305355728,"tsLiquidacion":1699305357446,"causaDevolucion":null,"urlCEP":"https://www.banxico.org.mx/cep/go?i=90646&s=20210302&d=XfVFFhWLrRXzfkDf%2BBz64wPUzwUabY0yviP6eTGyEL46eBrnViyvbTEM3P%2FwRTZ%2B5FmNtb%2FlC1Xu7od8ZyxwuBDPDiF2cVf7FFLlJ5KdMRI%3D"},{"idEF":14643670,"claveRastreo":"PruebaLiquidacion2","claveRastreoDevolucion":null,"conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157093203384","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TLQ","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":1.00,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":"FELIPE LOPEZ HERNANDEZ","rfcCep":"LOHF890619HCSPRL05","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305380368,"tsLiquidacion":1699305385288,"causaDevolucion":null,"urlCEP":"https://www.banxico.org.mx/cep/go?i=90646&s=20210302&d=XfVFFhWLrRXzfkDf%2BBz644fa0iR1jPHxDJtE%2B%2FuQQzT0ZTpftV6i4L4Dl4%2BiXeZW6vhv%2BTzU6WTgYv2VRQ9BddyoZrePWh1xRQ6XXbUxuHM%3D"},{"idEF":14643671,"claveRastreo":"PruebaLiquidacion3","claveRastreoDevolucion":null,"conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157093203384","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TLQ","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":5.00,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":"FELIPE LOPEZ HERNANDEZ","rfcCep":"LOHF890619HCSPRL05","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305389499,"tsLiquidacion":1699305392307,"causaDevolucion":null,"urlCEP":"https://www.banxico.org.mx/cep/go?i=90646&s=20210302&d=XfVFFhWLrRXzfkDf%2BBz64yUcP9S8Wqj4YmRvdq7%2BspHBcnxZntc2xDnnOelGAPeH9cjHVVjP0WHZhp6PyepBkCtHTlap0TTUcfScbhT5swI%3D"}],"total":5}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 06 Nov 2023 21:44:36 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "PruebaDevolucion1", "tipoOrden":
+      "R", "fechaOperacion": "20231106", "firma": "UosxA4L6RMJ8UevJw7mYleOCYd+rTKiTRaCv07cbyVnVu0JWBjGuDwaFyTEc3rQzK0VDZrcZEmqhL1d4iuK/tdrd0zmdEpT8HbDGM+frs6KBmVrqYxHDAJZ9FBn/698lHl99aB0BAu46EFoH7nzVqRNj2prAYRRiUfIJbPBB350="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '291'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.14.0.dev3
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":14643667,"claveRastreo":"PruebaDevolucion1","conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157018877012","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TCL","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":0.01,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":null,"rfcCep":"TCU200828RX8","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305268142,"tsLiquidacion":1699305273297,"causaDevolucion":16,"urlCEP":null}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 06 Nov 2023 21:44:37 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "PruebaDevolucion2", "tipoOrden":
+      "R", "fechaOperacion": "20231106", "firma": "UbTfWtykquA0ZkoP43h1w7GyexHAQb73l0DGXieule7GkhkKH5qUcKTHbpXcMT9Cp8BAhCowmcqFjqWsPdc96bLuqf6/6i4yF1bP+UOqGdS8V/8Pf3A99daB5nRz2uShYeymxW5wtwsz2SLRxEZqSySnW0W7jwsfOu1qPVOFT/4="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '291'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.14.0.dev3
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":14643668,"claveRastreo":"PruebaDevolucion2","conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157018877012","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TCL","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":10.00,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":null,"rfcCep":"TCU200828RX8","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305322440,"tsLiquidacion":1699305329288,"causaDevolucion":16,"urlCEP":null}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 06 Nov 2023 21:44:38 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "PruebaLiquidacion", "tipoOrden":
+      "R", "fechaOperacion": "20231106", "firma": "FsSYICoZcp7K5dzh/ZHCYKY4Yhww7xuXcR26A49gl2Ts9eEsu5zinhE8d5D4vv/QW4sErCGQaqSh/E0P2FyrFc31onu/MOlfNMScpQNqpqdyDtOtgSWPiUAnZzJa4FCchEee7ipXXcjrLmYYqMNQ2cxtAjJCRLyj3xh0AwY+OnA="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '291'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.14.0.dev3
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":14643669,"claveRastreo":"PruebaLiquidacion","conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157093203384","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TLQ","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":10.00,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":null,"rfcCep":"LOHF890619HCSPRL05","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305355728,"tsLiquidacion":1699305357446,"causaDevolucion":null,"urlCEP":"https://www.banxico.org.mx/cep/go?i=90646&s=20210302&d=XfVFFhWLrRXzfkDf%2BBz64wPUzwUabY0yviP6eTGyEL46eBrnViyvbTEM3P%2FwRTZ%2B5FmNtb%2FlC1Xu7od8ZyxwuBDPDiF2cVf7FFLlJ5KdMRI%3D"}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 06 Nov 2023 21:44:38 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "PruebaLiquidacion2", "tipoOrden":
+      "R", "fechaOperacion": "20231106", "firma": "C+iJtjBXyXYMHY02POBYFRcQjtpOSa3fIKPACRaaDg22UQWZDJvkmZ5Qv6S1TMHlr9lIM5jkShl3sHfHp6pgKdQBKBJDNWgKycVxVar168HaSckHiQq2cy4q7/hJo7io4Czpt850bvvB2n1mLetPAr09Xu3rCWTyHKRo2nqhKC0="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '292'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.14.0.dev3
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":14643670,"claveRastreo":"PruebaLiquidacion2","conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157093203384","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TLQ","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":1.00,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":null,"rfcCep":"LOHF890619HCSPRL05","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305380368,"tsLiquidacion":1699305385288,"causaDevolucion":null,"urlCEP":"https://www.banxico.org.mx/cep/go?i=90646&s=20210302&d=XfVFFhWLrRXzfkDf%2BBz644fa0iR1jPHxDJtE%2B%2FuQQzT0ZTpftV6i4L4Dl4%2BiXeZW6vhv%2BTzU6WTgYv2VRQ9BddyoZrePWh1xRQ6XXbUxuHM%3D"}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 06 Nov 2023 21:44:39 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"empresa": "TAMIZI", "claveRastreo": "PruebaLiquidacion3", "tipoOrden":
+      "R", "fechaOperacion": "20231106", "firma": "zcvNNZfKAue76JhKTn+CNS09OBlLYLDVJl71G3UDhU54OTVla4KoPkwpGWjAgqnZoJPnT+f7ssi4KqAhCjl1g0vq+4xMqomRYRhrNBeJKzwPYEhwOyX42Bs6ohEuL4cggSuLmLtSij6PPvAIc8MyeOXzOXse29IOiraEf6/GGrQ="}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '292'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - stpmex-python/3.14.0.dev3
+    method: POST
+    uri: https://efws-dev.stpmex.com/efws/API/consultaOrden
+  response:
+    body:
+      string: '{"estado":0,"mensaje":"Datos consultados correctamente","respuesta":{"idEF":14643671,"claveRastreo":"PruebaLiquidacion3","conceptoPago":"Pago
+        de prueba","cuentaBeneficiario":"646180157093203384","cuentaOrdenante":"646180117200000019","empresa":"TAMIZI","estado":"TLQ","fechaOperacion":20231106,"institucionContraparte":90646,"institucionOperante":90646,"medioEntrega":3,"monto":5.00,"nombreBeneficiario":"Beneficiario","nombreOrdenante":"AXEL
+        SERNA MANRIQUEZ","nombreCep":null,"rfcCep":"LOHF890619HCSPRL05","sello":null,"rfcCurpBeneficiario":"ND","referenciaNumerica":1234567,"rfcCurpOrdenante":"HESJ871014NZ5","tipoCuentaBeneficiario":40,"tipoCuentaOrdenante":40,"tipoPago":1,"tsCaptura":1699305389499,"tsLiquidacion":1699305392307,"causaDevolucion":null,"urlCEP":"https://www.banxico.org.mx/cep/go?i=90646&s=20210302&d=XfVFFhWLrRXzfkDf%2BBz64yUcP9S8Wqj4YmRvdq7%2BspHBcnxZntc2xDnnOelGAPeH9cjHVVjP0WHZhp6PyepBkCtHTlap0TTUcfScbhT5swI%3D"}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 06 Nov 2023 21:44:40 GMT
+      Server:
+      - nginx
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - Access-Control-Request-Method
+      - Access-Control-Request-Headers
+    status:
+      code: 200
+      message: OK
+version: 1

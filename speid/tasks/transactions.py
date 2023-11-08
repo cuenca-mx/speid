@@ -8,6 +8,7 @@ from cep.exc import CepError, MaxRequestError
 from mongoengine import DoesNotExist
 from stpmex.business_days import (
     current_cdmx_time_zone,
+    get_current_working_day,
     get_next_business_day,
     get_prior_business_day,
 )
@@ -168,21 +169,53 @@ def check_deposits_status(deposit: Dict) -> None:
 
     for fecha_operacion in fechas_operacion:
         try:
-            recibida = (
-                stpmex_client.ordenes_v2.consulta_clave_rastreo_recibida(
-                    clave_rastreo=req.clave_rastreo,
-                    fecha_operacion=fecha_operacion,
-                )
-            )
+            apply_stp_deposit(req.clave_rastreo, fecha_operacion)
         except (InvalidFutureDateError, EmptyResultsError):
             continue
-        else:
-            if (
-                recibida.tipoPago in REFUNDS_PAYMENTS_TYPES
-                or recibida.estado not in STP_VALID_DEPOSITS_STATUSES
-            ):
-                return
+        return
 
-            stp_request = stp_model_to_dict(recibida)
-            process_incoming_transaction(stp_request)
-            return
+
+def apply_stp_deposit(clave_rastreo, fecha_operacion) -> None:
+    """Busca una transaccion en el API de STP y la aplica si no existe"""
+    recibida = stpmex_client.ordenes_v2.consulta_clave_rastreo_recibida(
+        clave_rastreo=clave_rastreo,
+        fecha_operacion=fecha_operacion,
+    )
+    if (
+        recibida.tipoPago in REFUNDS_PAYMENTS_TYPES
+        or recibida.estado not in STP_VALID_DEPOSITS_STATUSES
+    ):
+        return
+    stp_request = stp_model_to_dict(recibida)
+    process_incoming_transaction(stp_request, event_type=EventType.reconciled)
+
+
+@celery.task
+def apply_missing_deposits_task() -> None:
+    """Consulta los depositos de un día y aplica los no abonados"""
+    fecha_operacion = get_current_working_day()
+    apply_missing_deposits(fecha_operacion)
+
+    now = dt.datetime.utcnow()
+    if 0 <= now.hour < 1:
+        fecha_operacion = get_prior_business_day(fecha_operacion)
+        apply_missing_deposits(fecha_operacion)
+
+
+def apply_missing_deposits(fecha_operacion: dt.date) -> List[str]:
+    """Consulta los depositos de un día y aplica los no abonados"""
+    try:
+        stp_deposits = stpmex_client.conciliacion.consulta_recibidas(
+            fecha_operacion
+        )
+    except EmptyResultsError:
+        return []
+
+    transactions = Transaction.objects(
+        tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
+    )
+    claves = {t.clave_rastreo for t in transactions}
+    missing = [d for d in stp_deposits if d.claveRastreo not in claves]
+    for orden in missing:
+        apply_stp_deposit(orden.claveRastreo, fecha_operacion)
+    return [m.claveRastreo for m in missing]
