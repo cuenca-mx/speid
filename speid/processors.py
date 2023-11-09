@@ -21,5 +21,5 @@ stpmex_client = Client(
     priv_key_passphrase=STP_KEY_PASSPHRASE,
     demo=IS_DEMO,
     base_url=STP_BASE_URL,
-    verify=False if IS_DEMO else STP_VERIFY_CERT,
+    verify=False if IS_DEMO else True,
 )
