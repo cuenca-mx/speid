@@ -29,3 +29,9 @@ class TransactionNeedManualReviewError(Exception):
 
     speid_id: str
     error: str
+
+
+class DuplicatedTransaction(Exception):
+    """
+    Duplicated transactions are not allowed
+    """
