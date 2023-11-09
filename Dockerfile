@@ -5,7 +5,7 @@ ADD Makefile requirements.txt verify_certificate.pem /speid/
 RUN mkdir /.aptible/
 ADD .aptible/Procfile /.aptible/Procfile
 WORKDIR /speid
-RUN cp verify_certificate.pem
+RUN cp verify_certificate.pem /etc/ssl/certs/
 RUN update-ca-certificates
 RUN pip install -qU pip
 RUN pip install -q gunicorn
