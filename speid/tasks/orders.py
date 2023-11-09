@@ -17,6 +17,7 @@ from stpmex.exc import (
 )
 
 from speid.exc import (
+    DuplicatedTransaction,
     MalformedOrderException,
     ResendSuccessOrderException,
     ScheduleError,
@@ -57,6 +58,7 @@ def send_order(self, order_val: dict):
         MalformedOrderException,
         ResendSuccessOrderException,
         TransactionNeedManualReviewError,
+        DuplicatedTransaction,
     ) as exc:
         capture_exception(exc)
     except ScheduleError:
@@ -96,7 +98,7 @@ def execute(order_val: dict):
     except DoesNotExist:
         transaction.events.append(Event(type=EventType.created))
         transaction.save()
-        pass
+
     except AssertionError:
         # Se hace un reenvío del estado de la transferencia
         # transaction.set_state(Estado.succeeded)
