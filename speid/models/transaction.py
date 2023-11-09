@@ -143,7 +143,12 @@ class Transaction(Document, BaseModel):
                 'partialFilterExpression': {'tipo': TipoTransaccion.retiro},
             },
             {'fields': ['+fecha_operacion', '+tipo']},
-            {'fields': ['+speid_id'], 'unique': True, 'sparse': True},
+            {
+                'fields': ['+speid_id'],
+                'unique': True,
+                'sparse': True,
+                'name': 'speid_id_1_unique',
+            },
         ],
     }
 
