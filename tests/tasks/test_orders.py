@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from freezegun import freeze_time
-from mongoengine import DoesNotExist, NotUniqueError
+from mongoengine import DoesNotExist
 from stpmex.exc import (
     AccountDoesNotExist,
     BankCodeClabeMismatch,
@@ -18,6 +18,7 @@ from stpmex.exc import (
 )
 
 from speid.exc import (
+    DuplicatedTransactionError,
     MalformedOrderException,
     ResendSuccessOrderException,
     ScheduleError,
@@ -95,7 +96,7 @@ def test_not_unique_speid_id_are_not_allowed(
         clave_rastreo=order['clave_rastreo']
     )
 
-    with pytest.raises(NotUniqueError), patch(
+    with pytest.raises(DuplicatedTransactionError), patch(
         'speid.tasks.orders.Transaction.create_order'
     ) as mock_create_order, patch(
         # Simulate that in a parallel task execution the order doesn't exist
