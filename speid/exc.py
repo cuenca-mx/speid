@@ -31,7 +31,7 @@ class TransactionNeedManualReviewError(Exception):
     error: str
 
 
-class DuplicatedTransaction(Exception):
+class DuplicatedTransactionError(Exception):
     """
     Duplicated transactions are not allowed
     """
