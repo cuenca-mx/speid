@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import clabe
 import luhnmod10
-from mongoengine import DoesNotExist
+from mongoengine import DoesNotExist, NotUniqueError
 from pydantic import ValidationError
 from sentry_sdk import capture_exception
 from stpmex.exc import (
@@ -17,6 +17,7 @@ from stpmex.exc import (
 )
 
 from speid.exc import (
+    DuplicatedTransactionError,
     MalformedOrderException,
     ResendSuccessOrderException,
     ScheduleError,
@@ -57,6 +58,7 @@ def send_order(self, order_val: dict):
         MalformedOrderException,
         ResendSuccessOrderException,
         TransactionNeedManualReviewError,
+        DuplicatedTransactionError,
     ) as exc:
         capture_exception(exc)
     except ScheduleError:
@@ -95,8 +97,10 @@ def execute(order_val: dict):
         transaction.events.append(Event(type=EventType.retry))
     except DoesNotExist:
         transaction.events.append(Event(type=EventType.created))
-        transaction.save()
-        pass
+        try:
+            transaction.save()
+        except NotUniqueError:
+            raise DuplicatedTransactionError
     except AssertionError:
         # Se hace un reenvío del estado de la transferencia
         # transaction.set_state(Estado.succeeded)
