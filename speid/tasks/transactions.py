@@ -215,7 +215,13 @@ def apply_missing_deposits(fecha_operacion: dt.date) -> List[str]:
         tipo=TipoTransaccion.deposito, fecha_operacion=fecha_operacion
     )
     claves = {t.clave_rastreo for t in transactions}
-    missing = [d for d in stp_deposits if d.claveRastreo not in claves]
+    missing = [
+        d
+        for d in stp_deposits
+        if d.claveRastreo not in claves
+        and d.tipoPago not in REFUNDS_PAYMENTS_TYPES
+        and d.estado in STP_VALID_DEPOSITS_STATUSES
+    ]
     for orden in missing:
         apply_stp_deposit(orden.claveRastreo, fecha_operacion)
     return [m.claveRastreo for m in missing]
