@@ -181,8 +181,6 @@ def apply_stp_deposit(clave_rastreo, fecha_operacion) -> None:
         clave_rastreo=clave_rastreo,
         fecha_operacion=fecha_operacion,
     )
-    # assert recibida.tipoPago not in REFUNDS_PAYMENTS_TYPES
-    # assert recibida.estado in STP_VALID_DEPOSITS_STATUSES
     if (
         recibida.tipoPago in REFUNDS_PAYMENTS_TYPES
         or recibida.estado not in STP_VALID_DEPOSITS_STATUSES
