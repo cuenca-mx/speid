@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from freezegun import freeze_time
-from mongoengine import DoesNotExist
 from stpmex.exc import (
     AccountDoesNotExist,
     BankCodeClabeMismatch,
@@ -18,7 +17,6 @@ from stpmex.exc import (
 )
 
 from speid.exc import (
-    DuplicatedTransactionError,
     MalformedOrderException,
     ResendSuccessOrderException,
     ScheduleError,
@@ -82,36 +80,6 @@ def test_malformed_order_worker(order, mock_callback_queue):
 
     transaction = Transaction.objects.order_by('-created_at').first()
     assert transaction.estado is Estado.error
-
-
-@pytest.mark.vcr
-def test_not_unique_speid_id_are_not_allowed(
-    order, second_physical_account, mock_callback_queue
-):
-    order['clave_rastreo'] = 'CUENCA11233453522'
-    order['cuenta_ordenante'] = second_physical_account.cuenta
-    execute(order)
-
-    transaction0 = Transaction.objects.get(
-        clave_rastreo=order['clave_rastreo']
-    )
-
-    with pytest.raises(DuplicatedTransactionError), patch(
-        'speid.tasks.orders.Transaction.create_order'
-    ) as mock_create_order, patch(
-        # Simulate that in a parallel task execution the order doesn't exist
-        'mongoengine.queryset.base.BaseQuerySet.get',
-        side_effect=DoesNotExist,
-    ):
-        execute(order)
-
-    transaction1 = Transaction.objects.get(
-        clave_rastreo=order['clave_rastreo']
-    )
-    assert transaction0.id == transaction1.id
-    assert transaction0.estado == transaction1.estado
-    assert transaction0.speid_id == transaction1.speid_id
-    mock_create_order.assert_not_called()
 
 
 @pytest.mark.vcr

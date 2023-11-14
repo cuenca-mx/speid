@@ -134,6 +134,7 @@ class Transaction(Document, BaseModel):
         'index_background': True,
         'indexes': [
             '+stp_id',
+            '+speid_id',
             '+clave_rastreo',
             # The Unique-Sparse index skips over any document that is missing
             # the indexed field (null values)
@@ -143,12 +144,6 @@ class Transaction(Document, BaseModel):
                 'partialFilterExpression': {'tipo': TipoTransaccion.retiro},
             },
             {'fields': ['+fecha_operacion', '+tipo']},
-            {
-                'fields': ['+speid_id'],
-                'unique': True,
-                'sparse': True,
-                'name': 'speid_id_1_unique',
-            },
         ],
     }
 
