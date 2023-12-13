@@ -1,18 +1,10 @@
 import datetime as dt
-import json
 
 import pytest
-import requests_mock
-from freezegun import freeze_time
 
 from speid.commands.spei import speid_group
 from speid.models import Transaction
-from speid.models.transaction import (
-    REFUNDS_PAYMENTS_TYPES,
-    STP_VALID_DEPOSITS_STATUSES,
-)
 from speid.types import Estado, EventType
-from speid.validations import StpTransaction
 
 
 @pytest.fixture
@@ -111,8 +103,8 @@ def test_re_execute_transaction_not_found(
     assert type(result.exception) is ValueError
 
 
-@freeze_time("2023-08-26 01:00:00")  # 2023-08-25 19:00 UTC-6
 @pytest.mark.usefixtures('mock_callback_queue')
+@pytest.mark.vcr
 def test_reconciliate_deposits_historic(runner):
     """
     Esta prueba simula obtener depósitos de días históricos, es decir, de
@@ -120,7 +112,7 @@ def test_reconciliate_deposits_historic(runner):
     en curso
     """
 
-    fecha_operacion = dt.date(2023, 8, 25)
+    fecha_operacion = dt.date(2023, 11, 6)
 
     initial_deposits_count = Transaction.objects(
         tipo='deposito', fecha_operacion=fecha_operacion
@@ -128,143 +120,36 @@ def test_reconciliate_deposits_historic(runner):
 
     assert initial_deposits_count == 0
 
-    with open('tests/commands/deposits_20230825.json') as f:
-        stp_response = json.loads(f.read())
-        deposits = stp_response['resultado']['lst']
-
-    with requests_mock.mock() as m:
-        m.post('/speiws/rest/ordenPago/consOrdenesFech', json=stp_response)
-
-        runner.invoke(
-            speid_group,
-            [
-                'reconciliate-deposits',
-                fecha_operacion.strftime('%Y-%m-%d'),
-                deposits[0]['claveRastreo'],
-            ],
-        )
+    runner.invoke(
+        speid_group,
+        [
+            'reconciliate-deposits',
+            fecha_operacion.strftime('%Y-%m-%d'),
+            'PruebaLiquidacion2,PruebaDevolucion1',
+        ],
+    )
 
     deposits_db = Transaction.objects(
         tipo='deposito', fecha_operacion=fecha_operacion
     ).all()
 
     assert len(deposits_db) == 1
+    assert deposits_db[0].clave_rastreo == 'PruebaLiquidacion2'
 
-
-@freeze_time("2023-08-27")  # 2023-08-26 18:00 UTC-6
-@pytest.mark.usefixtures('mock_callback_queue')
-def test_reconciliate_deposits_current_fecha_operacion(runner):
-    """
-    Esta prueba simula obtener depósitos del día operativo en curso
-    """
-    fecha_operacion = dt.date(2023, 8, 28)
-
-    initial_deposits_count = Transaction.objects(
-        tipo='deposito', fecha_operacion=fecha_operacion
-    ).count()
-
-    assert initial_deposits_count == 0
-
-    with open('tests/commands/deposits_20230828.json') as f:
-        stp_response = json.loads(f.read())
-        deposits = stp_response['resultado']['lst']
-
-    claves_rastreo = ','.join(d['claveRastreo'] for d in deposits)
-    devolucion = next(d for d in deposits if d['estado'] == 'D')
-    valid_deposits = [
-        d
-        for d in deposits
-        if d['estado'] in STP_VALID_DEPOSITS_STATUSES
-        and d['tipoPago'] not in REFUNDS_PAYMENTS_TYPES
-    ]
-
-    with requests_mock.mock() as m:
-        m.post('/speiws/rest/ordenPago/consOrdenesFech', json=stp_response)
-
-        runner.invoke(
-            speid_group,
-            [
-                'reconciliate-deposits',
-                fecha_operacion.strftime('%Y-%m-%d'),
-                claves_rastreo,
-            ],
-        )
+    # Al ejecutar el comando con las mismas claves de rastreo no debe
+    # duplicar los depósitos
+    runner.invoke(
+        speid_group,
+        [
+            'reconciliate-deposits',
+            fecha_operacion.strftime('%Y-%m-%d'),
+            'PruebaLiquidacion2,PruebaDevolucion1',
+        ],
+    )
 
     deposits_db = Transaction.objects(
         tipo='deposito', fecha_operacion=fecha_operacion
     ).all()
 
-    assert len(deposits_db) == len(valid_deposits)
-    assert not any(
-        d.clave_rastreo == devolucion['claveRastreo'] for d in deposits_db
-    )
-
-
-@freeze_time("2023-08-26 01:00:00")  # 2023-08-25 19:00 UTC-6
-@pytest.mark.usefixtures('mock_callback_queue')
-def test_reconciliate_deposits_ignores_duplicated(runner):
-    """
-    Esta prueba simula obtener depósitos de días históricos. Ignora depósitos
-    que ya existen en speid
-    """
-    fecha_operacion = dt.date(2023, 8, 25)
-
-    initial_deposits_count = Transaction.objects(
-        tipo='deposito', fecha_operacion=fecha_operacion
-    ).count()
-
-    assert initial_deposits_count == 0
-
-    with open('tests/commands/deposits_20230825.json') as f:
-        stp_response = json.loads(f.read())
-        deposits = stp_response['resultado']['lst']
-
-    deposit = deposits[0]
-    claves_rastreo = ','.join(d['claveRastreo'] for d in deposits)
-    external_tx = StpTransaction(  # type: ignore
-        Clave=deposit['idEF'],
-        FechaOperacion=deposit['fechaOperacion'],
-        InstitucionOrdenante=deposit['institucionContraparte'],
-        InstitucionBeneficiaria=deposit['institucionOperante'],
-        ClaveRastreo=deposit['claveRastreo'],
-        Monto=deposit['monto'],
-        NombreOrdenante=deposit['nombreOrdenante'],
-        TipoCuentaOrdenante=deposit['tipoCuentaOrdenante'],
-        CuentaOrdenante=deposit['cuentaOrdenante'],
-        RFCCurpOrdenante=deposit['rfcCurpOrdenante'],
-        NombreBeneficiario=deposit['nombreBeneficiario'],
-        TipoCuentaBeneficiario=deposit['tipoCuentaBeneficiario'],
-        CuentaBeneficiario=deposit['cuentaBeneficiario'],
-        RFCCurpBeneficiario='NA',
-        ConceptoPago=deposit['conceptoPago'],
-        ReferenciaNumerica=deposit['referenciaNumerica'],
-        Empresa=deposit['empresa'],
-    )
-    transaction = external_tx.transform()
-    transaction.estado = Estado.succeeded
-    transaction.save()
-
-    valid_deposits = [
-        d
-        for d in deposits
-        if d['estado'] in STP_VALID_DEPOSITS_STATUSES
-        and d['tipoPago'] not in REFUNDS_PAYMENTS_TYPES
-    ]
-
-    with requests_mock.mock() as m:
-        m.post('/speiws/rest/ordenPago/consOrdenesFech', json=stp_response)
-
-        runner.invoke(
-            speid_group,
-            [
-                'reconciliate-deposits',
-                fecha_operacion.strftime('%Y-%m-%d'),
-                claves_rastreo,
-            ],
-        )
-
-    deposits_db = Transaction.objects(
-        tipo='deposito', fecha_operacion=fecha_operacion
-    ).all()
-
-    assert len(deposits_db) == len(valid_deposits)
+    assert len(deposits_db) == 1
+    assert deposits_db[0].clave_rastreo == 'PruebaLiquidacion2'
