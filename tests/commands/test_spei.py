@@ -135,6 +135,7 @@ def test_reconciliate_deposits_historic(runner):
 
     assert len(deposits_db) == 1
     assert deposits_db[0].clave_rastreo == 'PruebaLiquidacion2'
+    assert deposits_db[0].monto == 1_00
 
     # Al ejecutar el comando con las mismas claves de rastreo no debe
     # duplicar los depósitos
