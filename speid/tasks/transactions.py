@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import cep
 import pytz
@@ -175,7 +175,7 @@ def check_deposits_status(deposit: Dict) -> None:
         return
 
 
-def apply_stp_deposit(clave_rastreo, fecha_operacion) -> None:
+def apply_stp_deposit(clave_rastreo, fecha_operacion) -> Optional[str]:
     """Busca una transaccion en el API de STP y la aplica si no existe"""
     recibida = stpmex_client.ordenes_v2.consulta_clave_rastreo_recibida(
         clave_rastreo=clave_rastreo,
@@ -185,9 +185,10 @@ def apply_stp_deposit(clave_rastreo, fecha_operacion) -> None:
         recibida.tipoPago in REFUNDS_PAYMENTS_TYPES
         or recibida.estado not in STP_VALID_DEPOSITS_STATUSES
     ):
-        return
+        return None
     stp_request = stp_model_to_dict(recibida)
     process_incoming_transaction(stp_request, event_type=EventType.reconciled)
+    return clave_rastreo
 
 
 @celery.task
