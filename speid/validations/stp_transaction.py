@@ -26,10 +26,10 @@ class StpTransaction:
     NombreBeneficiario: StrictStr
     TipoCuentaBeneficiario: int
     CuentaBeneficiario: StrictStr
-    RFCCurpBeneficiario: StrictStr
     ConceptoPago: StrictStr
     ReferenciaNumerica: int
     Empresa: StrictStr
+    RFCCurpBeneficiario: Optional[StrictStr] = None
     Clave: Optional[int] = None
 
     def transform(self) -> Transaction:
