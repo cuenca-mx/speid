@@ -62,21 +62,18 @@ def reconciliate_deposits(
 
     for clave_rastreo in claves_rastreo_set:
         try:
-            transaction = Transaction.objects.get(
+            Transaction.objects.get(
                 clave_rastreo=clave_rastreo,
                 fecha_operacion=fecha_operacion.date(),
             )
         except DoesNotExist:
-            transaction = None
-
-        if transaction:
-            not_processed.append(clave_rastreo)
-        else:
             processed_clave_rastreo = apply_stp_deposit(
                 clave_rastreo, fecha_operacion.date()
             )
             if not processed_clave_rastreo:
                 not_processed.append(clave_rastreo)
+        else:
+            not_processed.append(clave_rastreo)
 
     click.echo(f'No procesadas: {not_processed}')
 
