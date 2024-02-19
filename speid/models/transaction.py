@@ -183,10 +183,16 @@ class Transaction(Document, BaseModel):
             account = Account.objects.get(cuenta=self.cuenta_beneficiario)
             if account.is_restricted:
                 ordenante = self.rfc_curp_ordenante
-                is_valid = (
-                    ordenante == account.allowed_rfc
-                    or ordenante == account.allowed_curp
-                ) and self.monto >= MIN_AMOUNT
+                is_valid = all(
+                    [
+                        (
+                            ordenante == account.allowed_rfc
+                            or ordenante == account.allowed_curp
+                        ),
+                        self.monto >= MIN_AMOUNT,
+                        account.estado != Estado.pld_blocked,
+                    ]
+                )
         except DoesNotExist:
             pass
         return is_valid

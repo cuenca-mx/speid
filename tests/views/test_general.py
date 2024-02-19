@@ -240,7 +240,7 @@ def test_create_incoming_restricted_account(
 ):
     """
     Validate reject a depoist to restricted account if the
-    curp_rfc does not match with ordeenante
+    curp_rfc does not match with ordenante
     """
     default_income_transaction['CuentaBeneficiario'] = moral_account.cuenta
     moral_account.is_restricted = True
@@ -265,8 +265,25 @@ def test_create_incoming_restricted_account(
     assert resp.json['estado'] == 'DEVOLUCION'
     transaction.delete()
 
-    # curp and monto match, the transaction is approve, at least $100.0
+    # Curp Match and Monto match but account is blocked.
+    # The transaction is rejected
+    default_income_transaction['Monto'] = 100.00
+    default_income_transaction['RFCCurpOrdenante'] = moral_account.allowed_curp
+    default_income_transaction['ClaveRastreo'] = 'PRUEBATAMIZI2'
+    moral_account.estado = Estado.pld_blocked
+    moral_account.save()
+    resp = client.post('/ordenes', json=default_income_transaction)
+    transaction = Transaction.objects.order_by('-created_at').first()
+    assert transaction.estado is Estado.rejected
+    assert resp.status_code == 201
+    assert resp.json['estado'] == 'DEVOLUCION'
+    transaction.delete()
+
+    # curp, monto match and account is succeeded
+    # the transaction is approve, at least $100.0
     default_income_transaction['Monto'] = 100.0
+    moral_account.estado = Estado.succeeded
+    moral_account.save()
     resp = client.post('/ordenes', json=default_income_transaction)
     transaction = Transaction.objects.order_by('-created_at').first()
     assert resp.status_code == 201
