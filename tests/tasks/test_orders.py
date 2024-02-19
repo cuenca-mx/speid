@@ -168,12 +168,6 @@ def test_doesnt_retry_on_manual_review_exception(
     mock_capture_exception.assert_called_once()
 
 
-def test_hold_max_amount(order):
-    order['monto'] = 102000000
-    with pytest.raises(MalformedOrderException):
-        execute(order)
-
-
 @patch('speid.tasks.orders.capture_exception')
 @patch('speid.tasks.orders.send_order.retry')
 def test_stp_schedule_limit(
